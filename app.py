@@ -1,6 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from datetime import date
+from fastapi import FastAPI, HTTPException, Request, Response, Body
+from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from psycopg2 import sql
+from pydantic import BaseModel
 
 # Conectar ao banco de dados PostgreSQL
 conn = psycopg2.connect(
@@ -13,13 +16,27 @@ cur = conn.cursor()
 
 app = FastAPI()
 
+# Configuração do middleware CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+class Cliente(BaseModel):
+    cpf: str
+    nome_completo: str
+    data_nascimento: date
+    email: str
+    senha: str
 
 @app.post("/clientes/")
-async def cadastrar_cliente(cpf: int, nome_completo: str, data_nascimento: str, email: str, senha: str):
+async def cadastrar_cliente(cliente: Cliente):
     try:
         cur.execute(
             sql.SQL("INSERT INTO cliente (cpf, nome_completo, data_nascimento, email, senha) VALUES (%s, %s, %s, %s, %s)"),
-            (cpf, nome_completo, data_nascimento, email, senha)
+            (cliente.cpf, cliente.nome_completo, cliente.data_nascimento, cliente.email, cliente.senha)
         )
         conn.commit()
         return {"mensagem": "Cliente cadastrado com sucesso"}
@@ -28,8 +45,7 @@ async def cadastrar_cliente(cpf: int, nome_completo: str, data_nascimento: str, 
             raise HTTPException(status_code=409, detail="CPF já cadastrado")
         else:
             raise HTTPException(status_code=500, detail="Erro interno do servidor")
-
-
+        
 @app.get("/scfp/{cpf}")
 async def obter_cliente(cpf: int):
     cur.execute(
