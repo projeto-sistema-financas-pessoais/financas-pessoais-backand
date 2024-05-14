@@ -25,7 +25,6 @@ app.add_middleware(
 )
 
 class Cliente(BaseModel):
-    cpf: str
     nome_completo: str
     data_nascimento: date
     email: str
@@ -35,31 +34,27 @@ class Cliente(BaseModel):
 async def cadastrar_cliente(cliente: Cliente):
     try:
         cur.execute(
-            sql.SQL("INSERT INTO cliente (cpf, nome_completo, data_nascimento, email, senha) VALUES (%s, %s, %s, %s, %s)"),
-            (cliente.cpf, cliente.nome_completo, cliente.data_nascimento, cliente.email, cliente.senha)
+            sql.SQL("INSERT INTO cliente (nome_completo, data_nascimento, email, senha) VALUES (%s, %s, %s, %s)"),
+            (cliente.nome_completo, cliente.data_nascimento, cliente.email, cliente.senha)
         )
         conn.commit()
         return {"mensagem": "Cliente cadastrado com sucesso"}
     except psycopg2.IntegrityError as e:
-        if "duplicate key value" in str(e):
-            raise HTTPException(status_code=409, detail="CPF já cadastrado")
-        else:
-            raise HTTPException(status_code=500, detail="Erro interno do servidor")
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
         
-@app.get("/scfp/{cpf}")
-async def obter_cliente(cpf: int):
+@app.get("/scfp/{nome_completo}")
+async def obter_cliente(nome_completo: str):
     cur.execute(
-        sql.SQL("SELECT * FROM cliente WHERE cpf = %s"),
-        (cpf,)
+        sql.SQL("SELECT * FROM cliente WHERE nome completo = %s"),
+        (nome_completo,)
     )
     cliente = cur.fetchone()
     if cliente:
         return {
             "nome_completo": cliente[0],
             "data_nascimento": cliente[1],
-            "cpf": cliente[2],
-            "email": cliente[3],
-            "senha": cliente[4]
+            "email": cliente[2],
+            "senha": cliente[3]
         }
     else:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
