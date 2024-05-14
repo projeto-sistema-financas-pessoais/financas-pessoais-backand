@@ -1,9 +1,13 @@
-from datetime import date
-from fastapi import FastAPI, HTTPException, Request, Response, Body
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
-from psycopg2 import sql
-from pydantic import BaseModel
+from psycopg2 import sql, errors
+from pydantic import BaseModel, EmailStr
+from datetime import datetime
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
 
 # Conectar ao banco de dados PostgreSQL
 conn = psycopg2.connect(
@@ -26,8 +30,8 @@ app.add_middleware(
 
 class Cliente(BaseModel):
     nome_completo: str
-    data_nascimento: date
-    email: str
+    data_nascimento: datetime
+    email: EmailStr
     senha: str
 
 @app.post("/clientes/")
@@ -40,21 +44,35 @@ async def cadastrar_cliente(cliente: Cliente):
         conn.commit()
         return {"mensagem": "Cliente cadastrado com sucesso"}
     except psycopg2.IntegrityError as e:
-        raise HTTPException(status_code=500, detail="Erro interno do servidor")
-        
+        conn.rollback()
+        logging.error(f"IntegrityError: {str(e)}")
+        # Verificar se o erro é de chave duplicada
+        if 'duplicate key value violates unique constraint' in str(e):
+            raise HTTPException(status_code=400, detail="Este email já está em uso")
+        else:
+            raise HTTPException(status_code=500, detail="Erro interno do servidor - Integridade violada")
+    except Exception as e:
+        conn.rollback()
+        logging.error(f"Exception: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
+
 @app.get("/scfp/{nome_completo}")
 async def obter_cliente(nome_completo: str):
-    cur.execute(
-        sql.SQL("SELECT * FROM cliente WHERE nome completo = %s"),
-        (nome_completo,)
-    )
-    cliente = cur.fetchone()
-    if cliente:
-        return {
-            "nome_completo": cliente[0],
-            "data_nascimento": cliente[1],
-            "email": cliente[2],
-            "senha": cliente[3]
-        }
-    else:
-        raise HTTPException(status_code=404, detail="Cliente não encontrado")
+    try:
+        cur.execute(
+            sql.SQL("SELECT * FROM cliente WHERE nome_completo = %s"),
+            (nome_completo,)
+        )
+        cliente = cur.fetchone()
+        if cliente:
+            return {
+                "nome_completo": cliente[0],
+                "data_nascimento": cliente[1],
+                "email": cliente[2],
+                "senha": cliente[3]
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Cliente não encontrado")
+    except Exception as e:
+        logging.error(f"Exception: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
