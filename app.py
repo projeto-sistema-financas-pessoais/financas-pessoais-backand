@@ -46,15 +46,12 @@ async def cadastrar_cliente(cliente: Cliente):
     except psycopg2.IntegrityError as e:
         conn.rollback()
         logging.error(f"IntegrityError: {str(e)}")
-        # Verificar se o erro é de chave duplicada
-        if 'duplicate key value violates unique constraint' in str(e):
-            raise HTTPException(status_code=400, detail="Este email já está em uso")
-        else:
-            raise HTTPException(status_code=500, detail="Erro interno do servidor - Integridade violada")
+        raise HTTPException(status_code=409, detail="Email already exists")
     except Exception as e:
         conn.rollback()
         logging.error(f"Exception: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
+
 
 @app.get("/scfp/{nome_completo}")
 async def obter_cliente(nome_completo: str):
