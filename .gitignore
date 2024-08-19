@@ -1,4 +1,3 @@
 __pycache__/
-alembic.ini
 .env
 alembic/versions/*
