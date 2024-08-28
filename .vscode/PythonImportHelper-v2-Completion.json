@@ -56,6 +56,86 @@
         "documentation": {}
     },
     {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Header",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
         "label": "FastAPI",
         "importPath": "fastapi",
         "description": "fastapi",
@@ -93,6 +173,22 @@
         "description": "fastapi.responses",
         "isExtraImport": true,
         "detail": "fastapi.responses",
+        "documentation": {}
+    },
+    {
+        "label": "JSONResponse",
+        "importPath": "fastapi.responses",
+        "description": "fastapi.responses",
+        "isExtraImport": true,
+        "detail": "fastapi.responses",
+        "documentation": {}
+    },
+    {
+        "label": "AsyncSession",
+        "importPath": "sqlalchemy.ext.asyncio",
+        "description": "sqlalchemy.ext.asyncio",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.ext.asyncio",
         "documentation": {}
     },
     {
@@ -152,11 +248,19 @@
         "documentation": {}
     },
     {
-        "label": "generate_hash",
-        "importPath": "core.security",
-        "description": "core.security",
+        "label": "IntegrityError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
         "isExtraImport": true,
-        "detail": "core.security",
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
         "documentation": {}
     },
     {
@@ -168,6 +272,38 @@
         "documentation": {}
     },
     {
+        "label": "get_session",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "ContaModel",
+        "importPath": "models.conta_model",
+        "description": "models.conta_model",
+        "isExtraImport": true,
+        "detail": "models.conta_model",
+        "documentation": {}
+    },
+    {
+        "label": "ContaModel",
+        "importPath": "models.conta_model",
+        "description": "models.conta_model",
+        "isExtraImport": true,
+        "detail": "models.conta_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
         "label": "UsuarioModel",
         "importPath": "models.usuario_model",
         "description": "models.usuario_model",
@@ -189,6 +325,55 @@
         "description": "models.usuario_model",
         "isExtraImport": true,
         "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "ContaSchema",
+        "importPath": "schemas.conta_schema",
+        "description": "schemas.conta_schema",
+        "isExtraImport": true,
+        "detail": "schemas.conta_schema",
+        "documentation": {}
+    },
+    {
+        "label": "api.v1.endpoints",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "usuario",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "conta",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "generate_hash",
+        "importPath": "core.security",
+        "description": "core.security",
+        "isExtraImport": true,
+        "detail": "core.security",
         "documentation": {}
     },
     {
@@ -216,6 +401,14 @@
         "documentation": {}
     },
     {
+        "label": "OAuth2PasswordBearer",
+        "importPath": "fastapi.security",
+        "description": "fastapi.security",
+        "isExtraImport": true,
+        "detail": "fastapi.security",
+        "documentation": {}
+    },
+    {
         "label": "auth",
         "importPath": "core.auth",
         "description": "core.auth",
@@ -232,15 +425,23 @@
         "documentation": {}
     },
     {
-        "label": "usuario",
-        "importPath": "api.v1.endpoints",
-        "description": "api.v1.endpoints",
+        "label": "oauth2_schema",
+        "importPath": "core.auth",
+        "description": "core.auth",
         "isExtraImport": true,
-        "detail": "api.v1.endpoints",
+        "detail": "core.auth",
         "documentation": {}
     },
     {
         "label": "EmailStr",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
         "importPath": "pydantic",
         "description": "pydantic",
         "isExtraImport": true,
@@ -277,6 +478,30 @@
         "description": "pydantic",
         "isExtraImport": true,
         "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "EmailStr",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
         "documentation": {}
     },
     {
@@ -384,6 +609,14 @@
         "documentation": {}
     },
     {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
         "label": "timedelta",
         "importPath": "datetime",
         "description": "datetime",
@@ -397,6 +630,14 @@
         "description": "datetime",
         "isExtraImport": true,
         "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "importPath": "core.configs",
+        "description": "core.configs",
+        "isExtraImport": true,
+        "detail": "core.configs",
         "documentation": {}
     },
     {
@@ -513,6 +754,22 @@
     },
     {
         "label": "jwt",
+        "importPath": "jose",
+        "description": "jose",
+        "isExtraImport": true,
+        "detail": "jose",
+        "documentation": {}
+    },
+    {
+        "label": "jwt",
+        "importPath": "jose",
+        "description": "jose",
+        "isExtraImport": true,
+        "detail": "jose",
+        "documentation": {}
+    },
+    {
+        "label": "JWTError",
         "importPath": "jose",
         "description": "jose",
         "isExtraImport": true,
@@ -653,14 +910,6 @@
         "description": "passlib.context",
         "isExtraImport": true,
         "detail": "passlib.context",
-        "documentation": {}
-    },
-    {
-        "label": "op",
-        "importPath": "alembic",
-        "description": "alembic",
-        "isExtraImport": true,
-        "detail": "alembic",
         "documentation": {}
     },
     {
@@ -826,6 +1075,30 @@
     },
     {
         "label": "Enum",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "ForeignKey",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "UniqueConstraint",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "DECIMAL",
         "importPath": "sqlalchemy",
         "description": "sqlalchemy",
         "isExtraImport": true,
@@ -1153,14 +1426,6 @@
         "documentation": {}
     },
     {
-        "label": "ContaModel",
-        "importPath": "models.conta_model",
-        "description": "models.conta_model",
-        "isExtraImport": true,
-        "detail": "models.conta_model",
-        "documentation": {}
-    },
-    {
         "label": "ParenteModel",
         "importPath": "models.parente_model",
         "description": "models.parente_model",
@@ -1209,30 +1474,6 @@
         "documentation": {}
     },
     {
-        "label": "reune_table",
-        "importPath": "models.associations_model",
-        "description": "models.associations_model",
-        "isExtraImport": true,
-        "detail": "models.associations_model",
-        "documentation": {}
-    },
-    {
-        "label": "divide_table",
-        "importPath": "models.associations_model",
-        "description": "models.associations_model",
-        "isExtraImport": true,
-        "detail": "models.associations_model",
-        "documentation": {}
-    },
-    {
-        "label": "reune_table",
-        "importPath": "models.associations_model",
-        "description": "models.associations_model",
-        "isExtraImport": true,
-        "detail": "models.associations_model",
-        "documentation": {}
-    },
-    {
         "label": "divide_table",
         "importPath": "models.associations_model",
         "description": "models.associations_model",
@@ -1249,7 +1490,7 @@
         "documentation": {}
     },
     {
-        "label": "reune_table",
+        "label": "divide_table",
         "importPath": "models.associations_model",
         "description": "models.associations_model",
         "isExtraImport": true,
@@ -1358,6 +1599,15 @@
     {
         "label": "router",
         "kind": 5,
+        "importPath": "api.v1.endpoints.conta",
+        "description": "api.v1.endpoints.conta",
+        "peekOfCode": "router = APIRouter()\n# POST / Cadastro de conta\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_conta(\n    conta: ContaSchema, \n    db: AsyncSession = Depends(get_session),  \n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    nova_conta: ContaModel = ContaModel(\n        nome=conta.nome,",
+        "detail": "api.v1.endpoints.conta",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
         "importPath": "api.v1.endpoints.usuario",
         "description": "api.v1.endpoints.usuario",
         "peekOfCode": "router = APIRouter()\n# POST / Signup\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_usuario (usuario: UsuarioSchema, db: AsyncSession = Depends(get_session)):\n    novo_usuario: UsuarioModel = UsuarioModel(nome_completo = usuario.nome_completo,\n                                              data_nascimento = usuario.data_nascimento,\n                                              email= usuario.email,\n                                              senha = generate_hash(usuario.senha)\n                                              )\n    async with db as session:",
@@ -1369,7 +1619,7 @@
         "kind": 5,
         "importPath": "api.v1.api",
         "description": "api.v1.api",
-        "peekOfCode": "api_router = APIRouter()\napi_router.include_router(usuario.router, prefix='/usuarios', tags=[\"usuarios\"])",
+        "peekOfCode": "api_router = APIRouter()\napi_router.include_router(usuario.router, prefix='/usuarios', tags=[\"usuarios\"])\napi_router.include_router(conta.router, prefix='/contas', tags=[\"contas\"])\n\"\"\"\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzI0NjkyOTM4LCJpYXQiOjE3MjQwODgxMzgsInN1YiI6IjEifQ.qQgD-j4r-1lK8rKAcQ_i-e3xHOfXsZWAKoYPJbmnwmE\n\"\"\"",
         "detail": "api.v1.api",
         "documentation": {}
     },
@@ -1379,6 +1629,15 @@
         "importPath": "core.auth",
         "description": "core.auth",
         "peekOfCode": "def generate_token_access(sub: str) -> str:\n    # https://jwt.io\n    return _generate_token(\n        tipo_token='access_token',\n        tempo_vida=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),\n        sub = sub\n    )",
+        "detail": "core.auth",
+        "documentation": {}
+    },
+    {
+        "label": "oauth2_schema",
+        "kind": 5,
+        "importPath": "core.auth",
+        "description": "core.auth",
+        "peekOfCode": "oauth2_schema = OAuth2PasswordBearer(\n    tokenUrl=f\"{settings.API_V1_STR}/login\"\n)\nasync def auth(email: EmailStr, senha: str, db: AsyncSession) -> Optional[UsuarioModel]:\n    async with db as session:\n        query = select(UsuarioModel).filter(UsuarioModel.email == email)\n        result = await session.execute(query)\n        usuario: UsuarioModel = result.scalars().unique().one_or_none()\n        if not usuario:\n            print(\"check=>>> user\")",
         "detail": "core.auth",
         "documentation": {}
     },
@@ -1398,6 +1657,15 @@
         "description": "core.configs",
         "peekOfCode": "settings = Settings()",
         "detail": "core.configs",
+        "documentation": {}
+    },
+    {
+        "label": "TokenData",
+        "kind": 6,
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "peekOfCode": "class TokenData(BaseModel):\n    username: Optional[str] = None\nasync def get_session()-> Generator: # type: ignore\n    session: AsyncSession = Session()\n    try:\n        yield session\n    finally:\n        await session.close()\nasync def get_current_user(db: AsyncSession = Depends(get_session), token: str = Depends(oauth2_schema)) -> UsuarioModel:\n    credential_exception: HTTPException = HTTPException (",
+        "detail": "core.deps",
         "documentation": {}
     },
     {
@@ -1430,109 +1698,55 @@
     {
         "label": "upgrade",
         "kind": 2,
-        "importPath": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "description": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "peekOfCode": "def upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
-        "detail": "migrations.versions.bde03a7f99bf_criando_tabelas",
+        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
+        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "peekOfCode": "def upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),\n    sa.Column('senha', sa.String(length=500), nullable=False),\n    sa.PrimaryKeyConstraint('id_usuario'),\n    sa.UniqueConstraint('email')",
+        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "downgrade",
         "kind": 2,
-        "importPath": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "description": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "peekOfCode": "def downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
-        "detail": "migrations.versions.bde03a7f99bf_criando_tabelas",
+        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
+        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "peekOfCode": "def downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.drop_table('divide')\n    op.drop_table('MOVIMENTACAO')\n    op.drop_table('SUBCATEGORIA')\n    op.drop_table('FATURA')\n    op.drop_table('PARENTE')\n    op.drop_table('CONTA')\n    op.drop_table('CATEGORIA')\n    op.drop_table('CARTAO_CREDITO')",
+        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "revision",
         "kind": 5,
-        "importPath": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "description": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "peekOfCode": "revision = 'bde03a7f99bf'\ndown_revision = 'd32d708f0489'\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###",
-        "detail": "migrations.versions.bde03a7f99bf_criando_tabelas",
+        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
+        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "peekOfCode": "revision = '5c17197931e7'\ndown_revision = None\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),",
+        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "down_revision",
         "kind": 5,
-        "importPath": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "description": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "peekOfCode": "down_revision = 'd32d708f0489'\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass",
-        "detail": "migrations.versions.bde03a7f99bf_criando_tabelas",
+        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
+        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "peekOfCode": "down_revision = None\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),",
+        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "branch_labels",
         "kind": 5,
-        "importPath": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "description": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "peekOfCode": "branch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
-        "detail": "migrations.versions.bde03a7f99bf_criando_tabelas",
+        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
+        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "peekOfCode": "branch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),\n    sa.Column('senha', sa.String(length=500), nullable=False),",
+        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "depends_on",
         "kind": 5,
-        "importPath": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "description": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "peekOfCode": "depends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
-        "detail": "migrations.versions.bde03a7f99bf_criando_tabelas",
-        "documentation": {}
-    },
-    {
-        "label": "upgrade",
-        "kind": 2,
-        "importPath": "migrations.versions.d32d708f0489_criando_tabelas",
-        "description": "migrations.versions.d32d708f0489_criando_tabelas",
-        "peekOfCode": "def upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('CATEGORIA',\n    sa.Column('id_categoria', sa.BigInteger(), nullable=False),\n    sa.Column('nome', sa.String(length=60), nullable=False),\n    sa.Column('descricao', sa.String(length=500), nullable=True),\n    sa.Column('tipo_categoria', sa.Enum('FIXA', 'VARIAVEL', name='tipocategoria'), nullable=False),\n    sa.Column('modelo_categoria', sa.Enum('DESPESA', 'RECEITA', name='tipomovimentacao'), nullable=False),\n    sa.PrimaryKeyConstraint('id_categoria')\n    )",
-        "detail": "migrations.versions.d32d708f0489_criando_tabelas",
-        "documentation": {}
-    },
-    {
-        "label": "downgrade",
-        "kind": 2,
-        "importPath": "migrations.versions.d32d708f0489_criando_tabelas",
-        "description": "migrations.versions.d32d708f0489_criando_tabelas",
-        "peekOfCode": "def downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.drop_table('divide')\n    op.drop_table('MOVIMENTACAO')\n    op.drop_table('FATURA')\n    op.drop_table('reune')\n    op.drop_table('SUBCATEGORIA')\n    op.drop_table('PARENTE')\n    op.drop_table('CONTA')\n    op.drop_table('CARTAO_CREDITO')",
-        "detail": "migrations.versions.d32d708f0489_criando_tabelas",
-        "documentation": {}
-    },
-    {
-        "label": "revision",
-        "kind": 5,
-        "importPath": "migrations.versions.d32d708f0489_criando_tabelas",
-        "description": "migrations.versions.d32d708f0489_criando_tabelas",
-        "peekOfCode": "revision = 'd32d708f0489'\ndown_revision = None\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('CATEGORIA',\n    sa.Column('id_categoria', sa.BigInteger(), nullable=False),\n    sa.Column('nome', sa.String(length=60), nullable=False),\n    sa.Column('descricao', sa.String(length=500), nullable=True),",
-        "detail": "migrations.versions.d32d708f0489_criando_tabelas",
-        "documentation": {}
-    },
-    {
-        "label": "down_revision",
-        "kind": 5,
-        "importPath": "migrations.versions.d32d708f0489_criando_tabelas",
-        "description": "migrations.versions.d32d708f0489_criando_tabelas",
-        "peekOfCode": "down_revision = None\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('CATEGORIA',\n    sa.Column('id_categoria', sa.BigInteger(), nullable=False),\n    sa.Column('nome', sa.String(length=60), nullable=False),\n    sa.Column('descricao', sa.String(length=500), nullable=True),\n    sa.Column('tipo_categoria', sa.Enum('FIXA', 'VARIAVEL', name='tipocategoria'), nullable=False),",
-        "detail": "migrations.versions.d32d708f0489_criando_tabelas",
-        "documentation": {}
-    },
-    {
-        "label": "branch_labels",
-        "kind": 5,
-        "importPath": "migrations.versions.d32d708f0489_criando_tabelas",
-        "description": "migrations.versions.d32d708f0489_criando_tabelas",
-        "peekOfCode": "branch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('CATEGORIA',\n    sa.Column('id_categoria', sa.BigInteger(), nullable=False),\n    sa.Column('nome', sa.String(length=60), nullable=False),\n    sa.Column('descricao', sa.String(length=500), nullable=True),\n    sa.Column('tipo_categoria', sa.Enum('FIXA', 'VARIAVEL', name='tipocategoria'), nullable=False),\n    sa.Column('modelo_categoria', sa.Enum('DESPESA', 'RECEITA', name='tipomovimentacao'), nullable=False),",
-        "detail": "migrations.versions.d32d708f0489_criando_tabelas",
-        "documentation": {}
-    },
-    {
-        "label": "depends_on",
-        "kind": 5,
-        "importPath": "migrations.versions.d32d708f0489_criando_tabelas",
-        "description": "migrations.versions.d32d708f0489_criando_tabelas",
-        "peekOfCode": "depends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('CATEGORIA',\n    sa.Column('id_categoria', sa.BigInteger(), nullable=False),\n    sa.Column('nome', sa.String(length=60), nullable=False),\n    sa.Column('descricao', sa.String(length=500), nullable=True),\n    sa.Column('tipo_categoria', sa.Enum('FIXA', 'VARIAVEL', name='tipocategoria'), nullable=False),\n    sa.Column('modelo_categoria', sa.Enum('DESPESA', 'RECEITA', name='tipomovimentacao'), nullable=False),\n    sa.PrimaryKeyConstraint('id_categoria')",
-        "detail": "migrations.versions.d32d708f0489_criando_tabelas",
+        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
+        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "peekOfCode": "depends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),\n    sa.Column('senha', sa.String(length=500), nullable=False),\n    sa.PrimaryKeyConstraint('id_usuario'),",
+        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
         "documentation": {}
     },
     {
@@ -1603,16 +1817,7 @@
         "kind": 5,
         "importPath": "models.associations_model",
         "description": "models.associations_model",
-        "peekOfCode": "divide_table = Table(\n    \"divide\",\n    settings.DBBaseModel.metadata,\n    Column(\"id_parente\", BigInteger, ForeignKey(\"PARENTE.id_parente\"), primary_key=True),\n    Column(\"id_movimentacao\", BigInteger, ForeignKey(\"MOVIMENTACAO.id_movimentacao\"), primary_key=True),\n    Column(\"valor\", DECIMAL(10, 2), nullable=False), # valor que o cliente divide com o parente\n)\nreune_table = Table(\n    \"reune\",\n    settings.DBBaseModel.metadata,",
-        "detail": "models.associations_model",
-        "documentation": {}
-    },
-    {
-        "label": "reune_table",
-        "kind": 5,
-        "importPath": "models.associations_model",
-        "description": "models.associations_model",
-        "peekOfCode": "reune_table = Table(\n    \"reune\",\n    settings.DBBaseModel.metadata,\n    Column(\"id_categoria\", BigInteger, ForeignKey(\"CATEGORIA.id_categoria\"), primary_key=True),\n    Column(\"id_usuario\", BigInteger, ForeignKey(\"USUARIO.id_usuario\"), primary_key=True),\n    Column(\"valor_categoria\", DECIMAL(10, 2), nullable=False), # gastots maxímos por categoria\n)",
+        "peekOfCode": "divide_table = Table(\n    \"divide\",\n    settings.DBBaseModel.metadata,\n    Column(\"id_parente\", BigInteger, ForeignKey(\"PARENTE.id_parente\"), primary_key=True),\n    Column(\"id_movimentacao\", BigInteger, ForeignKey(\"MOVIMENTACAO.id_movimentacao\"), primary_key=True),\n    Column(\"valor\", DECIMAL(10, 2), nullable=False), # valor que o cliente divide com o parente\n)\n# reune_table = Table(\n#     \"reune\",\n#     settings.DBBaseModel.metadata,",
         "detail": "models.associations_model",
         "documentation": {}
     },
@@ -1630,7 +1835,7 @@
         "kind": 6,
         "importPath": "models.categoria_model",
         "description": "models.categoria_model",
-        "peekOfCode": "class CategoriaModel(settings.DBBaseModel):\n    __tablename__ = \"CATEGORIA\"\n    id_categoria = Column(BigInteger, primary_key=True)\n    nome = Column(String(60), nullable=False)\n    descricao = Column(String(500))\n    tipo_categoria = Column(SqlEnum(TipoCategoria), nullable=False)\n    modelo_categoria = Column(SqlEnum(TipoMovimentacao), nullable=False)\n    subcategorias = relationship(\"SubcategoriaModel\", back_populates=\"categoria\")\n    movimentacoes = relationship(\"MovimentacaoModel\", back_populates=\"categoria\")\n    usuarios = relationship(\"UsuarioModel\", secondary=reune_table, back_populates=\"categorias\")",
+        "peekOfCode": "class CategoriaModel(settings.DBBaseModel):\n    __tablename__ = \"CATEGORIA\"\n    id_categoria = Column(BigInteger, primary_key=True)\n    nome = Column(String(60), nullable=False)\n    descricao = Column(String(500))\n    tipo_categoria = Column(SqlEnum(TipoCategoria), nullable=False)\n    modelo_categoria = Column(SqlEnum(TipoMovimentacao), nullable=False)\n    id_usuario = Column(BigInteger, ForeignKey(\"USUARIO.id_usuario\"), nullable=False)\n    valor_categoria = Column(DECIMAL(10, 2), nullable=False)\n    subcategorias = relationship(\"SubcategoriaModel\", back_populates=\"categoria\")",
         "detail": "models.categoria_model",
         "documentation": {}
     },
@@ -1711,7 +1916,7 @@
         "kind": 6,
         "importPath": "models.subcategoria_model",
         "description": "models.subcategoria_model",
-        "peekOfCode": "class SubcategoriaModel(settings.DBBaseModel):\n    __tablename__ = \"SUBCATEGORIA\"\n    id_subcategoria = Column(BigInteger, primary_key=True)\n    descricao = Column(String(500))\n    nome = Column(String(60), nullable=False)\n    id_categoria = Column(BigInteger, ForeignKey(\"CATEGORIA.id_categoria\"), nullable=False)\n    categoria = relationship(\"CategoriaModel\", back_populates=\"subcategorias\")\n    __table_args__ = (UniqueConstraint('nome', 'id_categoria', name='SUBCATEGORIA_UK'),)",
+        "peekOfCode": "class SubcategoriaModel(settings.DBBaseModel):\n    __tablename__ = \"SUBCATEGORIA\"\n    id_subcategoria = Column(BigInteger, primary_key=True)\n    descricao = Column(String(500))\n    nome = Column(String(60), nullable=False)\n    id_categoria = Column(BigInteger, ForeignKey(\"CATEGORIA.id_categoria\"), nullable=False)\n    categoria = relationship(\"CategoriaModel\", back_populates=\"subcategorias\")\n    __table_args__ = (UniqueConstraint('nome', 'id_categoria', name='unique_nome_subcategoria'),)",
         "detail": "models.subcategoria_model",
         "documentation": {}
     },
@@ -1722,6 +1927,15 @@
         "description": "models.usuario_model",
         "peekOfCode": "class UsuarioModel(settings.DBBaseModel):\n    __tablename__ = \"USUARIO\"\n    id_usuario = Column(BigInteger, primary_key=True)\n    nome_completo = Column(String(50), nullable=False)\n    data_nascimento = Column(TIMESTAMP(timezone=True), nullable=False)\n    email = Column(String(50), nullable=False, unique=True)\n    senha = Column(String(500), nullable=False)\n    # nome = Column(String(60))\n    contas = relationship(\"ContaModel\", cascade= \"all, delete-orphan\", back_populates=\"usuario\")\n    parentes = relationship(\"ParenteModel\", cascade= \"all, delete-orphan\",back_populates=\"usuario\")",
         "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "ContaSchema",
+        "kind": 6,
+        "importPath": "schemas.conta_schema",
+        "description": "schemas.conta_schema",
+        "peekOfCode": "class ContaSchema(BaseModel):\n    descricao: str\n    tipo_conta: str\n    nome: str\n    nome_icone: str",
+        "detail": "schemas.conta_schema",
         "documentation": {}
     },
     {

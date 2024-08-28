@@ -16,7 +16,12 @@ from api.v1.api import api_router
 
 app: FastAPI = FastAPI(title='Finanças Pessoais')
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 
 # # Configurar logging

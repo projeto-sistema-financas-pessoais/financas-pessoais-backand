@@ -7,4 +7,4 @@ from .movimentacao_model import MovimentacaoModel
 from .fatura_model import FaturaModel
 from .categoria_model import CategoriaModel
 from .subcategoria_model import SubcategoriaModel
-from .associations_model import reune_table, divide_table
+from .associations_model import  divide_table

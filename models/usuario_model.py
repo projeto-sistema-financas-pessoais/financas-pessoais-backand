@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 
 from core.configs import settings
 
-from models.associations_model import reune_table
 
 class UsuarioModel(settings.DBBaseModel):
     __tablename__ = "USUARIO"
@@ -19,4 +18,4 @@ class UsuarioModel(settings.DBBaseModel):
     contas = relationship("ContaModel", cascade= "all, delete-orphan", back_populates="usuario")
     parentes = relationship("ParenteModel", cascade= "all, delete-orphan",back_populates="usuario")
     cartoes_credito = relationship("CartaoCreditoModel", cascade= "all, delete-orphan", back_populates="usuario")
-    categorias = relationship("CategoriaModel", secondary=reune_table, back_populates="usuarios")
+    categorias = relationship("CategoriaModel", cascade= "all, delete-orphan", back_populates="usuarios")

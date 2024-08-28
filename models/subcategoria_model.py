@@ -14,4 +14,4 @@ class SubcategoriaModel(settings.DBBaseModel):
 
     categoria = relationship("CategoriaModel", back_populates="subcategorias")
 
-    __table_args__ = (UniqueConstraint('nome', 'id_categoria', name='SUBCATEGORIA_UK'),)
+    __table_args__ = (UniqueConstraint('nome', 'id_categoria', name='unique_nome_subcategoria'),)

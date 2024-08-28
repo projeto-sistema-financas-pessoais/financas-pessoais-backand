@@ -1,4 +1,5 @@
 
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.usuario_model import UsuarioModel
 from pydantic import EmailStr
@@ -10,7 +11,9 @@ from datetime import datetime, timedelta
 from core.configs import settings
 from jose import jwt
 
-
+oauth2_schema = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/login"
+)
 
 async def auth(email: EmailStr, senha: str, db: AsyncSession) -> Optional[UsuarioModel]:
     async with db as session:
@@ -18,8 +21,11 @@ async def auth(email: EmailStr, senha: str, db: AsyncSession) -> Optional[Usuari
         result = await session.execute(query)
         usuario: UsuarioModel = result.scalars().unique().one_or_none()
         if not usuario:
+            print("check=>>> user")
+
             return None
         if not check_password(senha, usuario.senha):
+            print("check=>>>", check_password(senha, usuario.senha))
             return None
         
         return usuario

@@ -6,7 +6,7 @@ from models.categoria_model import CategoriaModel
 from models.fatura_model import FaturaModel
 from models.movimentacao_model import MovimentacaoModel
 from models.subcategoria_model import SubcategoriaModel
-from models.associations_model import reune_table, divide_table
+from models.associations_model import  divide_table
 
 
 from core.configs import settings

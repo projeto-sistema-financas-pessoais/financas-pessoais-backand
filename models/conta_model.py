@@ -20,5 +20,5 @@ class ContaModel(settings.DBBaseModel):
     faturas = relationship("FaturaModel", back_populates="conta")
     
     __table_args__ = (
-        UniqueConstraint('nome', 'id_usuario', name='unique_nome_cartao'),
+        UniqueConstraint('nome', 'id_usuario', name='unique_nome_conta'),
     )

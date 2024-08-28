@@ -1,3 +1,4 @@
+import api.v1.endpoints
 from fastapi import APIRouter
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from fastapi.responses import JSONResponse
@@ -38,13 +39,28 @@ async def post_usuario (usuario: UsuarioSchema, db: AsyncSession = Depends(get_s
     
 @router.post('/login')
 async def login(login_data: LoginDataSchema, db: AsyncSession = Depends(get_session)):
-    usuario = await auth(email=login_data.email, senha=login_data.senha, db=db)
+    usuario: UsuarioSchema = await auth(email=login_data.email, senha=login_data.senha, db=db)
     if not usuario:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Dados de acesso incorretos')
     return JSONResponse(
         content={
-            "access_token": generate_token_access(sub=usuario.id_usuario),
-            "token_type": "bearer"
+            "acesso_token": generate_token_access(sub=usuario.id_usuario),
+            "token_tipo": "bearer",
+            "nome": usuario.nome_completo
+        },
+        status_code=status.HTTP_200_OK
+    )
+    
+@router.post('/login')
+async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_session)):
+    usuario: UsuarioSchema = await auth(email=login_data.email, senha=login_data.senha, db=db)
+    if not usuario:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Dados de acesso incorretos')
+    return JSONResponse(
+        content={
+            "acesso_token": generate_token_access(sub=usuario.id_usuario),
+            "token_tipo": "bearer",
+            "nome": usuario.nome_completo
         },
         status_code=status.HTTP_200_OK
     )
