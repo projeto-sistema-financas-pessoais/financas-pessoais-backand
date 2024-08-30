@@ -19,7 +19,7 @@ class ContaSchema(BaseModel):
     
 class ContaSchemaUp(ContaSchema):
     descricao: Optional[str] = None
-    tipo_conta: Optional[TipoConta]
+    tipo_conta: Optional[TipoConta] = None
     nome: Optional[str] = None
     nome_icone: Optional[str] = None
     ativo : Optional[bool] = True
