@@ -12,7 +12,7 @@ from core.configs import settings
 from jose import jwt
 
 oauth2_schema = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login"
+    tokenUrl=f"{settings.API_V1_STR}/usuarios/login"
 )
 
 async def auth(email: EmailStr, senha: str, db: AsyncSession) -> Optional[UsuarioModel]:

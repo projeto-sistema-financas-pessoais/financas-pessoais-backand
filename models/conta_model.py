@@ -1,6 +1,8 @@
-from sqlalchemy import Column, String, BigInteger, ForeignKey, UniqueConstraint,Boolean
+from sqlalchemy import Column, String, BigInteger, ForeignKey, UniqueConstraint,Boolean, Enum as SqlEnum
 from core.configs import settings
 from sqlalchemy.orm import relationship
+
+from models.enums import TipoConta
 
 
 class ContaModel(settings.DBBaseModel):
@@ -8,7 +10,7 @@ class ContaModel(settings.DBBaseModel):
 
     id_conta = Column(BigInteger, primary_key=True) 
     descricao = Column(String(500))
-    tipo_conta = Column(String(100))
+    tipo_conta = Column(String(100), nullable=False)
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
     nome = Column(String(500), nullable=False)
     nome_icone = Column(String(100))

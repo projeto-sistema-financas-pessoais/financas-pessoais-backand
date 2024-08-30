@@ -30,7 +30,7 @@ async def get_current_user(db: AsyncSession = Depends(get_session), token: str =
     
     credential_exception: HTTPException = HTTPException (
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Não foi possível autentificar a credencial",
+        detail=f"Não foi possível autentificar a credencial " + token,
         headers={"WWW-Authenticate": "Bearer"}
     )
 
@@ -52,7 +52,7 @@ async def get_current_user(db: AsyncSession = Depends(get_session), token: str =
     
     
     async with db as session:
-        query = select(UsuarioModel).filter(UsuarioModel.id == int(token_data.username))
+        query = select(UsuarioModel).filter(UsuarioModel.id_usuario == int(token_data.username))
         result = await session.execute(query)
         usuario: Optional[UsuarioModel] = result.scalars().unique().one_or_none()
         

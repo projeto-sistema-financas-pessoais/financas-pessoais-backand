@@ -37,30 +37,31 @@ async def post_usuario (usuario: UsuarioSchema, db: AsyncSession = Depends(get_s
         except IntegrityError:
              raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Já existe um usuário com este email cadastrado')
     
-@router.post('/login')
-async def login(login_data: LoginDataSchema, db: AsyncSession = Depends(get_session)):
-    usuario: UsuarioSchema = await auth(email=login_data.email, senha=login_data.senha, db=db)
-    if not usuario:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Dados de acesso incorretos')
-    return JSONResponse(
-        content={
-            "acesso_token": generate_token_access(sub=usuario.id_usuario),
-            "token_tipo": "bearer",
-            "nome": usuario.nome_completo
-        },
-        status_code=status.HTTP_200_OK
-    )
+# @router.post('/login')
+# async def login(login_data: LoginDataSchema, db: AsyncSession = Depends(get_session)):
+#     usuario: UsuarioSchema = await auth(email=login_data.email, senha=login_data.senha, db=db)
+#     if not usuario:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Dados de acesso incorretos')
+#     return JSONResponse(
+#         content={
+#             "acesso_token": generate_token_access(sub=usuario.id_usuario),
+#             "token_tipo": "bearer",
+#             "nome": usuario.nome_completo
+#         },
+#         status_code=status.HTTP_200_OK
+#     )
     
 @router.post('/login')
 async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_session)):
-    usuario: UsuarioSchema = await auth(email=login_data.email, senha=login_data.senha, db=db)
+    usuario: UsuarioSchema = await auth(email=login_data.username, senha=login_data.password, db=db)
+    print(login_data.username, login_data.password)
     if not usuario:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Dados de acesso incorretos')
     return JSONResponse(
         content={
-            "acesso_token": generate_token_access(sub=usuario.id_usuario),
-            "token_tipo": "bearer",
-            "nome": usuario.nome_completo
+            "access_token": generate_token_access(sub=usuario.id_usuario),
+            "token_type": "bearer",
+            "name": usuario.nome_completo
         },
         status_code=status.HTTP_200_OK
     )
