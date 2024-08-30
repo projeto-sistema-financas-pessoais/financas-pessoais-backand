@@ -2,21 +2,21 @@
 from enum import Enum
 
     
-class TipoMovimentacao(Enum):
+class TipoMovimentacao(str, Enum):
     DESPESA = "Despesa"
     RECEITA = "Receita"
 
-class FormaPagamento(Enum):
+class FormaPagamento(str, Enum):
     DEBITO = "Débito"
     CREDITO = "Crédito"
     DINHEIRO = "Dinheiro"
 
-class CondicaoPagamento(Enum):
+class CondicaoPagamento(str, Enum):
     A_VISTA = "À vista"
     PARCELADO = "Parcelado"
     RECORRENTE = "Recorrente"
 
-class TipoCategoria(Enum):
+class TipoCategoria(str, Enum):
     FIXA = "Fixa"
     VARIAVEL = "Variável"
     
