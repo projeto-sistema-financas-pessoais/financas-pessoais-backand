@@ -1,5 +1,69 @@
 [
     {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "ClassVar",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Generator",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "APIRouter",
         "importPath": "fastapi",
         "description": "fastapi",
@@ -296,6 +360,22 @@
         "documentation": {}
     },
     {
+        "label": "MovimentacaoModel",
+        "importPath": "models.movimentacao_model",
+        "description": "models.movimentacao_model",
+        "isExtraImport": true,
+        "detail": "models.movimentacao_model",
+        "documentation": {}
+    },
+    {
+        "label": "MovimentacaoModel",
+        "importPath": "models.movimentacao_model",
+        "description": "models.movimentacao_model",
+        "isExtraImport": true,
+        "detail": "models.movimentacao_model",
+        "documentation": {}
+    },
+    {
         "label": "UsuarioModel",
         "importPath": "models.usuario_model",
         "description": "models.usuario_model",
@@ -341,6 +421,46 @@
         "description": "schemas.conta_schema",
         "isExtraImport": true,
         "detail": "schemas.conta_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ContaSchemaId",
+        "importPath": "schemas.conta_schema",
+        "description": "schemas.conta_schema",
+        "isExtraImport": true,
+        "detail": "schemas.conta_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ContaSchemaUp",
+        "importPath": "schemas.conta_schema",
+        "description": "schemas.conta_schema",
+        "isExtraImport": true,
+        "detail": "schemas.conta_schema",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
         "documentation": {}
     },
     {
@@ -494,70 +614,6 @@
         "description": "pydantic",
         "isExtraImport": true,
         "detail": "pydantic",
-        "documentation": {}
-    },
-    {
-        "label": "select",
-        "importPath": "sqlalchemy.future",
-        "description": "sqlalchemy.future",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.future",
-        "documentation": {}
-    },
-    {
-        "label": "select",
-        "importPath": "sqlalchemy.future",
-        "description": "sqlalchemy.future",
-        "isExtraImport": true,
-        "detail": "sqlalchemy.future",
-        "documentation": {}
-    },
-    {
-        "label": "Optional",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
-        "documentation": {}
-    },
-    {
-        "label": "List",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
-        "documentation": {}
-    },
-    {
-        "label": "ClassVar",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
-        "documentation": {}
-    },
-    {
-        "label": "List",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
-        "documentation": {}
-    },
-    {
-        "label": "Generator",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
-        "documentation": {}
-    },
-    {
-        "label": "Optional",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
         "documentation": {}
     },
     {
@@ -921,6 +977,14 @@
         "documentation": {}
     },
     {
+        "label": "op",
+        "importPath": "alembic",
+        "description": "alembic",
+        "isExtraImport": true,
+        "detail": "alembic",
+        "documentation": {}
+    },
+    {
         "label": "context",
         "importPath": "alembic",
         "description": "alembic",
@@ -1147,6 +1211,14 @@
     },
     {
         "label": "Boolean",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
         "importPath": "sqlalchemy",
         "description": "sqlalchemy",
         "isExtraImport": true,
@@ -1458,14 +1530,6 @@
         "documentation": {}
     },
     {
-        "label": "MovimentacaoModel",
-        "importPath": "models.movimentacao_model",
-        "description": "models.movimentacao_model",
-        "isExtraImport": true,
-        "detail": "models.movimentacao_model",
-        "documentation": {}
-    },
-    {
         "label": "SubcategoriaModel",
         "importPath": "models.subcategoria_model",
         "description": "models.subcategoria_model",
@@ -1514,6 +1578,14 @@
         "documentation": {}
     },
     {
+        "label": "TipoConta",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
         "label": "CondicaoPagamento",
         "importPath": "models.enums",
         "description": "models.enums",
@@ -1531,6 +1603,14 @@
     },
     {
         "label": "TipoMovimentacao",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoConta",
         "importPath": "models.enums",
         "description": "models.enums",
         "isExtraImport": true,
@@ -1601,7 +1681,7 @@
         "kind": 5,
         "importPath": "api.v1.endpoints.conta",
         "description": "api.v1.endpoints.conta",
-        "peekOfCode": "router = APIRouter()\n# POST / Cadastro de conta\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_conta(\n    conta: ContaSchema, \n    db: AsyncSession = Depends(get_session),  \n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    nova_conta: ContaModel = ContaModel(\n        nome=conta.nome,",
+        "peekOfCode": "router = APIRouter()\n# POST / Cadastro de conta\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_conta(\n    conta: ContaSchema, \n    db: AsyncSession = Depends(get_session),  \n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    nova_conta: ContaModel = ContaModel(\n        descricao=conta.descricao,",
         "detail": "api.v1.endpoints.conta",
         "documentation": {}
     },
@@ -1637,7 +1717,7 @@
         "kind": 5,
         "importPath": "core.auth",
         "description": "core.auth",
-        "peekOfCode": "oauth2_schema = OAuth2PasswordBearer(\n    tokenUrl=f\"{settings.API_V1_STR}/login\"\n)\nasync def auth(email: EmailStr, senha: str, db: AsyncSession) -> Optional[UsuarioModel]:\n    async with db as session:\n        query = select(UsuarioModel).filter(UsuarioModel.email == email)\n        result = await session.execute(query)\n        usuario: UsuarioModel = result.scalars().unique().one_or_none()\n        if not usuario:\n            print(\"check=>>> user\")",
+        "peekOfCode": "oauth2_schema = OAuth2PasswordBearer(\n    tokenUrl=f\"{settings.API_V1_STR}/usuarios/login\"\n)\nasync def auth(email: EmailStr, senha: str, db: AsyncSession) -> Optional[UsuarioModel]:\n    async with db as session:\n        query = select(UsuarioModel).filter(UsuarioModel.email == email)\n        result = await session.execute(query)\n        usuario: UsuarioModel = result.scalars().unique().one_or_none()\n        if not usuario:\n            print(\"check=>>> user\")",
         "detail": "core.auth",
         "documentation": {}
     },
@@ -1698,55 +1778,109 @@
     {
         "label": "upgrade",
         "kind": 2,
-        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
-        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "importPath": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "description": "migrations.versions.9863773f3cb0_criando_tabelas",
         "peekOfCode": "def upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),\n    sa.Column('senha', sa.String(length=500), nullable=False),\n    sa.PrimaryKeyConstraint('id_usuario'),\n    sa.UniqueConstraint('email')",
-        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
+        "detail": "migrations.versions.9863773f3cb0_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "downgrade",
         "kind": 2,
-        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
-        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "importPath": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "description": "migrations.versions.9863773f3cb0_criando_tabelas",
         "peekOfCode": "def downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.drop_table('divide')\n    op.drop_table('MOVIMENTACAO')\n    op.drop_table('SUBCATEGORIA')\n    op.drop_table('FATURA')\n    op.drop_table('PARENTE')\n    op.drop_table('CONTA')\n    op.drop_table('CATEGORIA')\n    op.drop_table('CARTAO_CREDITO')",
-        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
+        "detail": "migrations.versions.9863773f3cb0_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "revision",
         "kind": 5,
-        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
-        "description": "migrations.versions.5c17197931e7_criando_tabelas",
-        "peekOfCode": "revision = '5c17197931e7'\ndown_revision = None\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),",
-        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
+        "importPath": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "description": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "peekOfCode": "revision = '9863773f3cb0'\ndown_revision = None\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),",
+        "detail": "migrations.versions.9863773f3cb0_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "down_revision",
         "kind": 5,
-        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
-        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "importPath": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "description": "migrations.versions.9863773f3cb0_criando_tabelas",
         "peekOfCode": "down_revision = None\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),",
-        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
+        "detail": "migrations.versions.9863773f3cb0_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "branch_labels",
         "kind": 5,
-        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
-        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "importPath": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "description": "migrations.versions.9863773f3cb0_criando_tabelas",
         "peekOfCode": "branch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),\n    sa.Column('senha', sa.String(length=500), nullable=False),",
-        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
+        "detail": "migrations.versions.9863773f3cb0_criando_tabelas",
         "documentation": {}
     },
     {
         "label": "depends_on",
         "kind": 5,
-        "importPath": "migrations.versions.5c17197931e7_criando_tabelas",
-        "description": "migrations.versions.5c17197931e7_criando_tabelas",
+        "importPath": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "description": "migrations.versions.9863773f3cb0_criando_tabelas",
         "peekOfCode": "depends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    op.create_table('USUARIO',\n    sa.Column('id_usuario', sa.BigInteger(), nullable=False),\n    sa.Column('nome_completo', sa.String(length=50), nullable=False),\n    sa.Column('data_nascimento', sa.TIMESTAMP(timezone=True), nullable=False),\n    sa.Column('email', sa.String(length=50), nullable=False),\n    sa.Column('senha', sa.String(length=500), nullable=False),\n    sa.PrimaryKeyConstraint('id_usuario'),",
-        "detail": "migrations.versions.5c17197931e7_criando_tabelas",
+        "detail": "migrations.versions.9863773f3cb0_criando_tabelas",
+        "documentation": {}
+    },
+    {
+        "label": "upgrade",
+        "kind": 2,
+        "importPath": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "description": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "peekOfCode": "def upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
+        "detail": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "documentation": {}
+    },
+    {
+        "label": "downgrade",
+        "kind": 2,
+        "importPath": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "description": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "peekOfCode": "def downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
+        "detail": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "documentation": {}
+    },
+    {
+        "label": "revision",
+        "kind": 5,
+        "importPath": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "description": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "peekOfCode": "revision = 'c0de427ddd6b'\ndown_revision = '9863773f3cb0'\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###",
+        "detail": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "documentation": {}
+    },
+    {
+        "label": "down_revision",
+        "kind": 5,
+        "importPath": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "description": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "peekOfCode": "down_revision = '9863773f3cb0'\nbranch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass",
+        "detail": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "documentation": {}
+    },
+    {
+        "label": "branch_labels",
+        "kind": 5,
+        "importPath": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "description": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "peekOfCode": "branch_labels = None\ndepends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
+        "detail": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "documentation": {}
+    },
+    {
+        "label": "depends_on",
+        "kind": 5,
+        "importPath": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "description": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
+        "peekOfCode": "depends_on = None\ndef upgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###\ndef downgrade() -> None:\n    # ### commands auto generated by Alembic - please adjust! ###\n    pass\n    # ### end Alembic commands ###",
+        "detail": "migrations.versions.c0de427ddd6b_adicionando_descrição_como_null",
         "documentation": {}
     },
     {
@@ -1844,7 +1978,7 @@
         "kind": 6,
         "importPath": "models.conta_model",
         "description": "models.conta_model",
-        "peekOfCode": "class ContaModel(settings.DBBaseModel):\n    __tablename__ = \"CONTA\"\n    id_conta = Column(BigInteger, primary_key=True) \n    descricao = Column(String(500))\n    tipo_conta = Column(String(100))\n    id_usuario = Column(BigInteger, ForeignKey(\"USUARIO.id_usuario\"), nullable=False)\n    nome = Column(String(500), nullable=False)\n    nome_icone = Column(String(100))\n    ativo = Column(Boolean, default=True)  # Adicionando a coluna ativo\n    usuario = relationship(\"UsuarioModel\", back_populates=\"contas\")",
+        "peekOfCode": "class ContaModel(settings.DBBaseModel):\n    __tablename__ = \"CONTA\"\n    id_conta = Column(BigInteger, primary_key=True) \n    descricao = Column(String(500), nullable=True)\n    tipo_conta = Column(String(100), nullable=False)\n    id_usuario = Column(BigInteger, ForeignKey(\"USUARIO.id_usuario\"), nullable=False)\n    nome = Column(String(500), nullable=False)\n    nome_icone = Column(String(100))\n    ativo = Column(Boolean, default=True)  # Adicionando a coluna ativo\n    usuario = relationship(\"UsuarioModel\", back_populates=\"contas\")",
         "detail": "models.conta_model",
         "documentation": {}
     },
@@ -1853,7 +1987,7 @@
         "kind": 6,
         "importPath": "models.enums",
         "description": "models.enums",
-        "peekOfCode": "class TipoMovimentacao(Enum):\n    DESPESA = \"Despesa\"\n    RECEITA = \"Receita\"\nclass FormaPagamento(Enum):\n    DEBITO = \"Débito\"\n    CREDITO = \"Crédito\"\n    DINHEIRO = \"Dinheiro\"\nclass CondicaoPagamento(Enum):\n    A_VISTA = \"a vista\"\n    PARCELADO = \"parcelado\"",
+        "peekOfCode": "class TipoMovimentacao(str, Enum):\n    DESPESA = \"Despesa\"\n    RECEITA = \"Receita\"\nclass FormaPagamento(str, Enum):\n    DEBITO = \"Débito\"\n    CREDITO = \"Crédito\"\n    DINHEIRO = \"Dinheiro\"\nclass CondicaoPagamento(str, Enum):\n    A_VISTA = \"À vista\"\n    PARCELADO = \"Parcelado\"",
         "detail": "models.enums",
         "documentation": {}
     },
@@ -1862,7 +1996,7 @@
         "kind": 6,
         "importPath": "models.enums",
         "description": "models.enums",
-        "peekOfCode": "class FormaPagamento(Enum):\n    DEBITO = \"Débito\"\n    CREDITO = \"Crédito\"\n    DINHEIRO = \"Dinheiro\"\nclass CondicaoPagamento(Enum):\n    A_VISTA = \"a vista\"\n    PARCELADO = \"parcelado\"\n    RECORRENTE = \"recorrente\"\nclass TipoCategoria(Enum):\n    FIXA = \"Fixa\"",
+        "peekOfCode": "class FormaPagamento(str, Enum):\n    DEBITO = \"Débito\"\n    CREDITO = \"Crédito\"\n    DINHEIRO = \"Dinheiro\"\nclass CondicaoPagamento(str, Enum):\n    A_VISTA = \"À vista\"\n    PARCELADO = \"Parcelado\"\n    RECORRENTE = \"Recorrente\"\nclass TipoCategoria(str, Enum):\n    FIXA = \"Fixa\"",
         "detail": "models.enums",
         "documentation": {}
     },
@@ -1871,7 +2005,7 @@
         "kind": 6,
         "importPath": "models.enums",
         "description": "models.enums",
-        "peekOfCode": "class CondicaoPagamento(Enum):\n    A_VISTA = \"a vista\"\n    PARCELADO = \"parcelado\"\n    RECORRENTE = \"recorrente\"\nclass TipoCategoria(Enum):\n    FIXA = \"Fixa\"\n    VARIAVEL = \"Variável\"",
+        "peekOfCode": "class CondicaoPagamento(str, Enum):\n    A_VISTA = \"À vista\"\n    PARCELADO = \"Parcelado\"\n    RECORRENTE = \"Recorrente\"\nclass TipoCategoria(str, Enum):\n    FIXA = \"Fixa\"\n    VARIAVEL = \"Variável\"\nclass TipoConta(str, Enum):\n    CORRENTE = \"Corrente\"\n    POUPANCA = \"Poupança\"",
         "detail": "models.enums",
         "documentation": {}
     },
@@ -1880,7 +2014,16 @@
         "kind": 6,
         "importPath": "models.enums",
         "description": "models.enums",
-        "peekOfCode": "class TipoCategoria(Enum):\n    FIXA = \"Fixa\"\n    VARIAVEL = \"Variável\"",
+        "peekOfCode": "class TipoCategoria(str, Enum):\n    FIXA = \"Fixa\"\n    VARIAVEL = \"Variável\"\nclass TipoConta(str, Enum):\n    CORRENTE = \"Corrente\"\n    POUPANCA = \"Poupança\"\n    CONTA_PAGAMENTO = \"Conta de pagamento\"\n    CARTEIRA = \"Carteira\"\n    CONTA_SALARIO = \"Conta Salário\"",
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoConta",
+        "kind": 6,
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "peekOfCode": "class TipoConta(str, Enum):\n    CORRENTE = \"Corrente\"\n    POUPANCA = \"Poupança\"\n    CONTA_PAGAMENTO = \"Conta de pagamento\"\n    CARTEIRA = \"Carteira\"\n    CONTA_SALARIO = \"Conta Salário\"",
         "detail": "models.enums",
         "documentation": {}
     },
@@ -1934,7 +2077,25 @@
         "kind": 6,
         "importPath": "schemas.conta_schema",
         "description": "schemas.conta_schema",
-        "peekOfCode": "class ContaSchema(BaseModel):\n    descricao: str\n    tipo_conta: str\n    nome: str\n    nome_icone: str",
+        "peekOfCode": "class ContaSchema(BaseModel):\n    descricao: Optional[str] = None\n    tipo_conta: TipoConta\n    nome: str\n    nome_icone: str\n    ativo : Optional[bool] = True\n    class Config:\n        from_attributes = True\nclass ContaSchemaId(ContaSchema):\n    id_usuario: int",
+        "detail": "schemas.conta_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ContaSchemaId",
+        "kind": 6,
+        "importPath": "schemas.conta_schema",
+        "description": "schemas.conta_schema",
+        "peekOfCode": "class ContaSchemaId(ContaSchema):\n    id_usuario: int\n    id_conta: int\nclass ContaSchemaUp(ContaSchema):\n    descricao: Optional[str] = None\n    tipo_conta: Optional[TipoConta] = None\n    nome: Optional[str] = None\n    nome_icone: Optional[str] = None\n    ativo : Optional[bool] = True",
+        "detail": "schemas.conta_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ContaSchemaUp",
+        "kind": 6,
+        "importPath": "schemas.conta_schema",
+        "description": "schemas.conta_schema",
+        "peekOfCode": "class ContaSchemaUp(ContaSchema):\n    descricao: Optional[str] = None\n    tipo_conta: Optional[TipoConta] = None\n    nome: Optional[str] = None\n    nome_icone: Optional[str] = None\n    ativo : Optional[bool] = True",
         "detail": "schemas.conta_schema",
         "documentation": {}
     },

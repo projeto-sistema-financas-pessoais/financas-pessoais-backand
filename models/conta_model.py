@@ -9,7 +9,7 @@ class ContaModel(settings.DBBaseModel):
     __tablename__ = "CONTA"
 
     id_conta = Column(BigInteger, primary_key=True) 
-    descricao = Column(String(500))
+    descricao = Column(String(500), nullable=True)
     tipo_conta = Column(String(100), nullable=False)
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
     nome = Column(String(500), nullable=False)

@@ -6,7 +6,7 @@ from models.enums import TipoConta
 
 
 class ContaSchema(BaseModel):
-    descricao: str
+    descricao: Optional[str] = None
     tipo_conta: TipoConta
     nome: str
     nome_icone: str
@@ -15,7 +15,10 @@ class ContaSchema(BaseModel):
     class Config:
         from_attributes = True
     
-    
+class ContaSchemaId(ContaSchema):
+    id_usuario: int
+    id_conta: int
+       
     
 class ContaSchemaUp(ContaSchema):
     descricao: Optional[str] = None
