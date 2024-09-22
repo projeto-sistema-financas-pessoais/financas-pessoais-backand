@@ -103,7 +103,7 @@ async def get_contas ( db: AsyncSession = Depends(get_session),
 async def get_conta (conta_id: int,  db: AsyncSession = Depends(get_session),
                        usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
-        query = select(ContaModel).where(ContaModel.id_conta == conta_id, ContaModel.id_usuario == usuario_logado.id)
+        query = select(ContaModel).where(ContaModel.id_conta == conta_id, ContaModel.id_usuario == usuario_logado.id_usuario)
         result = await session.execute(query)
         conta: ContaSchemaId = result.scalars().unique().one_or_none()
         
