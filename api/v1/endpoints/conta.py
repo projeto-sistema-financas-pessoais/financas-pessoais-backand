@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from fastapi.responses import JSONResponse
@@ -6,9 +7,9 @@ from sqlalchemy.exc import IntegrityError
 
 from core.deps import get_current_user, get_session
 from models.conta_model import ContaModel
-from models.enums import TipoConta
+from models.movimentacao_model import MovimentacaoModel
 from models.usuario_model import UsuarioModel
-from schemas.conta_schema import ContaSchema, ContaSchemaUp
+from schemas.conta_schema import ContaSchema, ContaSchemaId, ContaSchemaUp
 
 from sqlalchemy.future import select
 
@@ -41,14 +42,21 @@ async def post_conta(
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Já existe uma conta com este nome')
         
 # PUT artigo
-@router.put('/{conta_id}', response_model=ContaSchema, status_code=status.HTTP_202_ACCEPTED)
-async def put_curso (conta_id: int, conta: ContaSchemaUp, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+@router.put('/{conta_id}', response_model=ContaSchemaId, status_code=status.HTTP_202_ACCEPTED)
+async def put_conta (conta_id: int, conta: ContaSchemaUp, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
 
        
         query = select(ContaModel).filter(ContaModel.id_conta == conta_id)
         result = await session.execute(query)
         conta_up: ContaModel = result.scalars().unique().one_or_none()
+        
+        
+        if conta_up.nome == 'Carteira':
+            raise HTTPException(
+                detail='Não é possível atualizar a conta Carteira.',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         
         if conta_up:
             
@@ -69,8 +77,86 @@ async def put_curso (conta_id: int, conta: ContaSchemaUp, db: AsyncSession = Dep
             if conta.ativo is not None:
                 conta_up.ativo = bool(conta.ativo)
             
-            await session.commit()
-                
-            return conta_up
+            try:
+                await session.commit()
+                return conta_up
+            except IntegrityError:
+                await session.rollback()  # Garantir rollback em caso de erro
+                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Já existe uma conta com este nome')
         else:
             raise HTTPException (detail= 'Conta não encontrada.', status_code=status.HTTP_404_NOT_FOUND)
+
+
+# GET / Contas do Usuário
+@router.get('/', response_model=List[ContaSchemaId])
+async def get_contas ( db: AsyncSession = Depends(get_session),
+                      usuario_logado: UsuarioModel = Depends(get_current_user)):
+    async with db as session:
+        query = select(ContaModel).where(ContaModel.id_usuario == usuario_logado.id_usuario)
+        result = await session.execute(query)
+        contas: List[ContaSchemaId] = result.scalars().unique().all()
+      
+        return contas
+    
+# GET / Conta do usuário
+@router.get('/{conta_id}', response_model=ContaSchemaId, status_code= status.HTTP_200_OK)
+async def get_conta (conta_id: int,  db: AsyncSession = Depends(get_session),
+                       usuario_logado: UsuarioModel = Depends(get_current_user)):
+    async with db as session:
+        query = select(ContaModel).where(ContaModel.id_conta == conta_id, ContaModel.id_usuario == usuario_logado.id_usuario)
+        result = await session.execute(query)
+        conta: ContaSchemaId = result.scalars().unique().one_or_none()
+        
+        
+        if conta:
+            return conta
+        else:
+            raise HTTPException (detail= 'Conta não encontrado.', status_code=status.HTTP_404_NOT_FOUND)
+        
+# DELETE Conta
+@router.delete('/{conta_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_conta (conta_id: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+    async with db as session:
+        query = select(ContaModel).where(ContaModel.id_conta == conta_id, ContaModel.id_usuario == usuario_logado.id_usuario)
+        result = await session.execute(query)
+        conta_del: ContaModel = result.scalars().unique().one_or_none()
+        
+     
+        if not conta_del:
+            raise HTTPException(detail='Conta não encontrada.', status_code=status.HTTP_404_NOT_FOUND)
+        
+        if conta_del.nome == 'Carteira':
+            raise HTTPException(detail='Não é possível deletar a conta ""Carteira""', status_code=status.HTTP_400_BAD_REQUEST)
+        
+        
+        # Verificar se existem movimentações associadas à conta
+        movimentacao_query = select(MovimentacaoModel).where(
+            MovimentacaoModel.id_conta == conta_id
+        )
+        movimentacao_result = await session.execute(movimentacao_query)
+        movimentacoes = movimentacao_result.scalars().unique().all()
+        
+        
+        if movimentacoes:
+            raise HTTPException(detail='Não é possível excluir a conta. Existem movimentações associadas.', status_code=status.HTTP_400_BAD_REQUEST)
+        
+        
+           
+        await session.delete(conta_del)
+        
+        await session.commit()
+            
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        
+        
+
+#GET / all Teste pra todas as contas de todos os usuários
+@router.get('/teste/', response_model=List[ContaSchemaId])
+async def get_contas_teste ( db: AsyncSession = Depends(get_session),
+                      usuario_logado: UsuarioModel = Depends(get_current_user)):
+    async with db as session:
+        query = select(ContaModel)
+        result = await session.execute(query)
+        contas: List[ContaSchemaId] = result.scalars().unique().all()
+      
+        return contas
