@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from api.v1.endpoints import usuario, conta
+from api.v1.endpoints import usuario, conta, categoria
 
 api_router = APIRouter()
 api_router.include_router(usuario.router, prefix='/usuarios', tags=["usuarios"])
 api_router.include_router(conta.router, prefix='/contas', tags=["contas"])
+api_router.include_router(categoria.router, prefix='/categorias', tags=["categorias"])
 
 
 
