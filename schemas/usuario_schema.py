@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
-
+from typing import Optional
 
 class UsuarioSchema(BaseModel):
     nome_completo: str
@@ -13,5 +13,12 @@ class UsuarioSchema(BaseModel):
 class LoginDataSchema(BaseModel):
     email: EmailStr
     senha: str
-    
+
+class UpdateUsuarioSchema(BaseModel):
+    nome_completo: str
+    data_nascimento: datetime
+
+    class Config:
+        orm_mode = True
+
     
