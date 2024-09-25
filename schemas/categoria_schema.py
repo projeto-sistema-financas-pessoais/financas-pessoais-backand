@@ -24,11 +24,11 @@ class CategoriaCreateSchema(BaseModel):
     valor_categoria: Decimal
 
 class CategoriaUpdateSchema(BaseModel):
-    nome: str
-    descricao: Optional[str]
-    tipo_categoria: TipoCategoria
-    modelo_categoria: TipoMovimentacao
-    valor_categoria: Decimal
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    tipo_categoria: Optional[TipoCategoria] = None
+    modelo_categoria: Optional[TipoMovimentacao] = None
+    valor_categoria: Optional[Decimal] = None
 
 class CategoriaSchemaId(CategoriaSchema):
     id_usuario: int

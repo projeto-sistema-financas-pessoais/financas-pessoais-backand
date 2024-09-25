@@ -57,7 +57,7 @@ async def get_categorias ( db: AsyncSession = Depends(get_session),
         return categorias
 
 
-@router.put('/{categoria_id}', response_model=CategoriaSchemaId, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/editar/{categoria_id}', response_model=CategoriaSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def put_categoria(
     categoria_id: int, 
     categoria: CategoriaUpdateSchema, 
