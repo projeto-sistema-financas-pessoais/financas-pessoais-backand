@@ -8,13 +8,11 @@ from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 from models.categoria_model import CategoriaModel
 from models.conta_model import ContaModel
-from schemas.usuario_schema import LoginDataSchema, UsuarioSchema, UpdateUsuarioSchema
+from schemas.usuario_schema import UsuarioSchema, UpdateUsuarioSchema
 from fastapi.security import OAuth2PasswordRequestForm
 from core.auth import auth, generate_token_access
-from models.enums import TipoCategoria, TipoMovimentacao
 
 router = APIRouter()
-
 
 
 @router.post('/cadastro', status_code=status.HTTP_201_CREATED)
@@ -41,7 +39,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0
+                    valor_categoria=0,
+                    nome_icone="6_wallet.svg"
                 ),
                 CategoriaModel(
                     nome="Alimentação",
@@ -49,7 +48,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0
+                    valor_categoria=0,
+                    nome_icone="6_wallet.svg"
                 ),
                 CategoriaModel(
                     nome="Transporte",
@@ -57,7 +57,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0
+                    valor_categoria=0,
+                    nome_icone="6_wallet.svg"
                 ),
                 CategoriaModel(
                     nome="Educação",
@@ -65,7 +66,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0
+                    valor_categoria=0,
+                    nome_icone="6_wallet.svg"
                 ),
                 CategoriaModel(
                     nome="Lazer",
@@ -73,7 +75,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Variável",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0
+                    valor_categoria=0,
+                    nome_icone="6_wallet.svg"
                 ),
                 CategoriaModel(
                     nome="Salário",
@@ -81,7 +84,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0
+                    valor_categoria=0,
+                    nome_icone="6_wallet.svg"
                 ),
                 CategoriaModel(
                     nome="Extra",
@@ -89,7 +93,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Variável",
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0
+                    valor_categoria=0,
+                    nome_icone="6_wallet.svg",
                 )
             ]
             session.add_all(categorias)

@@ -5,8 +5,11 @@ from typing import List
 from core.deps import get_current_user, get_session
 from models.categoria_model import CategoriaModel
 from models.usuario_model import UsuarioModel
+from models.movimentacao_model import MovimentacaoModel
 from schemas.categoria_schema import CategoriaSchema, CategoriaCreateSchema, CategoriaUpdateSchema, CategoriaSchemaId
 from sqlalchemy.future import select
+from models.enums import TipoMovimentacao
+
 
 router = APIRouter()
 
@@ -22,7 +25,8 @@ async def post_categoria(
         tipo_categoria=categoria.tipo_categoria,
         modelo_categoria=categoria.modelo_categoria,
         id_usuario=usuario_logado.id_usuario,
-        valor_categoria=categoria.valor_categoria
+        valor_categoria=categoria.valor_categoria,
+        nome_icone=categoria.nome_icone
     )
     
     async with db as session:
@@ -56,6 +60,32 @@ async def get_categorias ( db: AsyncSession = Depends(get_session),
       
         return categorias
 
+@router.get('/listar/receita', response_model=List[CategoriaSchemaId], status_code=status.HTTP_200_OK)
+async def get_categorias_receita(db: AsyncSession = Depends(get_session), 
+                                 usuario_logado: UsuarioModel = Depends(get_current_user)):
+    async with db as session:
+        query = select(CategoriaModel).where(
+            CategoriaModel.id_usuario == usuario_logado.id_usuario,
+            CategoriaModel.modelo_categoria == TipoMovimentacao.RECEITA
+        )
+        result = await session.execute(query)
+        categorias_receita: List[CategoriaSchemaId] = result.scalars().unique().all()
+
+        return categorias_receita
+
+# Listar categorias onde modelo_categoria é igual a Despesa
+@router.get('/listar/despesa', response_model=List[CategoriaSchemaId], status_code=status.HTTP_200_OK)
+async def get_categorias_despesa(db: AsyncSession = Depends(get_session), 
+                                 usuario_logado: UsuarioModel = Depends(get_current_user)):
+    async with db as session:
+        query = select(CategoriaModel).where(
+            CategoriaModel.id_usuario == usuario_logado.id_usuario,
+            CategoriaModel.modelo_categoria == TipoMovimentacao.DESPESA
+        )
+        result = await session.execute(query)
+        categorias_despesa: List[CategoriaSchemaId] = result.scalars().unique().all()
+
+        return categorias_despesa
 
 @router.put('/editar/{categoria_id}', response_model=CategoriaSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def put_categoria(
@@ -91,6 +121,8 @@ async def put_categoria(
             categoria_up.modelo_categoria = categoria.modelo_categoria
         if categoria.valor_categoria is not None:
             categoria_up.valor_categoria = categoria.valor_categoria
+        if categoria.nome_icone:
+            categoria_up.nome_icone = categoria.nome_icone
 
         try:
             await session.commit()
@@ -108,6 +140,17 @@ async def delete_categoria(id_categoria: int, db: AsyncSession = Depends(get_ses
         categoria = await session.get(CategoriaModel, id_categoria)
         if not categoria:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada")
+        
+        # Verificar se existem movimentações associadas à categoria
+        movimentacao_query = select(MovimentacaoModel).where(
+            MovimentacaoModel.id_conta == id_categoria
+        )
+        movimentacao_result = await session.execute(movimentacao_query)
+        movimentacoes = movimentacao_result.scalars().unique().all()
+        
+        
+        if movimentacoes:
+            raise HTTPException(detail='Não é possível excluir a categoria. Existem movimentações associadas.', status_code=status.HTTP_400_BAD_REQUEST)
         
         await session.delete(categoria)
         await session.commit()

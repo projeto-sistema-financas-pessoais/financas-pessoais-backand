@@ -15,6 +15,7 @@ class CategoriaModel(settings.DBBaseModel):
     modelo_categoria = Column(SqlEnum(TipoMovimentacao), nullable=False)
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
     valor_categoria = Column(DECIMAL(10, 2), nullable=False)
+    nome_icone = Column(String(100))
 
 
     subcategorias = relationship("SubcategoriaModel", back_populates="categoria")

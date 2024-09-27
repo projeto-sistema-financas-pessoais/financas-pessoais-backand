@@ -7,6 +7,7 @@ from core.deps import get_session, get_current_user
 from models.cartao_credito_model import CartaoCreditoModel
 from schemas.cartao_de_credito_schema import CartaoCreditoCreateSchema, CartaoCreditoSchema, CartaoCreditoUpdateSchema
 from models.usuario_model import UsuarioModel
+from models.fatura_model import FaturaModel
 
 router = APIRouter()
 
@@ -113,6 +114,17 @@ async def deletar_cartao_credito(
         if not cartao_credito:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de crédito não encontrado ou você não tem permissão para deletá-lo")
 
+    # Verificar se existem faturas associadas ao cartão de crédito
+        fatura_query = select(FaturaModel).where(
+            FaturaModel.id_cartao_credito == id_cartao_credito
+        )
+        Fatura_result = await session.execute(fatura_query)
+        faturas = Fatura_result.scalars().unique().all()
+        
+        
+        if faturas:
+            raise HTTPException(detail='Não é possível excluir o cartão de crédito. Existem faturas associadas.', status_code=status.HTTP_400_BAD_REQUEST)
+        
         await session.delete(cartao_credito)
         await session.commit()
 
