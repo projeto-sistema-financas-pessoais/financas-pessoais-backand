@@ -46,6 +46,7 @@ def upgrade() -> None:
     sa.Column('modelo_categoria', sa.Enum('DESPESA', 'RECEITA', name='tipomovimentacao'), nullable=False),
     sa.Column('id_usuario', sa.BigInteger(), nullable=False),
     sa.Column('valor_categoria', sa.DECIMAL(precision=10, scale=2), nullable=False),
+    sa.Column('nome_icone', sa.String(length=100), nullable=True),
     sa.ForeignKeyConstraint(['id_usuario'], ['USUARIO.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_categoria'),
     sa.UniqueConstraint('nome', 'id_usuario', name='unique_nome_categoria')
