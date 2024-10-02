@@ -120,7 +120,7 @@ async def delete_conta (conta_id: int, db: AsyncSession = Depends(get_session), 
             raise HTTPException(detail='Conta não encontrada.', status_code=status.HTTP_404_NOT_FOUND)
         
         if conta_del.nome == 'Carteira':
-            raise HTTPException(detail='Não é possível deletar a conta ""Carteira""', status_code=status.HTTP_400_BAD_REQUEST)
+            raise HTTPException(detail='Não é possível deletar a conta ""Carteira""', status_code=status.HTTP_406_NOT_ACCEPTABLE)
         
         
         # Verificar se existem movimentações associadas à conta
