@@ -39,7 +39,7 @@ async def post_conta(
             await session.rollback()  # Garantir rollback em caso de erro
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Já existe uma conta com este nome')
         
-@router.put('editar/{conta_id}', response_model=ContaSchemaId, status_code=status.HTTP_202_ACCEPTED)
+@router.put('/editar/{conta_id}', response_model=ContaSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def put_conta (conta_id: int, conta: ContaSchemaUp, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
 
