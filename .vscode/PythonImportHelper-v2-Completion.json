@@ -1,66 +1,74 @@
 [
     {
-        "label": "List",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
         "documentation": {}
     },
     {
-        "label": "Optional",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
         "documentation": {}
     },
     {
-        "label": "List",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
         "documentation": {}
     },
     {
-        "label": "ClassVar",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
         "documentation": {}
     },
     {
-        "label": "List",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "Response",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
         "documentation": {}
     },
     {
-        "label": "Generator",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
         "documentation": {}
     },
     {
-        "label": "Optional",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
         "documentation": {}
     },
     {
-        "label": "Optional",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
         "documentation": {}
     },
     {
@@ -113,6 +121,142 @@
     },
     {
         "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
         "importPath": "fastapi",
         "description": "fastapi",
         "isExtraImport": true,
@@ -232,19 +376,51 @@
         "documentation": {}
     },
     {
-        "label": "JSONResponse",
-        "importPath": "fastapi.responses",
-        "description": "fastapi.responses",
+        "label": "AsyncSession",
+        "importPath": "sqlalchemy.ext.asyncio",
+        "description": "sqlalchemy.ext.asyncio",
         "isExtraImport": true,
-        "detail": "fastapi.responses",
+        "detail": "sqlalchemy.ext.asyncio",
         "documentation": {}
     },
     {
-        "label": "JSONResponse",
-        "importPath": "fastapi.responses",
-        "description": "fastapi.responses",
+        "label": "AsyncSession",
+        "importPath": "sqlalchemy.ext.asyncio",
+        "description": "sqlalchemy.ext.asyncio",
         "isExtraImport": true,
-        "detail": "fastapi.responses",
+        "detail": "sqlalchemy.ext.asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "AsyncSession",
+        "importPath": "sqlalchemy.ext.asyncio",
+        "description": "sqlalchemy.ext.asyncio",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.ext.asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "AsyncSession",
+        "importPath": "sqlalchemy.ext.asyncio",
+        "description": "sqlalchemy.ext.asyncio",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.ext.asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "AsyncSession",
+        "importPath": "sqlalchemy.ext.asyncio",
+        "description": "sqlalchemy.ext.asyncio",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.ext.asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "AsyncSession",
+        "importPath": "sqlalchemy.ext.asyncio",
+        "description": "sqlalchemy.ext.asyncio",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.ext.asyncio",
         "documentation": {}
     },
     {
@@ -320,6 +496,158 @@
         "documentation": {}
     },
     {
+        "label": "IntegrityError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "IntegrityError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "IntegrityError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "IntegrityError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "IntegrityError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "IntegrityError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "select",
+        "importPath": "sqlalchemy.future",
+        "description": "sqlalchemy.future",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.future",
+        "documentation": {}
+    },
+    {
+        "label": "get_session",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_session",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
         "label": "get_current_user",
         "importPath": "core.deps",
         "description": "core.deps",
@@ -344,19 +672,419 @@
         "documentation": {}
     },
     {
-        "label": "ContaModel",
-        "importPath": "models.conta_model",
-        "description": "models.conta_model",
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
         "isExtraImport": true,
-        "detail": "models.conta_model",
+        "detail": "core.deps",
         "documentation": {}
     },
     {
-        "label": "ContaModel",
-        "importPath": "models.conta_model",
-        "description": "models.conta_model",
+        "label": "get_session",
+        "importPath": "core.deps",
+        "description": "core.deps",
         "isExtraImport": true,
-        "detail": "models.conta_model",
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_session",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_session",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_session",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "importPath": "core.deps",
+        "description": "core.deps",
+        "isExtraImport": true,
+        "detail": "core.deps",
+        "documentation": {}
+    },
+    {
+        "label": "CartaoCreditoModel",
+        "importPath": "models.cartao_credito_model",
+        "description": "models.cartao_credito_model",
+        "isExtraImport": true,
+        "detail": "models.cartao_credito_model",
+        "documentation": {}
+    },
+    {
+        "label": "CartaoCreditoModel",
+        "importPath": "models.cartao_credito_model",
+        "description": "models.cartao_credito_model",
+        "isExtraImport": true,
+        "detail": "models.cartao_credito_model",
+        "documentation": {}
+    },
+    {
+        "label": "CartaoCreditoCreateSchema",
+        "importPath": "schemas.cartao_de_credito_schema",
+        "description": "schemas.cartao_de_credito_schema",
+        "isExtraImport": true,
+        "detail": "schemas.cartao_de_credito_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CartaoCreditoSchema",
+        "importPath": "schemas.cartao_de_credito_schema",
+        "description": "schemas.cartao_de_credito_schema",
+        "isExtraImport": true,
+        "detail": "schemas.cartao_de_credito_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CartaoCreditoUpdateSchema",
+        "importPath": "schemas.cartao_de_credito_schema",
+        "description": "schemas.cartao_de_credito_schema",
+        "isExtraImport": true,
+        "detail": "schemas.cartao_de_credito_schema",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "UsuarioModel",
+        "importPath": "models.usuario_model",
+        "description": "models.usuario_model",
+        "isExtraImport": true,
+        "detail": "models.usuario_model",
+        "documentation": {}
+    },
+    {
+        "label": "FaturaModel",
+        "importPath": "models.fatura_model",
+        "description": "models.fatura_model",
+        "isExtraImport": true,
+        "detail": "models.fatura_model",
+        "documentation": {}
+    },
+    {
+        "label": "FaturaModel",
+        "importPath": "models.fatura_model",
+        "description": "models.fatura_model",
+        "isExtraImport": true,
+        "detail": "models.fatura_model",
+        "documentation": {}
+    },
+    {
+        "label": "FaturaModel",
+        "importPath": "models.fatura_model",
+        "description": "models.fatura_model",
+        "isExtraImport": true,
+        "detail": "models.fatura_model",
+        "documentation": {}
+    },
+    {
+        "label": "FaturaModel",
+        "importPath": "models.fatura_model",
+        "description": "models.fatura_model",
+        "isExtraImport": true,
+        "detail": "models.fatura_model",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "ClassVar",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Generator",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaModel",
+        "importPath": "models.categoria_model",
+        "description": "models.categoria_model",
+        "isExtraImport": true,
+        "detail": "models.categoria_model",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaModel",
+        "importPath": "models.categoria_model",
+        "description": "models.categoria_model",
+        "isExtraImport": true,
+        "detail": "models.categoria_model",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaModel",
+        "importPath": "models.categoria_model",
+        "description": "models.categoria_model",
+        "isExtraImport": true,
+        "detail": "models.categoria_model",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaModel",
+        "importPath": "models.categoria_model",
+        "description": "models.categoria_model",
+        "isExtraImport": true,
+        "detail": "models.categoria_model",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaModel",
+        "importPath": "models.categoria_model",
+        "description": "models.categoria_model",
+        "isExtraImport": true,
+        "detail": "models.categoria_model",
         "documentation": {}
     },
     {
@@ -376,43 +1104,187 @@
         "documentation": {}
     },
     {
-        "label": "UsuarioModel",
-        "importPath": "models.usuario_model",
-        "description": "models.usuario_model",
+        "label": "MovimentacaoModel",
+        "importPath": "models.movimentacao_model",
+        "description": "models.movimentacao_model",
         "isExtraImport": true,
-        "detail": "models.usuario_model",
+        "detail": "models.movimentacao_model",
         "documentation": {}
     },
     {
-        "label": "UsuarioModel",
-        "importPath": "models.usuario_model",
-        "description": "models.usuario_model",
+        "label": "MovimentacaoModel",
+        "importPath": "models.movimentacao_model",
+        "description": "models.movimentacao_model",
         "isExtraImport": true,
-        "detail": "models.usuario_model",
+        "detail": "models.movimentacao_model",
         "documentation": {}
     },
     {
-        "label": "UsuarioModel",
-        "importPath": "models.usuario_model",
-        "description": "models.usuario_model",
+        "label": "CategoriaSchema",
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
         "isExtraImport": true,
-        "detail": "models.usuario_model",
+        "detail": "schemas.categoria_schema",
         "documentation": {}
     },
     {
-        "label": "UsuarioModel",
-        "importPath": "models.usuario_model",
-        "description": "models.usuario_model",
+        "label": "CategoriaCreateSchema",
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
         "isExtraImport": true,
-        "detail": "models.usuario_model",
+        "detail": "schemas.categoria_schema",
         "documentation": {}
     },
     {
-        "label": "UsuarioModel",
-        "importPath": "models.usuario_model",
-        "description": "models.usuario_model",
+        "label": "CategoriaUpdateSchema",
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
         "isExtraImport": true,
-        "detail": "models.usuario_model",
+        "detail": "schemas.categoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaSchemaId",
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
+        "isExtraImport": true,
+        "detail": "schemas.categoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "TipoMovimentacao",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoMovimentacao",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoCategoria",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoConta",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "CondicaoPagamento",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "FormaPagamento",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoMovimentacao",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoMovimentacao",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoCategoria",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoConta",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "CondicaoPagamento",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "FormaPagamento",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "TipoMovimentacao",
+        "importPath": "models.enums",
+        "description": "models.enums",
+        "isExtraImport": true,
+        "detail": "models.enums",
+        "documentation": {}
+    },
+    {
+        "label": "ContaModel",
+        "importPath": "models.conta_model",
+        "description": "models.conta_model",
+        "isExtraImport": true,
+        "detail": "models.conta_model",
+        "documentation": {}
+    },
+    {
+        "label": "ContaModel",
+        "importPath": "models.conta_model",
+        "description": "models.conta_model",
+        "isExtraImport": true,
+        "detail": "models.conta_model",
+        "documentation": {}
+    },
+    {
+        "label": "ContaModel",
+        "importPath": "models.conta_model",
+        "description": "models.conta_model",
+        "isExtraImport": true,
+        "detail": "models.conta_model",
+        "documentation": {}
+    },
+    {
+        "label": "ContaModel",
+        "importPath": "models.conta_model",
+        "description": "models.conta_model",
+        "isExtraImport": true,
+        "detail": "models.conta_model",
         "documentation": {}
     },
     {
@@ -440,27 +1312,123 @@
         "documentation": {}
     },
     {
-        "label": "select",
-        "importPath": "sqlalchemy.future",
-        "description": "sqlalchemy.future",
+        "label": "FaturaCreateSchema",
+        "importPath": "schemas.fatura_schema",
+        "description": "schemas.fatura_schema",
         "isExtraImport": true,
-        "detail": "sqlalchemy.future",
+        "detail": "schemas.fatura_schema",
         "documentation": {}
     },
     {
-        "label": "select",
-        "importPath": "sqlalchemy.future",
-        "description": "sqlalchemy.future",
+        "label": "FaturaUpdateSchema",
+        "importPath": "schemas.fatura_schema",
+        "description": "schemas.fatura_schema",
         "isExtraImport": true,
-        "detail": "sqlalchemy.future",
+        "detail": "schemas.fatura_schema",
         "documentation": {}
     },
     {
-        "label": "select",
-        "importPath": "sqlalchemy.future",
-        "description": "sqlalchemy.future",
+        "label": "MovimentacaoCreateSchema",
+        "importPath": "schemas.movimentacao_schema",
+        "description": "schemas.movimentacao_schema",
         "isExtraImport": true,
-        "detail": "sqlalchemy.future",
+        "detail": "schemas.movimentacao_schema",
+        "documentation": {}
+    },
+    {
+        "label": "MovimentacaoUpdateSchema",
+        "importPath": "schemas.movimentacao_schema",
+        "description": "schemas.movimentacao_schema",
+        "isExtraImport": true,
+        "detail": "schemas.movimentacao_schema",
+        "documentation": {}
+    },
+    {
+        "label": "MovimentacaoSchema",
+        "importPath": "schemas.movimentacao_schema",
+        "description": "schemas.movimentacao_schema",
+        "isExtraImport": true,
+        "detail": "schemas.movimentacao_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteModel",
+        "importPath": "models.parente_model",
+        "description": "models.parente_model",
+        "isExtraImport": true,
+        "detail": "models.parente_model",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteModel",
+        "importPath": "models.parente_model",
+        "description": "models.parente_model",
+        "isExtraImport": true,
+        "detail": "models.parente_model",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteCreateSchema",
+        "importPath": "schemas.parente_schema",
+        "description": "schemas.parente_schema",
+        "isExtraImport": true,
+        "detail": "schemas.parente_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteSchema",
+        "importPath": "schemas.parente_schema",
+        "description": "schemas.parente_schema",
+        "isExtraImport": true,
+        "detail": "schemas.parente_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteUpdateSchema",
+        "importPath": "schemas.parente_schema",
+        "description": "schemas.parente_schema",
+        "isExtraImport": true,
+        "detail": "schemas.parente_schema",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaModel",
+        "importPath": "models.subcategoria_model",
+        "description": "models.subcategoria_model",
+        "isExtraImport": true,
+        "detail": "models.subcategoria_model",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaModel",
+        "importPath": "models.subcategoria_model",
+        "description": "models.subcategoria_model",
+        "isExtraImport": true,
+        "detail": "models.subcategoria_model",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaCreateSchema",
+        "importPath": "schemas.subcategoria_schema",
+        "description": "schemas.subcategoria_schema",
+        "isExtraImport": true,
+        "detail": "schemas.subcategoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaSchema",
+        "importPath": "schemas.subcategoria_schema",
+        "description": "schemas.subcategoria_schema",
+        "isExtraImport": true,
+        "detail": "schemas.subcategoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaUpdateSchema",
+        "importPath": "schemas.subcategoria_schema",
+        "description": "schemas.subcategoria_schema",
+        "isExtraImport": true,
+        "detail": "schemas.subcategoria_schema",
         "documentation": {}
     },
     {
@@ -489,6 +1457,62 @@
         "documentation": {}
     },
     {
+        "label": "categoria",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "subcategoria",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "cartao_de_credito",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "fatura",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "parente",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "movimentacao",
+        "importPath": "api.v1.endpoints",
+        "description": "api.v1.endpoints",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "JSONResponse",
+        "importPath": "fastapi.responses",
+        "description": "fastapi.responses",
+        "isExtraImport": true,
+        "detail": "fastapi.responses",
+        "documentation": {}
+    },
+    {
         "label": "generate_hash",
         "importPath": "core.security",
         "description": "core.security",
@@ -497,7 +1521,7 @@
         "documentation": {}
     },
     {
-        "label": "LoginDataSchema",
+        "label": "UsuarioSchema",
         "importPath": "schemas.usuario_schema",
         "description": "schemas.usuario_schema",
         "isExtraImport": true,
@@ -505,7 +1529,7 @@
         "documentation": {}
     },
     {
-        "label": "UsuarioSchema",
+        "label": "UpdateUsuarioSchema",
         "importPath": "schemas.usuario_schema",
         "description": "schemas.usuario_schema",
         "isExtraImport": true,
@@ -577,7 +1601,63 @@
         "documentation": {}
     },
     {
+        "label": "constr",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
         "label": "EmailStr",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
         "importPath": "pydantic",
         "description": "pydantic",
         "isExtraImport": true,
@@ -642,6 +1722,30 @@
     },
     {
         "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -1498,46 +2602,6 @@
         "documentation": {}
     },
     {
-        "label": "ParenteModel",
-        "importPath": "models.parente_model",
-        "description": "models.parente_model",
-        "isExtraImport": true,
-        "detail": "models.parente_model",
-        "documentation": {}
-    },
-    {
-        "label": "CartaoCreditoModel",
-        "importPath": "models.cartao_credito_model",
-        "description": "models.cartao_credito_model",
-        "isExtraImport": true,
-        "detail": "models.cartao_credito_model",
-        "documentation": {}
-    },
-    {
-        "label": "CategoriaModel",
-        "importPath": "models.categoria_model",
-        "description": "models.categoria_model",
-        "isExtraImport": true,
-        "detail": "models.categoria_model",
-        "documentation": {}
-    },
-    {
-        "label": "FaturaModel",
-        "importPath": "models.fatura_model",
-        "description": "models.fatura_model",
-        "isExtraImport": true,
-        "detail": "models.fatura_model",
-        "documentation": {}
-    },
-    {
-        "label": "SubcategoriaModel",
-        "importPath": "models.subcategoria_model",
-        "description": "models.subcategoria_model",
-        "isExtraImport": true,
-        "detail": "models.subcategoria_model",
-        "documentation": {}
-    },
-    {
         "label": "divide_table",
         "importPath": "models.associations_model",
         "description": "models.associations_model",
@@ -1559,62 +2623,6 @@
         "description": "models.associations_model",
         "isExtraImport": true,
         "detail": "models.associations_model",
-        "documentation": {}
-    },
-    {
-        "label": "TipoMovimentacao",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
-        "documentation": {}
-    },
-    {
-        "label": "TipoCategoria",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
-        "documentation": {}
-    },
-    {
-        "label": "TipoConta",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
-        "documentation": {}
-    },
-    {
-        "label": "CondicaoPagamento",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
-        "documentation": {}
-    },
-    {
-        "label": "FormaPagamento",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
-        "documentation": {}
-    },
-    {
-        "label": "TipoMovimentacao",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
-        "documentation": {}
-    },
-    {
-        "label": "TipoConta",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
         "documentation": {}
     },
     {
@@ -1623,6 +2631,30 @@
         "description": "enum",
         "isExtraImport": true,
         "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
         "documentation": {}
     },
     {
@@ -1679,10 +2711,64 @@
     {
         "label": "router",
         "kind": 5,
+        "importPath": "api.v1.endpoints.cartao_de_credito",
+        "description": "api.v1.endpoints.cartao_de_credito",
+        "peekOfCode": "router = APIRouter()\n@router.post('/cadastro', response_model=CartaoCreditoSchema, status_code=status.HTTP_201_CREATED)\nasync def create_cartao_credito(\n    cartao_credito: CartaoCreditoCreateSchema, \n    db: AsyncSession = Depends(get_session), \n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    novo_cartao: CartaoCreditoModel = CartaoCreditoModel(\n        nome=cartao_credito.nome,\n        limite=cartao_credito.limite,",
+        "detail": "api.v1.endpoints.cartao_de_credito",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "api.v1.endpoints.categoria",
+        "description": "api.v1.endpoints.categoria",
+        "peekOfCode": "router = APIRouter()\n@router.post('/criar', status_code=status.HTTP_201_CREATED)\nasync def post_categoria(\n    categoria: CategoriaCreateSchema, \n    db: AsyncSession = Depends(get_session),\n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    nova_categoria: CategoriaModel = CategoriaModel(\n        nome=categoria.nome,\n        descricao=categoria.descricao,",
+        "detail": "api.v1.endpoints.categoria",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
         "importPath": "api.v1.endpoints.conta",
         "description": "api.v1.endpoints.conta",
-        "peekOfCode": "router = APIRouter()\n# POST / Cadastro de conta\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_conta(\n    conta: ContaSchema, \n    db: AsyncSession = Depends(get_session),  \n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    nova_conta: ContaModel = ContaModel(\n        descricao=conta.descricao,",
+        "peekOfCode": "router = APIRouter()\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_conta(\n    conta: ContaSchema, \n    db: AsyncSession = Depends(get_session),  \n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    nova_conta: ContaModel = ContaModel(\n        descricao=conta.descricao,\n        tipo_conta=str (conta.tipo_conta.value),",
         "detail": "api.v1.endpoints.conta",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "api.v1.endpoints.fatura",
+        "description": "api.v1.endpoints.fatura",
+        "peekOfCode": "router = APIRouter()\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def create_fatura(\n    fatura: FaturaCreateSchema,\n    db: AsyncSession = Depends(get_session),\n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    nova_fatura = FaturaModel(\n        data_vencimento=fatura.data_vencimento,\n        data_fechamento=fatura.data_fechamento,",
+        "detail": "api.v1.endpoints.fatura",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "api.v1.endpoints.movimentacao",
+        "description": "api.v1.endpoints.movimentacao",
+        "peekOfCode": "router = APIRouter()\n@router.post('/', status_code=status.HTTP_201_CREATED)\nasync def create_movimentacao(\n    movimentacao: MovimentacaoCreateSchema,\n    db: AsyncSession = Depends(get_session),\n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    async with db as session:\n        # Verificar se a conta pertence ao usuário logado\n        query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)",
+        "detail": "api.v1.endpoints.movimentacao",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
+        "peekOfCode": "router = APIRouter()\n@router.post('/cadastro', response_model=ParenteSchema, status_code=status.HTTP_201_CREATED)\nasync def create_parente(parente: ParenteCreateSchema, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):\n    async with db as session:\n        if parente.id_usuario != usuario_logado.id_usuario:\n            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=\"Você não pode criar um parente para outro usuário.\")\n        query = select(ParenteModel).filter(ParenteModel.nome == parente.nome, ParenteModel.id_usuario == usuario_logado.id_usuario)\n        result = await session.execute(query)\n        parente_existente = result.scalars().first()\n        if parente_existente:",
+        "detail": "api.v1.endpoints.parente",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "api.v1.endpoints.subcategoria",
+        "description": "api.v1.endpoints.subcategoria",
+        "peekOfCode": "router = APIRouter()\n@router.post('/cadastro', response_model=SubcategoriaSchema, status_code=status.HTTP_201_CREATED)\nasync def post_subcategoria(\n    subcategoria: SubcategoriaCreateSchema,\n    db: AsyncSession = Depends(get_session),\n    usuario_logado: UsuarioModel = Depends(get_current_user)\n):\n    async with db as session:\n        query = select(CategoriaModel).where(\n            CategoriaModel.id_categoria == subcategoria.id_categoria,",
+        "detail": "api.v1.endpoints.subcategoria",
         "documentation": {}
     },
     {
@@ -1690,7 +2776,7 @@
         "kind": 5,
         "importPath": "api.v1.endpoints.usuario",
         "description": "api.v1.endpoints.usuario",
-        "peekOfCode": "router = APIRouter()\n# POST / Signup\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_usuario (usuario: UsuarioSchema, db: AsyncSession = Depends(get_session)):\n    novo_usuario: UsuarioModel = UsuarioModel(nome_completo = usuario.nome_completo,\n                                              data_nascimento = usuario.data_nascimento,\n                                              email= usuario.email,\n                                              senha = generate_hash(usuario.senha)\n                                              )\n    async with db as session:",
+        "peekOfCode": "router = APIRouter()\n@router.post('/cadastro', status_code=status.HTTP_201_CREATED)\nasync def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_session)):\n    novo_usuario: UsuarioModel = UsuarioModel(\n        nome_completo=usuario.nome_completo,\n        data_nascimento=usuario.data_nascimento,\n        email=usuario.email,\n        senha=generate_hash(usuario.senha)\n    )\n    async with db as session:",
         "detail": "api.v1.endpoints.usuario",
         "documentation": {}
     },
@@ -1699,7 +2785,7 @@
         "kind": 5,
         "importPath": "api.v1.api",
         "description": "api.v1.api",
-        "peekOfCode": "api_router = APIRouter()\napi_router.include_router(usuario.router, prefix='/usuarios', tags=[\"usuarios\"])\napi_router.include_router(conta.router, prefix='/contas', tags=[\"contas\"])\n\"\"\"\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzI0NjkyOTM4LCJpYXQiOjE3MjQwODgxMzgsInN1YiI6IjEifQ.qQgD-j4r-1lK8rKAcQ_i-e3xHOfXsZWAKoYPJbmnwmE\n\"\"\"",
+        "peekOfCode": "api_router = APIRouter()\napi_router.include_router(usuario.router, prefix='/usuarios', tags=[\"usuarios\"])\napi_router.include_router(conta.router, prefix='/contas', tags=[\"contas\"])\napi_router.include_router(categoria.router, prefix='/categorias', tags=[\"categorias\"])\napi_router.include_router(subcategoria.router, prefix='/subcategoria', tags=[\"subcategoria\"])\napi_router.include_router(cartao_de_credito.router, prefix='/cartaoCredito', tags=[\"cartao_credito\"])\napi_router.include_router(fatura.router, prefix='/fatura', tags=[\"fatura\"])\napi_router.include_router(parente.router, prefix='/parente', tags=[\"parente\"])\napi_router.include_router(movimentacao.router, prefix='/movimentacao', tags=[\"movimentacao\"])\n\"\"\"",
         "detail": "api.v1.api",
         "documentation": {}
     },
@@ -1969,7 +3055,7 @@
         "kind": 6,
         "importPath": "models.categoria_model",
         "description": "models.categoria_model",
-        "peekOfCode": "class CategoriaModel(settings.DBBaseModel):\n    __tablename__ = \"CATEGORIA\"\n    id_categoria = Column(BigInteger, primary_key=True)\n    nome = Column(String(60), nullable=False)\n    descricao = Column(String(500))\n    tipo_categoria = Column(SqlEnum(TipoCategoria), nullable=False)\n    modelo_categoria = Column(SqlEnum(TipoMovimentacao), nullable=False)\n    id_usuario = Column(BigInteger, ForeignKey(\"USUARIO.id_usuario\"), nullable=False)\n    valor_categoria = Column(DECIMAL(10, 2), nullable=False)\n    subcategorias = relationship(\"SubcategoriaModel\", back_populates=\"categoria\")",
+        "peekOfCode": "class CategoriaModel(settings.DBBaseModel):\n    __tablename__ = \"CATEGORIA\"\n    id_categoria = Column(BigInteger, primary_key=True)\n    nome = Column(String(60), nullable=False)\n    descricao = Column(String(500))\n    tipo_categoria = Column(SqlEnum(TipoCategoria), nullable=False)\n    modelo_categoria = Column(SqlEnum(TipoMovimentacao), nullable=False)\n    id_usuario = Column(BigInteger, ForeignKey(\"USUARIO.id_usuario\"), nullable=False)\n    valor_categoria = Column(DECIMAL(10, 2), nullable=False)\n    nome_icone = Column(String(100))",
         "detail": "models.categoria_model",
         "documentation": {}
     },
@@ -2073,6 +3159,69 @@
         "documentation": {}
     },
     {
+        "label": "CartaoCreditoSchema",
+        "kind": 6,
+        "importPath": "schemas.cartao_de_credito_schema",
+        "description": "schemas.cartao_de_credito_schema",
+        "peekOfCode": "class CartaoCreditoSchema(BaseModel):\n    id_cartao_credito: int\n    nome: str\n    limite: Decimal\n    id_usuario: int\n    nome_icone: Optional[str]\n    ativo: bool\n    class Config:\n        orm_mode = True\nclass CartaoCreditoCreateSchema(BaseModel):",
+        "detail": "schemas.cartao_de_credito_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CartaoCreditoCreateSchema",
+        "kind": 6,
+        "importPath": "schemas.cartao_de_credito_schema",
+        "description": "schemas.cartao_de_credito_schema",
+        "peekOfCode": "class CartaoCreditoCreateSchema(BaseModel):\n    nome: Decimal\n    limite: Decimal\n    nome_icone: Optional[str]\n    class Config:\n        orm_mode = True\nclass CartaoCreditoUpdateSchema(BaseModel):\n    nome: Optional[str] = None\n    limite: Optional[Decimal] = None\n    nome_icone: Optional[str] = None",
+        "detail": "schemas.cartao_de_credito_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CartaoCreditoUpdateSchema",
+        "kind": 6,
+        "importPath": "schemas.cartao_de_credito_schema",
+        "description": "schemas.cartao_de_credito_schema",
+        "peekOfCode": "class CartaoCreditoUpdateSchema(BaseModel):\n    nome: Optional[str] = None\n    limite: Optional[Decimal] = None\n    nome_icone: Optional[str] = None\n    ativo: Optional[bool] = None\n    class Config:\n        orm_mode = True",
+        "detail": "schemas.cartao_de_credito_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaSchema",
+        "kind": 6,
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
+        "peekOfCode": "class CategoriaSchema(BaseModel):\n    id_categoria: int\n    nome: str\n    descricao: Optional[str]\n    tipo_categoria: TipoCategoria\n    modelo_categoria: TipoMovimentacao\n    id_usuario: int\n    valor_categoria: Decimal\n    nome_icone: str\n    class Config:",
+        "detail": "schemas.categoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaCreateSchema",
+        "kind": 6,
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
+        "peekOfCode": "class CategoriaCreateSchema(BaseModel):\n    nome: str\n    descricao: Optional[str]\n    tipo_categoria: TipoCategoria\n    modelo_categoria: TipoMovimentacao\n    id_usuario: int\n    valor_categoria: Decimal\n    nome_icone: str\nclass CategoriaUpdateSchema(BaseModel):\n    nome: Optional[str] = None",
+        "detail": "schemas.categoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaUpdateSchema",
+        "kind": 6,
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
+        "peekOfCode": "class CategoriaUpdateSchema(BaseModel):\n    nome: Optional[str] = None\n    descricao: Optional[str] = None\n    tipo_categoria: Optional[TipoCategoria] = None\n    modelo_categoria: Optional[TipoMovimentacao] = None\n    valor_categoria: Optional[Decimal] = None\n    nome_icone: Optional[str] = None\nclass CategoriaSchemaId(CategoriaSchema):\n    id_usuario: int\n    id_c: int",
+        "detail": "schemas.categoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaSchemaId",
+        "kind": 6,
+        "importPath": "schemas.categoria_schema",
+        "description": "schemas.categoria_schema",
+        "peekOfCode": "class CategoriaSchemaId(CategoriaSchema):\n    id_usuario: int\n    id_c: int",
+        "detail": "schemas.categoria_schema",
+        "documentation": {}
+    },
+    {
         "label": "ContaSchema",
         "kind": 6,
         "importPath": "schemas.conta_schema",
@@ -2100,11 +3249,119 @@
         "documentation": {}
     },
     {
+        "label": "FaturaCreateSchema",
+        "kind": 6,
+        "importPath": "schemas.fatura_schema",
+        "description": "schemas.fatura_schema",
+        "peekOfCode": "class FaturaCreateSchema(BaseModel):\n    data_vencimento: date\n    data_fechamento: Optional[date]\n    data_pagamento: Optional[date]\n    id_conta: int\n    id_cartao_credito: int\n    class Config:\n        orm_mode = True\nclass FaturaUpdateSchema(BaseModel):\n    data_vencimento: Optional[date] = None",
+        "detail": "schemas.fatura_schema",
+        "documentation": {}
+    },
+    {
+        "label": "FaturaUpdateSchema",
+        "kind": 6,
+        "importPath": "schemas.fatura_schema",
+        "description": "schemas.fatura_schema",
+        "peekOfCode": "class FaturaUpdateSchema(BaseModel):\n    data_vencimento: Optional[date] = None\n    data_fechamento: Optional[date] = None\n    data_pagamento: Optional[date] = None\n    id_conta: Optional[int] = None\n    id_cartao_credito: Optional[int] = None",
+        "detail": "schemas.fatura_schema",
+        "documentation": {}
+    },
+    {
+        "label": "MovimentacaoCreateSchema",
+        "kind": 6,
+        "importPath": "schemas.movimentacao_schema",
+        "description": "schemas.movimentacao_schema",
+        "peekOfCode": "class MovimentacaoCreateSchema(BaseModel):\n    valor: Decimal\n    descricao: Optional[str]\n    tipoMovimentacao: TipoMovimentacao\n    forma_pagamento: FormaPagamento\n    condicao_pagamento: CondicaoPagamento\n    datatime: datetime\n    quantidade_parcelas: Optional[int]\n    consolidado: str\n    tipo_recorrencia: Optional[str]",
+        "detail": "schemas.movimentacao_schema",
+        "documentation": {}
+    },
+    {
+        "label": "MovimentacaoUpdateSchema",
+        "kind": 6,
+        "importPath": "schemas.movimentacao_schema",
+        "description": "schemas.movimentacao_schema",
+        "peekOfCode": "class MovimentacaoUpdateSchema(BaseModel):\n    valor: Optional[Decimal] = None\n    descricao: Optional[str] = None\n    tipoMovimentacao: Optional[TipoMovimentacao] = None\n    forma_pagamento: Optional[FormaPagamento] = None\n    condicao_pagamento: Optional[CondicaoPagamento] = None\n    datatime: Optional[datetime] = None\n    quantidade_parcelas: Optional[int] = None\n    consolidado: Optional[str] = None\n    tipo_recorrencia: Optional[str] = None",
+        "detail": "schemas.movimentacao_schema",
+        "documentation": {}
+    },
+    {
+        "label": "MovimentacaoSchema",
+        "kind": 6,
+        "importPath": "schemas.movimentacao_schema",
+        "description": "schemas.movimentacao_schema",
+        "peekOfCode": "class MovimentacaoSchema(BaseModel):\n    id_movimentacao: int\n    valor: Decimal\n    descricao: Optional[str]\n    tipoMovimentacao: TipoMovimentacao\n    forma_pagamento: FormaPagamento\n    condicao_pagamento: CondicaoPagamento\n    datatime: datetime\n    quantidade_parcelas: Optional[int]\n    consolidado: str",
+        "detail": "schemas.movimentacao_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteBaseSchema",
+        "kind": 6,
+        "importPath": "schemas.parente_schema",
+        "description": "schemas.parente_schema",
+        "peekOfCode": "class ParenteBaseSchema(BaseModel):\n    grau_parentesco: Optional[str]\n    nome: str\nclass ParenteCreateSchema(ParenteBaseSchema):\n    id_usuario: int\nclass ParenteSchema(ParenteBaseSchema):\n    id_parente: int\n    id_usuario: int\n    class Config:\n        orm_mode = True",
+        "detail": "schemas.parente_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteCreateSchema",
+        "kind": 6,
+        "importPath": "schemas.parente_schema",
+        "description": "schemas.parente_schema",
+        "peekOfCode": "class ParenteCreateSchema(ParenteBaseSchema):\n    id_usuario: int\nclass ParenteSchema(ParenteBaseSchema):\n    id_parente: int\n    id_usuario: int\n    class Config:\n        orm_mode = True\nclass ParenteUpdateSchema(ParenteBaseSchema):\n    grau_parentesco: Optional[str] = None\n    nome: Optional[str] = None",
+        "detail": "schemas.parente_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteSchema",
+        "kind": 6,
+        "importPath": "schemas.parente_schema",
+        "description": "schemas.parente_schema",
+        "peekOfCode": "class ParenteSchema(ParenteBaseSchema):\n    id_parente: int\n    id_usuario: int\n    class Config:\n        orm_mode = True\nclass ParenteUpdateSchema(ParenteBaseSchema):\n    grau_parentesco: Optional[str] = None\n    nome: Optional[str] = None",
+        "detail": "schemas.parente_schema",
+        "documentation": {}
+    },
+    {
+        "label": "ParenteUpdateSchema",
+        "kind": 6,
+        "importPath": "schemas.parente_schema",
+        "description": "schemas.parente_schema",
+        "peekOfCode": "class ParenteUpdateSchema(ParenteBaseSchema):\n    grau_parentesco: Optional[str] = None\n    nome: Optional[str] = None",
+        "detail": "schemas.parente_schema",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaCreateSchema",
+        "kind": 6,
+        "importPath": "schemas.subcategoria_schema",
+        "description": "schemas.subcategoria_schema",
+        "peekOfCode": "class SubcategoriaCreateSchema(BaseModel):\n    nome: str\n    descricao: Optional[str]\n    id_categoria: int\nclass SubcategoriaSchema(SubcategoriaCreateSchema):\n    id_subcategoria: int\n    class Config:\n        orm_mode = True\nclass SubcategoriaUpdateSchema(BaseModel):\n    nome: Optional[str] = None",
+        "detail": "schemas.subcategoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaSchema",
+        "kind": 6,
+        "importPath": "schemas.subcategoria_schema",
+        "description": "schemas.subcategoria_schema",
+        "peekOfCode": "class SubcategoriaSchema(SubcategoriaCreateSchema):\n    id_subcategoria: int\n    class Config:\n        orm_mode = True\nclass SubcategoriaUpdateSchema(BaseModel):\n    nome: Optional[str] = None\n    descricao: Optional[str] = None",
+        "detail": "schemas.subcategoria_schema",
+        "documentation": {}
+    },
+    {
+        "label": "SubcategoriaUpdateSchema",
+        "kind": 6,
+        "importPath": "schemas.subcategoria_schema",
+        "description": "schemas.subcategoria_schema",
+        "peekOfCode": "class SubcategoriaUpdateSchema(BaseModel):\n    nome: Optional[str] = None\n    descricao: Optional[str] = None",
+        "detail": "schemas.subcategoria_schema",
+        "documentation": {}
+    },
+    {
         "label": "UsuarioSchema",
         "kind": 6,
         "importPath": "schemas.usuario_schema",
         "description": "schemas.usuario_schema",
-        "peekOfCode": "class UsuarioSchema(BaseModel):\n    nome_completo: str\n    data_nascimento: datetime\n    email: EmailStr\n    senha: str\nclass LoginDataSchema(BaseModel):\n    email: EmailStr\n    senha: str",
+        "peekOfCode": "class UsuarioSchema(BaseModel):\n    nome_completo: str\n    data_nascimento: datetime\n    email: EmailStr\n    senha: str\nclass LoginDataSchema(BaseModel):\n    email: EmailStr\n    senha: str\nclass UpdateUsuarioSchema(BaseModel):\n    nome_completo: Optional[str] = None",
         "detail": "schemas.usuario_schema",
         "documentation": {}
     },
@@ -2113,7 +3370,16 @@
         "kind": 6,
         "importPath": "schemas.usuario_schema",
         "description": "schemas.usuario_schema",
-        "peekOfCode": "class LoginDataSchema(BaseModel):\n    email: EmailStr\n    senha: str",
+        "peekOfCode": "class LoginDataSchema(BaseModel):\n    email: EmailStr\n    senha: str\nclass UpdateUsuarioSchema(BaseModel):\n    nome_completo: Optional[str] = None\n    data_nascimento: Optional[datetime] = None\n    class Config:\n        orm_mode = True",
+        "detail": "schemas.usuario_schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateUsuarioSchema",
+        "kind": 6,
+        "importPath": "schemas.usuario_schema",
+        "description": "schemas.usuario_schema",
+        "peekOfCode": "class UpdateUsuarioSchema(BaseModel):\n    nome_completo: Optional[str] = None\n    data_nascimento: Optional[datetime] = None\n    class Config:\n        orm_mode = True",
         "detail": "schemas.usuario_schema",
         "documentation": {}
     }
