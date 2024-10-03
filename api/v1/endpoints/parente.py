@@ -20,7 +20,8 @@ async def post_parente(
     novo_parente: ParenteModel = ParenteModel(
         nome=parente.nome,
         grau_parentesco=parente.grau_parentesco,
-        id_usuario=usuario_logado.id_usuario
+        id_usuario=usuario_logado.id_usuario,
+        ativo=parente.ativo
 
     )
     

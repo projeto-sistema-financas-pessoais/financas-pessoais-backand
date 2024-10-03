@@ -71,6 +71,7 @@ def upgrade() -> None:
     sa.Column('grau_parentesco', sa.String(length=100), nullable=True),
     sa.Column('nome', sa.String(length=60), nullable=False),
     sa.Column('id_usuario', sa.BigInteger(), nullable=False),
+     sa.Column('ativo', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['id_usuario'], ['USUARIO.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_parente')
     )
