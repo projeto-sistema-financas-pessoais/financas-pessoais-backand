@@ -11,32 +11,26 @@ from models.usuario_model import UsuarioModel
 
 router = APIRouter()
 
-@router.post('/cadastro', response_model=ParenteSchema, status_code=status.HTTP_201_CREATED)
-async def create_parente(parente: ParenteSchema, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+@router.post('/cadastro', status_code=status.HTTP_201_CREATED)
+async def post_parente(
+    parente: ParenteSchema, 
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    novo_parente: ParenteModel = ParenteModel(
+        nome=parente.nome,
+        grau_parentesco=parente.grau_parentesco,
+        id_usuario=usuario_logado.id_usuario
+
+    )
+    
     async with db as session:
-        if parente.id_usuario != usuario_logado.id_usuario:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não pode criar um parente para outro usuário.")
-
-        query = select(ParenteModel).filter(ParenteModel.nome == parente.nome, ParenteModel.id_usuario == usuario_logado.id_usuario)
-        result = await session.execute(query)
-        parente_existente = result.scalars().first()
-
-        if parente_existente:
-            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Você já possui um parente com este nome.")
-
-        novo_parente = ParenteModel(
-            grau_parentesco=parente.grau_parentesco,
-            nome=parente.nome,
-            id_usuario=usuario_logado.id_usuario  
-        )
-
-        session.add(novo_parente)
         try:
+            session.add(novo_parente)
             await session.commit()
             return novo_parente
         except IntegrityError:
-            await session.rollback()
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao criar o parente. Verifique os dados e tente novamente.")
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Parente já cadastrada para este usuário")
 
 @router.put('/editar/{id_parente}', response_model=ParenteSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):

@@ -3,7 +3,6 @@ from typing import Optional
 
 class ParenteSchema(BaseModel):
     nome: str
-    id_usuario: int
     grau_parentesco: str
 
     class Config:
