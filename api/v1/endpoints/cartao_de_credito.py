@@ -2,18 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
+from typing import List
 
 from core.deps import get_session, get_current_user
 from models.cartao_credito_model import CartaoCreditoModel
-from schemas.cartao_de_credito_schema import CartaoCreditoCreateSchema, CartaoCreditoSchema, CartaoCreditoUpdateSchema
+from schemas.cartao_de_credito_schema import CartaoCreditoSchema, CartaoCreditoSchemaId, CartaoCreditoSchemaUp
 from models.usuario_model import UsuarioModel
 from models.fatura_model import FaturaModel
 
 router = APIRouter()
 
-@router.post('/cadastro', response_model=CartaoCreditoSchema, status_code=status.HTTP_201_CREATED)
-async def create_cartao_credito(
-    cartao_credito: CartaoCreditoCreateSchema, 
+@router.post('/cadastro', status_code=status.HTTP_201_CREATED)
+async def post_cartao_credito(
+    cartao_credito: CartaoCreditoSchema, 
     db: AsyncSession = Depends(get_session), 
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -34,10 +35,11 @@ async def create_cartao_credito(
             await session.rollback()  
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Já existe um cartão de crédito com este nome para este usuário")
 
-@router.put('/editar/{id_cartao_credito}', response_model=CartaoCreditoSchema, status_code=status.HTTP_202_ACCEPTED)
+
+@router.put('/editar/{id_cartao_credito}', response_model=CartaoCreditoSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def update_cartao_credito(
     id_cartao_credito: int, 
-    cartao_credito_update: CartaoCreditoUpdateSchema, 
+    cartao_credito_update: CartaoCreditoSchemaUp, 
     db: AsyncSession = Depends(get_session), 
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -69,16 +71,16 @@ async def update_cartao_credito(
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Já existe um cartão com este nome para este usuário")
         
 
-@router.get('/Listar', response_model=list[CartaoCreditoSchema], status_code=status.HTTP_200_OK)
+@router.get('/listar', response_model=list[CartaoCreditoSchemaId], status_code=status.HTTP_200_OK)
 async def listar_cartoes_credito(db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
         query = select(CartaoCreditoModel).where(CartaoCreditoModel.id_usuario == usuario_logado.id_usuario)
         result = await session.execute(query)
-        cartoes_credito = result.scalars().all()
+        cartoes_credito: List[CartaoCreditoSchemaId] = result.scalars().unique().all()
 
         return cartoes_credito
     
-@router.get('/visualizar/{id_cartao_credito}', response_model=CartaoCreditoSchema, status_code=status.HTTP_200_OK)
+@router.get('/visualizar/{id_cartao_credito}', response_model=CartaoCreditoSchemaId, status_code=status.HTTP_200_OK)
 async def listar_cartao_credito(
     id_cartao_credito: int, 
     db: AsyncSession = Depends(get_session), 
@@ -109,7 +111,7 @@ async def deletar_cartao_credito(
             CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
         )
         result = await session.execute(query)
-        cartao_credito = result.scalars().one_or_none()
+        cartao_credito = result.scalars().unique().one_or_none()
 
         if not cartao_credito:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de crédito não encontrado ou você não tem permissão para deletá-lo")
