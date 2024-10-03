@@ -15,7 +15,7 @@ class FaturaSchema(BaseModel):
 class FaturaSchemaId(FaturaSchema):
     id_cartao_credito: int
     id_conta: int
-    id_ftaura: int
+    id_fatura: int
 class FaturaSchemaUpdate(BaseModel):
     data_vencimento: Optional[date] = None
     data_fechamento: Optional[date] = None

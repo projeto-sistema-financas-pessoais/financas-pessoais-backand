@@ -2,8 +2,9 @@ from pydantic import BaseModel
 from typing import Optional
 
 class ParenteSchema(BaseModel):
-    id_parente: int
+    nome: str
     id_usuario: int
+    grau_parentesco: str
 
     class Config:
         orm_mode = True
