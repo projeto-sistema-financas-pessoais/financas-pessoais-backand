@@ -18,8 +18,8 @@ app: FastAPI = FastAPI(title='Finanças Pessoais')
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permitir todas as origens; ajuste conforme necessário
-    allow_methods=["GET", "POST", "PUT", "OPTIONS", "DELETE"],
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PUT"],
     allow_headers=["*"],
 )
 

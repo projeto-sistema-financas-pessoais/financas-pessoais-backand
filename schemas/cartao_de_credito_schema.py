@@ -1,31 +1,23 @@
-from pydantic import BaseModel, constr
+from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
 
 class CartaoCreditoSchema(BaseModel):
-    id_cartao_credito: int
     nome: str
     limite: Decimal
+    nome_icone: str
+    ativo: Optional[bool] = True
+
+    class Config:
+        from_attributes = True
+
+class CartaoCreditoSchemaId(CartaoCreditoSchema):
     id_usuario: int
-    nome_icone: Optional[str]
-    ativo: bool
+    id_cartao_credito: int
 
-    class Config:
-        orm_mode = True
-
-class CartaoCreditoCreateSchema(BaseModel):
-    nome: Decimal
-    limite: Decimal
-    nome_icone: Optional[str]
-
-    class Config:
-        orm_mode = True
-
-class CartaoCreditoUpdateSchema(BaseModel):
+class CartaoCreditoSchemaUp(CartaoCreditoSchema):
     nome: Optional[str] = None
     limite: Optional[Decimal] = None
     nome_icone: Optional[str] = None
     ativo: Optional[bool] = None
 
-    class Config:
-        orm_mode = True

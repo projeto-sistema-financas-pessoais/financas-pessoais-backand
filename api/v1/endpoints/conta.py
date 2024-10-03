@@ -109,9 +109,15 @@ async def get_conta (conta_id: int,  db: AsyncSession = Depends(get_session),
             raise HTTPException (detail= 'Conta não encontrado.', status_code=status.HTTP_404_NOT_FOUND)
         
 @router.delete('/deletar/{conta_id}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_conta (conta_id: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+async def delete_conta (
+    conta_id: int, 
+    db: AsyncSession = Depends(get_session), 
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
     async with db as session:
-        query = select(ContaModel).where(ContaModel.id_conta == conta_id, ContaModel.id_usuario == usuario_logado.id_usuario)
+        query = select(ContaModel).where(
+            ContaModel.id_conta == conta_id, 
+                        ContaModel.id_usuario == usuario_logado.id_usuario)
         result = await session.execute(query)
         conta_del: ContaModel = result.scalars().unique().one_or_none()
         
