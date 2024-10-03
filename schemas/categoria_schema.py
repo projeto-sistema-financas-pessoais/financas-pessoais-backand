@@ -9,7 +9,6 @@ class CategoriaSchema(BaseModel):
     descricao: Optional[str]
     tipo_categoria: TipoCategoria
     modelo_categoria: TipoMovimentacao
-    id_usuario: int
     valor_categoria: Decimal
     nome_icone: str
 
@@ -17,17 +16,7 @@ class CategoriaSchema(BaseModel):
     class Config:
         orm_mode = True
 
-class CategoriaCreateSchema(BaseModel):
-    nome: str
-    descricao: Optional[str]
-    tipo_categoria: TipoCategoria
-    modelo_categoria: TipoMovimentacao
-    id_usuario: int
-    valor_categoria: Decimal
-    nome_icone: str
-
-
-class CategoriaUpdateSchema(BaseModel):
+class CategoriaSchemaUpdate(BaseModel):
     nome: Optional[str] = None
     descricao: Optional[str] = None
     tipo_categoria: Optional[TipoCategoria] = None
@@ -38,4 +27,4 @@ class CategoriaUpdateSchema(BaseModel):
 
 class CategoriaSchemaId(CategoriaSchema):
     id_usuario: int
-    id_c: int
+    id_categoria: int

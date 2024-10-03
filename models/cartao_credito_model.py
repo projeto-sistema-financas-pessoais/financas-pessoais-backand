@@ -13,7 +13,7 @@ class CartaoCreditoModel(settings.DBBaseModel):
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
     nome_icone = Column(String(100))
     ativo = Column(Boolean, default=True)  # Adicionando a coluna ativo
-
+    limite_disponivel = Column(DECIMAL(10,2))
 
     usuario = relationship("UsuarioModel", back_populates="cartoes_credito")
     faturas = relationship("FaturaModel", back_populates="cartao_credito")

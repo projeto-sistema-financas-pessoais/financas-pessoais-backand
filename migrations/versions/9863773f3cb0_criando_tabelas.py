@@ -34,6 +34,7 @@ def upgrade() -> None:
     sa.Column('id_usuario', sa.BigInteger(), nullable=False),
     sa.Column('nome_icone', sa.String(length=100), nullable=True),
     sa.Column('ativo', sa.Boolean(), nullable=True),
+    sa.Column('limite_disponivel', sa.DECIMAL(precision=10, scale=2), nullable=True),
     sa.ForeignKeyConstraint(['id_usuario'], ['USUARIO.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_cartao_credito'),
     sa.UniqueConstraint('nome', 'id_usuario', name='unique_nome_cartao')
@@ -47,6 +48,7 @@ def upgrade() -> None:
     sa.Column('id_usuario', sa.BigInteger(), nullable=False),
     sa.Column('valor_categoria', sa.DECIMAL(precision=10, scale=2), nullable=False),
     sa.Column('nome_icone', sa.String(length=100), nullable=True),
+    sa.Column('ativo', sa.Boolean, nullable=True),
     sa.ForeignKeyConstraint(['id_usuario'], ['USUARIO.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_categoria'),
     sa.UniqueConstraint('nome', 'id_usuario', name='unique_nome_categoria')
@@ -59,6 +61,7 @@ def upgrade() -> None:
     sa.Column('nome', sa.String(length=500), nullable=False),
     sa.Column('nome_icone', sa.String(length=100), nullable=True),
     sa.Column('ativo', sa.Boolean(), nullable=True),
+    sa.Column('gastos_totais', sa.DECIMAL(precision=10, scale=2), nullable=True),
     sa.ForeignKeyConstraint(['id_usuario'], ['USUARIO.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_conta'),
     sa.UniqueConstraint('nome', 'id_usuario', name='unique_nome_conta')
@@ -78,6 +81,7 @@ def upgrade() -> None:
     sa.Column('data_pagamento', sa.Date(), nullable=True),
     sa.Column('id_conta', sa.BigInteger(), nullable=True),
     sa.Column('id_cartao_credito', sa.BigInteger(), nullable=True),
+    sa.Column('fatura_gastos', sa.DECIMAL(precision=10, scale=2), nullable=True),
     sa.ForeignKeyConstraint(['id_cartao_credito'], ['CARTAO_CREDITO.id_cartao_credito'], ),
     sa.ForeignKeyConstraint(['id_conta'], ['CONTA.id_conta'], ),
     sa.PrimaryKeyConstraint('id_fatura')

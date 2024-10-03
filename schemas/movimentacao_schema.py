@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import date, datetime
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao
 
-class MovimentacaoCreateSchema(BaseModel):
+class MovimentacaoSchema(BaseModel):
     valor: Decimal
     descricao: Optional[str]
     tipoMovimentacao: TipoMovimentacao
@@ -23,7 +23,7 @@ class MovimentacaoCreateSchema(BaseModel):
     class Config:
         orm_mode = True
 
-class MovimentacaoUpdateSchema(BaseModel):
+class MovimentacaoSchemaUpdate(BaseModel):
     valor: Optional[Decimal] = None
     descricao: Optional[str] = None
     tipoMovimentacao: Optional[TipoMovimentacao] = None
@@ -39,19 +39,7 @@ class MovimentacaoUpdateSchema(BaseModel):
     id_categoria: Optional[int] = None
     id_fatura: Optional[int] = None
 
-class MovimentacaoSchema(BaseModel):
-    id_movimentacao: int
-    valor: Decimal
-    descricao: Optional[str]
-    tipoMovimentacao: TipoMovimentacao
-    forma_pagamento: FormaPagamento
-    condicao_pagamento: CondicaoPagamento
-    datatime: datetime
-    quantidade_parcelas: Optional[int]
-    consolidado: str
-    tipo_recorrencia: Optional[str]
-    recorrencia: Optional[str]
-    data_pagamento: date
+class MovimentacaoSchemaId(MovimentacaoSchema):
+    id_fatura: int
     id_conta: int
-    id_categoria: int
-    id_fatura: Optional[int]
+    id_movimentacao: int

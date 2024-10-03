@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional
 
-class FaturaCreateSchema(BaseModel):
+class FaturaSchema(BaseModel):
     data_vencimento: date
     data_fechamento: Optional[date]
     data_pagamento: Optional[date]
@@ -12,7 +12,11 @@ class FaturaCreateSchema(BaseModel):
     class Config:
         orm_mode = True
 
-class FaturaUpdateSchema(BaseModel):
+class FaturaSchemaId(FaturaSchema):
+    id_cartao_credito: int
+    id_conta: int
+    id_ftaura: int
+class FaturaSchemaUpdate(BaseModel):
     data_vencimento: Optional[date] = None
     data_fechamento: Optional[date] = None
     data_pagamento: Optional[date] = None

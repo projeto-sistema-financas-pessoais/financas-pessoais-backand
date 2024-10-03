@@ -6,14 +6,14 @@ from typing import List
 from core.deps import get_session, get_current_user
 from models.subcategoria_model import SubcategoriaModel
 from models.categoria_model import CategoriaModel
-from schemas.subcategoria_schema import SubcategoriaCreateSchema, SubcategoriaSchema, SubcategoriaUpdateSchema
+from schemas.subcategoria_schema import SubcategoriaSchema, SubcategoriaSchemaUpdate
 from models.usuario_model import UsuarioModel
 
 router = APIRouter()
 
 @router.post('/cadastro', response_model=SubcategoriaSchema, status_code=status.HTTP_201_CREATED)
 async def post_subcategoria(
-    subcategoria: SubcategoriaCreateSchema,
+    subcategoria: SubcategoriaSchema,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -52,7 +52,7 @@ async def post_subcategoria(
 @router.put('/editar/{id_subcategoria}', response_model=SubcategoriaSchema, status_code=status.HTTP_202_ACCEPTED)
 async def put_subcategoria(
     id_subcategoria: int,
-    subcategoria_update: SubcategoriaUpdateSchema,
+    subcategoria_update: SubcategoriaSchemaUpdate,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -90,19 +90,7 @@ async def put_subcategoria(
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Já existe uma subcategoria com este nome nesta categoria")
         
 
-@router.get('/Listar/', response_model=List[SubcategoriaSchema], status_code=status.HTTP_200_OK)
-async def get_subcategorias(db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
-    async with db as session:
-        query_categorias = select(CategoriaModel.id_categoria).where(CategoriaModel.id_usuario == usuario_logado.id_usuario)
-        result_categorias = await session.execute(query_categorias)
-        categorias_ids = [categoria.id_categoria for categoria in result_categorias.scalars().all()]
-
-        query_subcategorias = select(SubcategoriaModel).where(SubcategoriaModel.id_categoria.in_(categorias_ids))
-        result_subcategorias = await session.execute(query_subcategorias)
-        subcategorias = result_subcategorias.scalars().all()
-
-        return subcategorias
-    
+  
 @router.get('/categoria/{id_categoria}/subcategorias', response_model=List[SubcategoriaSchema], status_code=status.HTTP_200_OK)
 async def get_subcategorias_by_categoria(id_categoria: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from models.movimentacao_model import MovimentacaoModel
-from schemas.movimentacao_schema import MovimentacaoCreateSchema, MovimentacaoUpdateSchema, MovimentacaoSchema
+from schemas.movimentacao_schema import MovimentacaoSchema, MovimentacaoSchemaUpdate, MovimentacaoSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 from models.conta_model import ContaModel
@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
-    movimentacao: MovimentacaoCreateSchema,
+    movimentacao: MovimentacaoSchema,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -73,7 +73,7 @@ async def create_movimentacao(
         
 async def update_movimentacao(
     id_movimentacao: int,
-    movimentacao_update: MovimentacaoUpdateSchema,
+    movimentacao_update: MovimentacaoSchemaUpdate,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -150,7 +150,7 @@ async def update_movimentacao(
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar movimentação")
     
-@router.get('/', response_model=List[MovimentacaoSchema])
+@router.get('/listar', response_model=List[MovimentacaoSchemaId])
 async def listar_movimentacoes(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
@@ -167,7 +167,7 @@ async def listar_movimentacoes(
         return movimentacoes
         
         
-@router.get('/{id_movimentacao}', response_model=MovimentacaoSchema)
+@router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
 async def visualizar_movimentacao(
     id_movimentacao: int,
     db: AsyncSession = Depends(get_session),
@@ -183,7 +183,7 @@ async def visualizar_movimentacao(
 
         return movimentacao
 
-@router.delete('/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_movimentacao(
     id_movimentacao: int,
     db: AsyncSession = Depends(get_session),

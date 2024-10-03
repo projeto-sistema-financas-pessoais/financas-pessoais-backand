@@ -20,7 +20,7 @@ class ContaSchemaId(ContaSchema):
     id_conta: int
        
     
-class ContaSchemaUp(ContaSchema):
+class ContaSchemaUpdate(ContaSchema):
     descricao: Optional[str] = None
     tipo_conta: Optional[TipoConta] = None
     nome: Optional[str] = None

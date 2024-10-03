@@ -15,7 +15,7 @@ class CartaoCreditoSchemaId(CartaoCreditoSchema):
     id_usuario: int
     id_cartao_credito: int
 
-class CartaoCreditoSchemaUp(CartaoCreditoSchema):
+class CartaoCreditoSchemaUpdate(CartaoCreditoSchema):
     nome: Optional[str] = None
     limite: Optional[Decimal] = None
     nome_icone: Optional[str] = None
