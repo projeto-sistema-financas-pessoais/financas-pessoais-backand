@@ -103,7 +103,7 @@ def upgrade() -> None:
     sa.Column('tipoMovimentacao', sa.Enum('DESPESA', 'RECEITA', name='tipomovimentacao'), nullable=False),
     sa.Column('forma_pagamento', sa.Enum('DEBITO', 'CREDITO', 'DINHEIRO', name='formapagamento'), nullable=False),
     sa.Column('condicao_pagamento', sa.Enum('A_VISTA', 'PARCELADO', 'RECORRENTE', name='condicaopagamento'), nullable=False),
-    sa.Column('datatime', sa.DateTime(), nullable=False),
+    sa.Column('datatime', sa.TIMESTAMP(timezone=True), nullable=True),
     sa.Column('quantidade_parcelas', sa.BigInteger(), nullable=True),
     sa.Column('consolidado', sa.String(length=100), nullable=False),
     sa.Column('tipo_recorrencia', sa.String(length=100), nullable=True),

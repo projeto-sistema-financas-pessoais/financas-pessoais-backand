@@ -6,7 +6,7 @@ class SubcategoriaSchema(BaseModel):
     descricao: Optional[str]
     id_categoria: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class SubcategoriaSchemaUpdate(BaseModel):

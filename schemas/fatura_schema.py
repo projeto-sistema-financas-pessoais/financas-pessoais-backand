@@ -10,8 +10,7 @@ class FaturaSchema(BaseModel):
     id_cartao_credito: int
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True
 class FaturaSchemaId(FaturaSchema):
     id_cartao_credito: int
     id_conta: int

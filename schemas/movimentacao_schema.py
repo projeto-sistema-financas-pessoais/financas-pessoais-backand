@@ -10,7 +10,7 @@ class MovimentacaoSchema(BaseModel):
     tipoMovimentacao: TipoMovimentacao
     forma_pagamento: FormaPagamento
     condicao_pagamento: CondicaoPagamento
-    datatime: datetime
+    datatime: Optional[datetime]
     quantidade_parcelas: Optional[int]
     consolidado: str
     tipo_recorrencia: Optional[str]
@@ -18,10 +18,10 @@ class MovimentacaoSchema(BaseModel):
     data_pagamento: date
     id_conta: int
     id_categoria: int
-    id_fatura: Optional[int]
+    # id_fatura: Optional[int] 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MovimentacaoSchemaUpdate(BaseModel):
     valor: Optional[Decimal] = None
@@ -40,6 +40,6 @@ class MovimentacaoSchemaUpdate(BaseModel):
     id_fatura: Optional[int] = None
 
 class MovimentacaoSchemaId(MovimentacaoSchema):
-    id_fatura: int
+    id_categoria: int
     id_conta: int
     id_movimentacao: int

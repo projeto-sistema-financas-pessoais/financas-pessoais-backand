@@ -17,6 +17,6 @@ class UpdateUsuarioSchema(BaseModel):
     data_nascimento: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
     

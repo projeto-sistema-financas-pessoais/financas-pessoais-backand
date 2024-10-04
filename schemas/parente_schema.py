@@ -7,7 +7,7 @@ class ParenteSchema(BaseModel):
     ativo : Optional[bool] = True
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ParenteSchemaId(ParenteSchema):
     id_usuario: int
