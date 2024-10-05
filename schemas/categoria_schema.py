@@ -38,4 +38,4 @@ class CategoriaUpdateSchema(BaseModel):
 
 class CategoriaSchemaId(CategoriaSchema):
     id_usuario: int
-    id_c: int
+    id_categoria: int
