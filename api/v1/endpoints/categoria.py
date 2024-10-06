@@ -25,7 +25,8 @@ async def post_categoria(
         modelo_categoria=categoria.modelo_categoria,
         id_usuario=usuario_logado.id_usuario,
         valor_categoria=categoria.valor_categoria,
-        nome_icone=categoria.nome_icone
+        nome_icone=categoria.nome_icone,
+        ativo=categoria.ativo
     )
     
     async with db as session:
@@ -72,6 +73,8 @@ async def put_categoria(
             categoria_up.valor_categoria = categoria.valor_categoria
         if categoria.nome_icone:
             categoria_up.nome_icone = categoria.nome_icone
+        if categoria.ativo:
+            categoria_up.ativo = categoria.ativo
 
         try:
             await session.commit()

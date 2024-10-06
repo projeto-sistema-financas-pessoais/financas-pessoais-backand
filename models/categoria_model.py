@@ -13,9 +13,9 @@ class CategoriaModel(settings.DBBaseModel):
     tipo_categoria = Column(SqlEnum(TipoCategoria), nullable=False)
     modelo_categoria = Column(SqlEnum(TipoMovimentacao), nullable=False)
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
-    valor_categoria = Column(DECIMAL(10, 2), nullable=False)
+    valor_categoria = Column(DECIMAL(10, 2), nullable=True)
     nome_icone = Column(String(100))
-    ativo = Column(Boolean, default=True)
+    ativo = Column(Boolean, default=True, nullable=False)
 
 
     movimentacoes = relationship("MovimentacaoModel", back_populates="categoria")

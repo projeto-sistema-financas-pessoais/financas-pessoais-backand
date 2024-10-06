@@ -40,7 +40,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=0,
-                    nome_icone="6_carteira.svg",
+                    nome_icone="health.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -50,7 +50,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=0,
-                    nome_icone="6_carteira.svg",
+                    nome_icone="food.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -60,7 +60,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=0,
-                    nome_icone="6_carteira.svg",
+                    nome_icone="car.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -70,7 +70,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=0,
-                    nome_icone="6_carteira.svg",
+                    nome_icone="book.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -80,7 +80,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=0,
-                    nome_icone="6_carteira.svg",
+                    nome_icone="happy.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -90,7 +90,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=0,
-                    nome_icone="6_carteira.svg",
+                    nome_icone="salary.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -100,7 +100,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=0,
-                    nome_icone="6_carteira.svg",
+                    nome_icone="extra.svg",
                     ativo=True
                 )
             ]
