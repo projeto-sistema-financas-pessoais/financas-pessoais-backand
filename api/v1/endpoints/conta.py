@@ -1,14 +1,12 @@
 from typing import List
-from fastapi import APIRouter
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-
 from core.deps import get_current_user, get_session
 from models.conta_model import ContaModel
 from models.movimentacao_model import MovimentacaoModel
 from models.usuario_model import UsuarioModel
-from schemas.conta_schema import ContaSchema, ContaSchemaId, ContaSchemaUp
+from schemas.conta_schema import ContaSchema, ContaSchemaId, ContaSchemaUpdate
 
 from sqlalchemy.future import select
 
@@ -26,8 +24,8 @@ async def post_conta(
         id_usuario = usuario_logado.id_usuario,
         nome=conta.nome,
         nome_icone=conta.nome_icone,
-        ativo=conta.ativo if conta.ativo is not None else True  # Garantindo o valor padrão
-            
+        ativo=conta.ativo if conta.ativo is not None else True,  # Garantindo o valor padrão
+        saldo=0
     )
     
     async with db as session:
@@ -40,7 +38,10 @@ async def post_conta(
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Já existe uma conta com este nome')
         
 @router.put('/editar/{conta_id}', response_model=ContaSchemaId, status_code=status.HTTP_202_ACCEPTED)
-async def put_conta (conta_id: int, conta: ContaSchemaUp, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+async def put_conta (conta_id: int, 
+                     conta: ContaSchemaUpdate, 
+                     db: AsyncSession = Depends(get_session), 
+                     usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
 
        
@@ -66,7 +67,6 @@ async def put_conta (conta_id: int, conta: ContaSchemaUp, db: AsyncSession = Dep
                 conta_up.descricao = conta.descricao
             if conta.tipo_conta:
                 conta_up.tipo_conta = conta.tipo_conta.value
-
             if conta.nome:
                 conta_up.nome = conta.nome
             if conta.nome_icone:

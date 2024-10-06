@@ -1,6 +1,6 @@
 
 
-from sqlalchemy import Column, String, BigInteger, ForeignKey, DECIMAL, Enum as SqlEnum, Date, DateTime
+from sqlalchemy import Column, String, BigInteger, ForeignKey, DECIMAL, Enum as SqlEnum, Date, TIMESTAMP
 from core.configs import settings
 from sqlalchemy.orm import relationship
 from models.associations_model import divide_table
@@ -17,7 +17,7 @@ class MovimentacaoModel(settings.DBBaseModel):
     tipoMovimentacao = Column(SqlEnum(TipoMovimentacao), nullable=False)
     forma_pagamento = Column(SqlEnum(FormaPagamento), nullable=False)
     condicao_pagamento = Column(SqlEnum(CondicaoPagamento), nullable=False)
-    datatime = Column(DateTime, nullable=False)
+    datatime = Column(TIMESTAMP(timezone=True), nullable=True)
     quantidade_parcelas = Column(BigInteger)
     consolidado = Column(String(100), nullable=False)
     tipo_recorrencia = Column(String(100))

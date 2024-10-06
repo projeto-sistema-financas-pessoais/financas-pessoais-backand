@@ -1,43 +1,40 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from models.parente_model import ParenteModel
-from schemas.parente_schema import ParenteCreateSchema, ParenteSchema, ParenteUpdateSchema
+from schemas.parente_schema import ParenteSchema, ParenteSchemaUpdate, ParenteSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 
+
 router = APIRouter()
 
-@router.post('/cadastro', response_model=ParenteSchema, status_code=status.HTTP_201_CREATED)
-async def create_parente(parente: ParenteCreateSchema, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+@router.post('/cadastro', status_code=status.HTTP_201_CREATED)
+async def post_parente(
+    parente: ParenteSchema, 
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    novo_parente: ParenteModel = ParenteModel(
+        nome=parente.nome,
+        grau_parentesco=parente.grau_parentesco,
+        id_usuario=usuario_logado.id_usuario,
+        ativo=parente.ativo
+
+    )
+    
     async with db as session:
-        if parente.id_usuario != usuario_logado.id_usuario:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não pode criar um parente para outro usuário.")
-
-        query = select(ParenteModel).filter(ParenteModel.nome == parente.nome, ParenteModel.id_usuario == usuario_logado.id_usuario)
-        result = await session.execute(query)
-        parente_existente = result.scalars().first()
-
-        if parente_existente:
-            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Você já possui um parente com este nome.")
-
-        novo_parente = ParenteModel(
-            grau_parentesco=parente.grau_parentesco,
-            nome=parente.nome,
-            id_usuario=usuario_logado.id_usuario  
-        )
-
-        session.add(novo_parente)
         try:
+            session.add(novo_parente)
             await session.commit()
             return novo_parente
         except IntegrityError:
-            await session.rollback()
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao criar o parente. Verifique os dados e tente novamente.")
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Parente já cadastrada para este usuário")
 
-@router.put('/editar/{id_parente}', response_model=ParenteSchema, status_code=status.HTTP_202_ACCEPTED)
-async def update_parente(id_parente: int, parente_update: ParenteUpdateSchema, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+@router.put('/editar/{id_parente}', response_model=ParenteSchemaId, status_code=status.HTTP_202_ACCEPTED)
+async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
         query = select(ParenteModel).filter(ParenteModel.id_parente == id_parente)
         result = await session.execute(query)
@@ -70,19 +67,19 @@ async def update_parente(id_parente: int, parente_update: ParenteUpdateSchema, d
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar o parente. Verifique os dados e tente novamente.")
         
-@router.get('/listar', response_model=list[ParenteSchema], status_code=status.HTTP_200_OK)
+@router.get('/listar', response_model=list[ParenteSchemaId], status_code=status.HTTP_200_OK)
 async def get_parentes(db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
         query = select(ParenteModel).filter(ParenteModel.id_usuario == usuario_logado.id_usuario)
         result = await session.execute(query)
-        parentes = result.scalars().all()
+        parentes: List[ParenteSchemaId] = result.scalars().all()
 
         if not parentes:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum parente encontrado.")
 
         return parentes
 
-@router.get('/visualizar/{id_parente}', response_model=ParenteSchema, status_code=status.HTTP_200_OK)
+@router.get('/visualizar/{id_parente}', response_model=ParenteSchemaId, status_code=status.HTTP_200_OK)
 async def get_parente(id_parente: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
         query = select(ParenteModel).filter(ParenteModel.id_parente == id_parente, ParenteModel.id_usuario == usuario_logado.id_usuario)

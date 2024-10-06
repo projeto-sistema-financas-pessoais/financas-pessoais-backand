@@ -6,7 +6,7 @@ from typing import List
 
 from core.deps import get_session, get_current_user
 from models.cartao_credito_model import CartaoCreditoModel
-from schemas.cartao_de_credito_schema import CartaoCreditoSchema, CartaoCreditoSchemaId, CartaoCreditoSchemaUp
+from schemas.cartao_de_credito_schema import CartaoCreditoSchema, CartaoCreditoSchemaId, CartaoCreditoSchemaUpdate
 from models.usuario_model import UsuarioModel
 from models.fatura_model import FaturaModel
 
@@ -39,7 +39,7 @@ async def post_cartao_credito(
 @router.put('/editar/{id_cartao_credito}', response_model=CartaoCreditoSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def update_cartao_credito(
     id_cartao_credito: int, 
-    cartao_credito_update: CartaoCreditoSchemaUp, 
+    cartao_credito_update: CartaoCreditoSchemaUpdate, 
     db: AsyncSession = Depends(get_session), 
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):

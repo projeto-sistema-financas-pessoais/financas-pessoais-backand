@@ -1391,46 +1391,7 @@
         "detail": "schemas.parente_schema",
         "documentation": {}
     },
-    {
-        "label": "SubcategoriaModel",
-        "importPath": "models.subcategoria_model",
-        "description": "models.subcategoria_model",
-        "isExtraImport": true,
-        "detail": "models.subcategoria_model",
-        "documentation": {}
-    },
-    {
-        "label": "SubcategoriaModel",
-        "importPath": "models.subcategoria_model",
-        "description": "models.subcategoria_model",
-        "isExtraImport": true,
-        "detail": "models.subcategoria_model",
-        "documentation": {}
-    },
-    {
-        "label": "SubcategoriaCreateSchema",
-        "importPath": "schemas.subcategoria_schema",
-        "description": "schemas.subcategoria_schema",
-        "isExtraImport": true,
-        "detail": "schemas.subcategoria_schema",
-        "documentation": {}
-    },
-    {
-        "label": "SubcategoriaSchema",
-        "importPath": "schemas.subcategoria_schema",
-        "description": "schemas.subcategoria_schema",
-        "isExtraImport": true,
-        "detail": "schemas.subcategoria_schema",
-        "documentation": {}
-    },
-    {
-        "label": "SubcategoriaUpdateSchema",
-        "importPath": "schemas.subcategoria_schema",
-        "description": "schemas.subcategoria_schema",
-        "isExtraImport": true,
-        "detail": "schemas.subcategoria_schema",
-        "documentation": {}
-    },
+   
     {
         "label": "api.v1.endpoints",
         "kind": 6,
@@ -1458,14 +1419,6 @@
     },
     {
         "label": "categoria",
-        "importPath": "api.v1.endpoints",
-        "description": "api.v1.endpoints",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints",
-        "documentation": {}
-    },
-    {
-        "label": "subcategoria",
         "importPath": "api.v1.endpoints",
         "description": "api.v1.endpoints",
         "isExtraImport": true,

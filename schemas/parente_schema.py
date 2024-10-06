@@ -1,21 +1,19 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class ParenteBaseSchema(BaseModel):
-    grau_parentesco: Optional[str]
+class ParenteSchema(BaseModel):
     nome: str
-
-class ParenteCreateSchema(ParenteBaseSchema):
-    id_usuario: int
-
-class ParenteSchema(ParenteBaseSchema):
-    id_parente: int
-    id_usuario: int
+    grau_parentesco: str
+    ativo : Optional[bool] = True
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-class ParenteUpdateSchema(ParenteBaseSchema):
+class ParenteSchemaId(ParenteSchema):
+    id_usuario: int
+    id_parente: int
+
+class ParenteSchemaUpdate(ParenteSchema):
     grau_parentesco: Optional[str] = None
     nome: Optional[str] = None
-
+    ativo : Optional[bool] = True

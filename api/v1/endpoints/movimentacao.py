@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from models.movimentacao_model import MovimentacaoModel
-from schemas.movimentacao_schema import MovimentacaoCreateSchema, MovimentacaoUpdateSchema, MovimentacaoSchema
+from schemas.movimentacao_schema import MovimentacaoSchema, MovimentacaoSchemaUpdate, MovimentacaoSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 from models.conta_model import ContaModel
@@ -13,37 +13,32 @@ from typing import List
 
 router = APIRouter()
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
+@router.post('/cadastro', response_model=MovimentacaoSchema, status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
-    movimentacao: MovimentacaoCreateSchema,
+    movimentacao: MovimentacaoSchema,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
     async with db as session:
         # Verificar se a conta pertence ao usuário logado
+        print(f"Verificando se a conta {movimentacao.id_conta} pertence ao usuário {usuario_logado.id_usuario}")
         query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
         result_conta = await session.execute(query_conta)
         conta = result_conta.scalars().first()
 
         if not conta:
+            print(f"Conta {movimentacao.id_conta} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
 
         # Verificar se a categoria pertence ao usuário logado
+        print(f"Verificando se a categoria {movimentacao.id_categoria} pertence ao usuário {usuario_logado.id_usuario}")
         query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == movimentacao.id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
         result_categoria = await session.execute(query_categoria)
         categoria = result_categoria.scalars().first()
 
         if not categoria:
+            print(f"Categoria {movimentacao.id_categoria} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
-
-        # Verificar se a fatura pertence ao usuário logado (se fornecida)
-        if movimentacao.id_fatura:
-            query_fatura = select(FaturaModel).where(FaturaModel.id_fatura == movimentacao.id_fatura)
-            result_fatura = await session.execute(query_fatura)
-            fatura = result_fatura.scalars().first()
-
-            if not fatura:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fatura não encontrada.")
 
         # Criar nova movimentação
         nova_movimentacao = MovimentacaoModel(
@@ -60,20 +55,25 @@ async def create_movimentacao(
             data_pagamento=movimentacao.data_pagamento,
             id_conta=movimentacao.id_conta,
             id_categoria=movimentacao.id_categoria,
-            id_fatura=movimentacao.id_fatura
         )
+        print("============== Nova Movimentação Criada ==============")
+        print(f"Movimentação: {nova_movimentacao}")
+        print(f"Conta associada: {conta}")
+        print(f"Categoria associada: {categoria}")
 
         try:
             session.add(nova_movimentacao)
             await session.commit()
+            print(f"Movimentação {nova_movimentacao.id_movimentacao} criada com sucesso.")
             return nova_movimentacao
-        except IntegrityError:
+        except IntegrityError as e:
+            print(f"Erro de integridade ao criar movimentação: {e}")
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao criar movimentação.")
-        
+
 async def update_movimentacao(
     id_movimentacao: int,
-    movimentacao_update: MovimentacaoUpdateSchema,
+    movimentacao_update: MovimentacaoSchemaUpdate,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -150,7 +150,7 @@ async def update_movimentacao(
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar movimentação")
     
-@router.get('/', response_model=List[MovimentacaoSchema])
+@router.get('/listar', response_model=List[MovimentacaoSchemaId])
 async def listar_movimentacoes(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
@@ -167,7 +167,7 @@ async def listar_movimentacoes(
         return movimentacoes
         
         
-@router.get('/{id_movimentacao}', response_model=MovimentacaoSchema)
+@router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
 async def visualizar_movimentacao(
     id_movimentacao: int,
     db: AsyncSession = Depends(get_session),
@@ -183,7 +183,7 @@ async def visualizar_movimentacao(
 
         return movimentacao
 
-@router.delete('/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_movimentacao(
     id_movimentacao: int,
     db: AsyncSession = Depends(get_session),

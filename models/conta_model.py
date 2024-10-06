@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, BigInteger, ForeignKey, UniqueConstraint,Boolean, Enum as SqlEnum
+from sqlalchemy import Column, String, DECIMAL, BigInteger, ForeignKey, UniqueConstraint,Boolean, Enum as SqlEnum
 from core.configs import settings
 from sqlalchemy.orm import relationship
 
@@ -15,7 +15,7 @@ class ContaModel(settings.DBBaseModel):
     nome = Column(String(500), nullable=False)
     nome_icone = Column(String(100))
     ativo = Column(Boolean, default=True)  # Adicionando a coluna ativo
-
+    saldo = Column(DECIMAL(10,2))
 
     usuario = relationship("UsuarioModel", back_populates="contas")
     movimentacoes = relationship("MovimentacaoModel", back_populates="conta")

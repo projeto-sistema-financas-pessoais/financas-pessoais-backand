@@ -1,6 +1,6 @@
-from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from decimal import Decimal
 
 from models.enums import TipoConta
 
@@ -18,9 +18,10 @@ class ContaSchema(BaseModel):
 class ContaSchemaId(ContaSchema):
     id_usuario: int
     id_conta: int
+    saldo: Decimal
        
     
-class ContaSchemaUp(ContaSchema):
+class ContaSchemaUpdate(ContaSchema):
     descricao: Optional[str] = None
     tipo_conta: Optional[TipoConta] = None
     nome: Optional[str] = None

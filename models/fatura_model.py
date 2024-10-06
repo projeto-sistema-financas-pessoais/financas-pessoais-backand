@@ -11,8 +11,10 @@ class FaturaModel(settings.DBBaseModel):
     data_vencimento = Column(Date)
     data_fechamento = Column(Date)
     data_pagamento = Column(Date)
+    fatura_gastos = Column(DECIMAL(10,2))
     id_conta = Column(BigInteger, ForeignKey("CONTA.id_conta"))
     id_cartao_credito = Column(BigInteger, ForeignKey("CARTAO_CREDITO.id_cartao_credito"))
+    
 
     conta = relationship("ContaModel", back_populates="faturas")
     cartao_credito = relationship("CartaoCreditoModel", back_populates="faturas")

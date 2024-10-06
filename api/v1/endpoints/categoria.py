@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from typing import List
@@ -6,27 +6,27 @@ from core.deps import get_current_user, get_session
 from models.categoria_model import CategoriaModel
 from models.usuario_model import UsuarioModel
 from models.movimentacao_model import MovimentacaoModel
-from schemas.categoria_schema import CategoriaSchema, CategoriaCreateSchema, CategoriaUpdateSchema, CategoriaSchemaId
+from schemas.categoria_schema import CategoriaSchema, CategoriaSchemaUpdate, CategoriaSchemaId
 from sqlalchemy.future import select
 from models.enums import TipoMovimentacao
 
 
 router = APIRouter()
 
-@router.post('/criar', status_code=status.HTTP_201_CREATED)
+@router.post('/cadastro', status_code=status.HTTP_201_CREATED)
 async def post_categoria(
-    categoria: CategoriaCreateSchema, 
+    categoria: CategoriaSchema, 
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
     nova_categoria: CategoriaModel = CategoriaModel(
         nome=categoria.nome,
-        descricao=categoria.descricao,
         tipo_categoria=categoria.tipo_categoria,
         modelo_categoria=categoria.modelo_categoria,
         id_usuario=usuario_logado.id_usuario,
         valor_categoria=categoria.valor_categoria,
-        nome_icone=categoria.nome_icone
+        nome_icone=categoria.nome_icone,
+        ativo=categoria.ativo
     )
     
     async with db as session:
@@ -37,18 +37,52 @@ async def post_categoria(
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Categoria já cadastrada para este usuário")
 
-@router.get('/visualizar/{id_categoria}', response_model=CategoriaSchema, status_code=status.HTTP_200_OK)
-async def get_categoria(
-    id_categoria: int, 
-    db: AsyncSession = Depends(get_session),
-    usuario_logado: UsuarioModel = Depends(get_current_user)):
+@router.put('/editar/{categoria_id}', response_model=CategoriaSchemaId, status_code=status.HTTP_202_ACCEPTED)
+async def put_categoria(
+    categoria_id: int, 
+    categoria: CategoriaSchemaUpdate, 
+    db: AsyncSession = Depends(get_session), 
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
     async with db as session:
-        query = select(CategoriaModel).where(CategoriaModel.id_categoria == id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
+        query = select(CategoriaModel).filter(CategoriaModel.id_categoria == categoria_id)
         result = await session.execute(query)
-        categoria = CategoriaSchemaId = result.scalars().unique().one_or_none()
-        if not categoria:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada")
-        return categoria
+        categoria_up: CategoriaModel = result.scalars().unique().one_or_none()
+
+        if not categoria_up:
+            raise HTTPException(
+                detail="Categoria não encontrada.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        if categoria_up.id_usuario != usuario_logado.id_usuario:
+            raise HTTPException(
+                detail="Você não tem permissão para editar esta categoria.",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
+        if categoria.nome:
+            categoria_up.nome = categoria.nome
+        if categoria.tipo_categoria:
+            categoria_up.tipo_categoria = categoria.tipo_categoria
+        if categoria.modelo_categoria:
+            categoria_up.modelo_categoria = categoria.modelo_categoria
+        if categoria.valor_categoria is not None:
+            categoria_up.valor_categoria = categoria.valor_categoria
+        if categoria.nome_icone:
+            categoria_up.nome_icone = categoria.nome_icone
+        if categoria.ativo:
+            categoria_up.ativo = categoria.ativo
+
+        try:
+            await session.commit()
+            return categoria_up
+        except IntegrityError:
+            await session.rollback()  
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE, 
+                detail='Já existe uma categoria com este nome para o usuário.'
+            )
 
 @router.get('/listar/', response_model=List[CategoriaSchemaId])
 async def get_categorias ( db: AsyncSession = Depends(get_session),
@@ -87,71 +121,56 @@ async def get_categorias_despesa(db: AsyncSession = Depends(get_session),
 
         return categorias_despesa
 
-@router.put('/editar/{categoria_id}', response_model=CategoriaSchemaId, status_code=status.HTTP_202_ACCEPTED)
-async def put_categoria(
-    categoria_id: int, 
-    categoria: CategoriaUpdateSchema, 
+
+@router.get('/visualizar/{id_categoria}', response_model=CategoriaSchema, status_code=status.HTTP_200_OK)
+async def get_categoria(
+    id_categoria: int, 
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)):
+    async with db as session:
+        query = select(CategoriaModel).where(CategoriaModel.id_categoria == id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
+        result = await session.execute(query)
+        categoria = CategoriaSchemaId = result.scalars().unique().one_or_none()
+        if categoria:
+            return categoria
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada")
+
+@router.delete('/deletar/{id_categoria}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_categoria (
+    id_categoria: int, 
     db: AsyncSession = Depends(get_session), 
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
     async with db as session:
-        query = select(CategoriaModel).filter(CategoriaModel.id_categoria == categoria_id)
+        query = select(CategoriaModel).where(
+            CategoriaModel.id_categoria == id_categoria, 
+                        CategoriaModel.id_usuario == usuario_logado.id_usuario)
         result = await session.execute(query)
-        categoria_up: CategoriaModel = result.scalars().unique().one_or_none()
-
-        if not categoria_up:
-            raise HTTPException(
-                detail="Categoria não encontrada.",
-                status_code=status.HTTP_404_NOT_FOUND
-            )
-
-        if categoria_up.id_usuario != usuario_logado.id_usuario:
-            raise HTTPException(
-                detail="Você não tem permissão para editar esta categoria.",
-                status_code=status.HTTP_403_FORBIDDEN
-            )
-
-        if categoria.nome:
-            categoria_up.nome = categoria.nome
-        if categoria.descricao:
-            categoria_up.descricao = categoria.descricao
-        if categoria.tipo_categoria:
-            categoria_up.tipo_categoria = categoria.tipo_categoria
-        if categoria.modelo_categoria:
-            categoria_up.modelo_categoria = categoria.modelo_categoria
-        if categoria.valor_categoria is not None:
-            categoria_up.valor_categoria = categoria.valor_categoria
-        if categoria.nome_icone:
-            categoria_up.nome_icone = categoria.nome_icone
-
-        try:
-            await session.commit()
-            return categoria_up
-        except IntegrityError:
-            await session.rollback()  
-            raise HTTPException(
-                status_code=status.HTTP_406_NOT_ACCEPTABLE, 
-                detail='Já existe uma categoria com este nome para o usuário.'
-            )
-
-@router.delete('/deletar/{id_categoria}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_categoria(id_categoria: int, db: AsyncSession = Depends(get_session)):
-    async with db as session:
-        categoria = await session.get(CategoriaModel, id_categoria)
-        if not categoria:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada")
+        categoria_del: CategoriaModel = result.scalars().unique().one_or_none()
         
+     
+        if not categoria_del:
+            raise HTTPException(detail='Categoria não encontrada.', status_code=status.HTTP_404_NOT_FOUND)
+        
+              
         # Verificar se existem movimentações associadas à categoria
         movimentacao_query = select(MovimentacaoModel).where(
-            MovimentacaoModel.id_conta == id_categoria
+            MovimentacaoModel.id_categoria == id_categoria
         )
         movimentacao_result = await session.execute(movimentacao_query)
         movimentacoes = movimentacao_result.scalars().unique().all()
         
         
         if movimentacoes:
-            raise HTTPException(detail='Não é possível excluir a categoria. Existem movimentações associadas.', status_code=status.HTTP_400_BAD_REQUEST)
+            raise HTTPException(detail='Não é possível excluir a categoria; Existem movimentações associadas.', status_code=status.HTTP_400_BAD_REQUEST)
         
-        await session.delete(categoria)
+        
+           
+        await session.delete(categoria_del)
+        
         await session.commit()
-        return {"detail": "Categoria excluída com sucesso"}
+            
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        
+        
