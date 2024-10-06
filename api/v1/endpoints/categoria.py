@@ -63,8 +63,6 @@ async def put_categoria(
 
         if categoria.nome:
             categoria_up.nome = categoria.nome
-        if categoria.descricao:
-            categoria_up.descricao = categoria.descricao
         if categoria.tipo_categoria:
             categoria_up.tipo_categoria = categoria.tipo_categoria
         if categoria.modelo_categoria:

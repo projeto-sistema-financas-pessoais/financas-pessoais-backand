@@ -24,7 +24,8 @@ async def post_conta(
         id_usuario = usuario_logado.id_usuario,
         nome=conta.nome,
         nome_icone=conta.nome_icone,
-        ativo=conta.ativo if conta.ativo is not None else True  # Garantindo o valor padrão
+        ativo=conta.ativo if conta.ativo is not None else True,  # Garantindo o valor padrão
+        saldo=0
     )
     
     async with db as session:
@@ -66,7 +67,6 @@ async def put_conta (conta_id: int,
                 conta_up.descricao = conta.descricao
             if conta.tipo_conta:
                 conta_up.tipo_conta = conta.tipo_conta.value
-
             if conta.nome:
                 conta_up.nome = conta.nome
             if conta.nome_icone:

@@ -35,7 +35,6 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
             categorias = [
                 CategoriaModel(
                     nome="Saúde",
-                    descricao="Categoria para despesas com saúde",
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
@@ -45,7 +44,6 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 ),
                 CategoriaModel(
                     nome="Alimentação",
-                    descricao="Categoria para despesas com alimentação",
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
@@ -55,7 +53,6 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 ),
                 CategoriaModel(
                     nome="Transporte",
-                    descricao="Categoria para despesas com transporte",
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
@@ -65,7 +62,6 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 ),
                 CategoriaModel(
                     nome="Educação",
-                    descricao="Categoria para despesas com educação",
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
@@ -75,7 +71,6 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 ),
                 CategoriaModel(
                     nome="Lazer",
-                    descricao="Categoria destinada para despesas com lazer",
                     tipo_categoria="Variável",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
@@ -85,7 +80,6 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 ),
                 CategoriaModel(
                     nome="Salário",
-                    descricao="Salário base",
                     tipo_categoria="Fixa",
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
@@ -95,7 +89,6 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 ),
                 CategoriaModel(
                     nome="Extra",
-                    descricao="Entradas extras",
                     tipo_categoria="Variável",
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
@@ -114,7 +107,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 tipo_conta="Carteira",
                 id_usuario=novo_usuario.id_usuario,
                 ativo=True,
-                gastos_totais=0
+                saldo=0
             )
             session.add(conta_carteira)
 

@@ -4,9 +4,7 @@ from typing import Optional
 from decimal import Decimal
 
 class CategoriaSchema(BaseModel):
-    id_categoria: int
     nome: str
-    descricao: Optional[str]
     tipo_categoria: TipoCategoria
     modelo_categoria: TipoMovimentacao
     valor_categoria: Decimal
@@ -17,7 +15,6 @@ class CategoriaSchema(BaseModel):
 
 class CategoriaSchemaUpdate(BaseModel):
     nome: Optional[str] = None
-    descricao: Optional[str] = None
     tipo_categoria: Optional[TipoCategoria] = None
     modelo_categoria: Optional[TipoMovimentacao] = None
     valor_categoria: Optional[Decimal] = None
