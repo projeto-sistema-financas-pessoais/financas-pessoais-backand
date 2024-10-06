@@ -20,6 +20,8 @@ class CategoriaSchemaUpdate(BaseModel):
     valor_categoria: Optional[Decimal] = None
     nome_icone: Optional[str] = None
     ativo : Optional[bool] = True
+      
 class CategoriaSchemaId(CategoriaSchema):
     id_usuario: int
     id_categoria: int
+
