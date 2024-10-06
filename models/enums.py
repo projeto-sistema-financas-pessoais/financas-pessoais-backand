@@ -5,6 +5,7 @@ from enum import Enum
 class TipoMovimentacao(str, Enum):
     DESPESA = "Despesa"
     RECEITA = "Receita"
+    TRANSFERENCIA = "Transferencia"
 
 class FormaPagamento(str, Enum):
     DEBITO = "Débito"
@@ -26,4 +27,14 @@ class TipoConta(str, Enum):
     CONTA_PAGAMENTO = "Conta de pagamento"
     CARTEIRA = "Carteira"
     CONTA_SALARIO = "Conta Salário"
+
+class TipoRecoorencia(str, Enum):
+    ANUAL = "Anual"
+    SEMESTRAL = "Semestral"
+    TRIMESTRAL = "Trimestral"
+    BIMESTRAL = "Bimestral"
+    MENSAL = "Mensal"
+    QUINZENAL = "Quinzenal"
+    SEMANAL = "Semanal"
+    DIÁRIO = "Diário"
     

@@ -10,7 +10,6 @@ class CategoriaModel(settings.DBBaseModel):
 
     id_categoria = Column(BigInteger, primary_key=True)
     nome = Column(String(60), nullable=False)
-    descricao = Column(String(500))
     tipo_categoria = Column(SqlEnum(TipoCategoria), nullable=False)
     modelo_categoria = Column(SqlEnum(TipoMovimentacao), nullable=False)
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
@@ -19,7 +18,6 @@ class CategoriaModel(settings.DBBaseModel):
     ativo = Column(Boolean, default=True)
 
 
-    subcategorias = relationship("SubcategoriaModel", back_populates="categoria")
     movimentacoes = relationship("MovimentacaoModel", back_populates="categoria")
     usuarios = relationship("UsuarioModel", back_populates="categorias")
     

@@ -21,7 +21,6 @@ async def post_categoria(
 ):
     nova_categoria: CategoriaModel = CategoriaModel(
         nome=categoria.nome,
-        descricao=categoria.descricao,
         tipo_categoria=categoria.tipo_categoria,
         modelo_categoria=categoria.modelo_categoria,
         id_usuario=usuario_logado.id_usuario,

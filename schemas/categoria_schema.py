@@ -11,8 +11,7 @@ class CategoriaSchema(BaseModel):
     modelo_categoria: TipoMovimentacao
     valor_categoria: Decimal
     nome_icone: str
-
-
+    ativo : Optional[bool] = True
     class Config:
         from_attributes = True
 
@@ -23,8 +22,7 @@ class CategoriaSchemaUpdate(BaseModel):
     modelo_categoria: Optional[TipoMovimentacao] = None
     valor_categoria: Optional[Decimal] = None
     nome_icone: Optional[str] = None
-
-
+    ativo : Optional[bool] = True
 class CategoriaSchemaId(CategoriaSchema):
     id_usuario: int
     id_categoria: int
