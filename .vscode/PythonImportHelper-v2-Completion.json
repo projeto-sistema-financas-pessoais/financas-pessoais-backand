@@ -2584,7 +2584,7 @@
         "kind": 5,
         "importPath": "api.v1.api",
         "description": "api.v1.api",
-        "peekOfCode": "api_router = APIRouter()\napi_router.include_router(usuario.router, prefix='/usuarios', tags=[\"usuarios\"])\napi_router.include_router(conta.router, prefix='/contas', tags=[\"contas\"])\napi_router.include_router(categoria.router, prefix='/categorias', tags=[\"categorias\"])\napi_router.include_router(cartao_de_credito.router, prefix='/cartaoCredito', tags=[\"cartao_credito\"])\napi_router.include_router(fatura.router, prefix='/fatura', tags=[\"fatura\"])\napi_router.include_router(parente.router, prefix='/parente', tags=[\"parente\"])\napi_router.include_router(movimentacao.router, prefix='/movimentacao', tags=[\"movimentacao\"])\n\"\"\"\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzI0NjkyOTM4LCJpYXQiOjE3MjQwODgxMzgsInN1YiI6IjEifQ.qQgD-j4r-1lK8rKAcQ_i-e3xHOfXsZWAKoYPJbmnwmE",
+        "peekOfCode": "api_router = APIRouter()\napi_router.include_router(usuario.router, prefix='/usuarios', tags=[\"usuarios\"])\napi_router.include_router(conta.router, prefix='/contas', tags=[\"contas\"])\napi_router.include_router(categoria.router, prefix='/categorias', tags=[\"categorias\"])\napi_router.include_router(cartao_de_credito.router, prefix='/cartaoCredito', tags=[\"cartao_credito\"])\napi_router.include_router(fatura.router, prefix='/fatura', tags=[\"fatura\"])\napi_router.include_router(parente.router, prefix='/parente', tags=[\"parente\"])\napi_router.include_router(movimentacao.router, prefix='/movimentacao', tags=[\"movimentacao\"])",
         "detail": "api.v1.api",
         "documentation": {}
     },

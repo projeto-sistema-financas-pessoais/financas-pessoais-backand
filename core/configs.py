@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     token: str = secrets.token_urlsafe(32)
     """
     ALGORITHM: str = config("ALGORITHM")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*24*7
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*8
     
     class Config:
         case_sensitive = True

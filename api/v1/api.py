@@ -10,6 +10,3 @@ api_router.include_router(fatura.router, prefix='/fatura', tags=["fatura"])
 api_router.include_router(parente.router, prefix='/parente', tags=["parente"])
 api_router.include_router(movimentacao.router, prefix='/movimentacao', tags=["movimentacao"])
 
-"""
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzI0NjkyOTM4LCJpYXQiOjE3MjQwODgxMzgsInN1YiI6IjEifQ.qQgD-j4r-1lK8rKAcQ_i-e3xHOfXsZWAKoYPJbmnwmE
-"""
