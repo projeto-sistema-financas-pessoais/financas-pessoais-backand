@@ -38,7 +38,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="health.svg",
                     ativo=True
                 ),
@@ -47,7 +47,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="food.svg",
                     ativo=True
                 ),
@@ -56,7 +56,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="car.svg",
                     ativo=True
                 ),
@@ -65,7 +65,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="book.svg",
                     ativo=True
                 ),
@@ -74,7 +74,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Variável",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="happy.svg",
                     ativo=True
                 ),
@@ -83,7 +83,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="salary.svg",
                     ativo=True
                 ),
@@ -92,7 +92,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Variável",
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="extra.svg",
                     ativo=True
                 )

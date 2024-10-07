@@ -61,18 +61,19 @@ async def put_categoria(
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
+
+        categoria_up.valor_categoria = categoria.valor_categoria
+
         if categoria.nome:
             categoria_up.nome = categoria.nome
         if categoria.tipo_categoria:
             categoria_up.tipo_categoria = categoria.tipo_categoria
         if categoria.modelo_categoria:
             categoria_up.modelo_categoria = categoria.modelo_categoria
-        if categoria.valor_categoria is not None:
-            categoria_up.valor_categoria = categoria.valor_categoria
         if categoria.nome_icone:
             categoria_up.nome_icone = categoria.nome_icone
-        if categoria.ativo:
-            categoria_up.ativo = categoria.ativo
+        if categoria.ativo is not Ellipsis:
+                categoria_up.ativo = bool(categoria.ativo)
 
         try:
             await session.commit()
@@ -101,7 +102,7 @@ async def get_categorias_receita(db: AsyncSession = Depends(get_session),
         query = select(CategoriaModel).where(
             CategoriaModel.id_usuario == usuario_logado.id_usuario,
             CategoriaModel.modelo_categoria == TipoMovimentacao.RECEITA
-        )
+        ).order_by(CategoriaModel.nome)
         result = await session.execute(query)
         categorias_receita: List[CategoriaSchemaId] = result.scalars().unique().all()
 
@@ -115,7 +116,7 @@ async def get_categorias_despesa(db: AsyncSession = Depends(get_session),
         query = select(CategoriaModel).where(
             CategoriaModel.id_usuario == usuario_logado.id_usuario,
             CategoriaModel.modelo_categoria == TipoMovimentacao.DESPESA
-        )
+        ).order_by(CategoriaModel.nome)
         result = await session.execute(query)
         categorias_despesa: List[CategoriaSchemaId] = result.scalars().unique().all()
 
@@ -130,7 +131,7 @@ async def get_categoria(
     async with db as session:
         query = select(CategoriaModel).where(CategoriaModel.id_categoria == id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
         result = await session.execute(query)
-        categoria = CategoriaSchemaId = result.scalars().unique().one_or_none()
+        categoria : CategoriaSchemaId = result.scalars().unique().one_or_none()
         if categoria:
             return categoria
         else:

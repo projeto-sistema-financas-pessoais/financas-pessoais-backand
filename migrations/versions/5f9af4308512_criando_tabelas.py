@@ -1,8 +1,8 @@
-"""Criando tabelas
+"""criando tabelas
 
-Revision ID: 9863773f3cb0
-Revises: 1b5925595d7f
-Create Date: 2024-08-29 22:46:22.774840
+Revision ID: 5f9af4308512
+Revises: 
+Create Date: 2024-10-07 11:38:35.050341
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9863773f3cb0'
+revision = '5f9af4308512'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -43,11 +43,11 @@ def upgrade() -> None:
     sa.Column('id_categoria', sa.BigInteger(), nullable=False),
     sa.Column('nome', sa.String(length=60), nullable=False),
     sa.Column('tipo_categoria', sa.Enum('FIXA', 'VARIAVEL', name='tipocategoria'), nullable=False),
-    sa.Column('modelo_categoria', sa.Enum('DESPESA', 'RECEITA', name='tipomovimentacao'), nullable=False),
+    sa.Column('modelo_categoria', sa.Enum('DESPESA', 'RECEITA', 'TRANSFERENCIA', name='tipomovimentacao'), nullable=False),
     sa.Column('id_usuario', sa.BigInteger(), nullable=False),
-    sa.Column('valor_categoria', sa.DECIMAL(precision=10, scale=2), nullable=False),
+    sa.Column('valor_categoria', sa.DECIMAL(precision=10, scale=2), nullable=True),
     sa.Column('nome_icone', sa.String(length=100), nullable=True),
-    sa.Column('ativo', sa.Boolean, nullable=True),
+    sa.Column('ativo', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['id_usuario'], ['USUARIO.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_categoria'),
     sa.UniqueConstraint('nome', 'id_usuario', name='unique_nome_categoria')
@@ -70,7 +70,7 @@ def upgrade() -> None:
     sa.Column('grau_parentesco', sa.String(length=100), nullable=True),
     sa.Column('nome', sa.String(length=60), nullable=False),
     sa.Column('id_usuario', sa.BigInteger(), nullable=False),
-     sa.Column('ativo', sa.Boolean(), nullable=True),
+    sa.Column('ativo', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['id_usuario'], ['USUARIO.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_parente')
     )
@@ -79,9 +79,9 @@ def upgrade() -> None:
     sa.Column('data_vencimento', sa.Date(), nullable=True),
     sa.Column('data_fechamento', sa.Date(), nullable=True),
     sa.Column('data_pagamento', sa.Date(), nullable=True),
+    sa.Column('fatura_gastos', sa.DECIMAL(precision=10, scale=2), nullable=True),
     sa.Column('id_conta', sa.BigInteger(), nullable=True),
     sa.Column('id_cartao_credito', sa.BigInteger(), nullable=True),
-    sa.Column('fatura_gastos', sa.DECIMAL(precision=10, scale=2), nullable=True),
     sa.ForeignKeyConstraint(['id_cartao_credito'], ['CARTAO_CREDITO.id_cartao_credito'], ),
     sa.ForeignKeyConstraint(['id_conta'], ['CONTA.id_conta'], ),
     sa.PrimaryKeyConstraint('id_fatura')
@@ -90,7 +90,7 @@ def upgrade() -> None:
     sa.Column('id_movimentacao', sa.BigInteger(), nullable=False),
     sa.Column('valor', sa.DECIMAL(precision=10, scale=2), nullable=False),
     sa.Column('descricao', sa.String(length=500), nullable=True),
-    sa.Column('tipoMovimentacao', sa.Enum('DESPESA', 'RECEITA', name='tipomovimentacao'), nullable=False),
+    sa.Column('tipoMovimentacao', sa.Enum('DESPESA', 'RECEITA', 'TRANSFERENCIA', name='tipomovimentacao'), nullable=False),
     sa.Column('forma_pagamento', sa.Enum('DEBITO', 'CREDITO', 'DINHEIRO', name='formapagamento'), nullable=False),
     sa.Column('condicao_pagamento', sa.Enum('A_VISTA', 'PARCELADO', 'RECORRENTE', name='condicaopagamento'), nullable=False),
     sa.Column('datatime', sa.TIMESTAMP(timezone=True), nullable=True),
