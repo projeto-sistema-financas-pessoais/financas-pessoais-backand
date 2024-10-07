@@ -59,6 +59,13 @@ async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, d
 
         if parente_update.nome is not None:
             parente.nome = parente_update.nome
+            
+        if parente_update.ativo is not None:
+            parente.ativo = bool(parente_update.ativo)
+
+            
+            
+     
 
         try:
             await session.commit()

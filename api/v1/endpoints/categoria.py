@@ -72,7 +72,7 @@ async def put_categoria(
             categoria_up.modelo_categoria = categoria.modelo_categoria
         if categoria.nome_icone:
             categoria_up.nome_icone = categoria.nome_icone
-        if categoria.ativo is not Ellipsis:
+        if categoria.ativo is not None:
                 categoria_up.ativo = bool(categoria.ativo)
 
         try:
