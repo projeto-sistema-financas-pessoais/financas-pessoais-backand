@@ -19,9 +19,9 @@ class Settings(BaseSettings):
     token: str = secrets.token_urlsafe(32)
     """
     ALGORITHM: str = config("ALGORITHM")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*24*7
     EMAIL_ADDRESS: str = config("EMAIL_ADDRESS")
     EMAIL_PASSWORD: str = config("EMAIL_PASSWORD")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*8
     
     class Config:
         case_sensitive = True

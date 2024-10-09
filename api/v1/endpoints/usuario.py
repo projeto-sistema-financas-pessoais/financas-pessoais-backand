@@ -41,7 +41,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="health.svg",
                     ativo=True
                 ),
@@ -50,11 +50,55 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     tipo_categoria="Fixa",
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
-                    valor_categoria=0,
+                    valor_categoria=None,
                     nome_icone="food.svg",
                     ativo=True
                 ),
-                # Demais categorias
+                CategoriaModel(
+                    nome="Transporte",
+                    tipo_categoria="Fixa",
+                    modelo_categoria="Despesa",
+                    id_usuario=novo_usuario.id_usuario,
+                    valor_categoria=None,
+                    nome_icone="car.svg",
+                    ativo=True
+                ),
+                CategoriaModel(
+                    nome="Educação",
+                    tipo_categoria="Fixa",
+                    modelo_categoria="Despesa",
+                    id_usuario=novo_usuario.id_usuario,
+                    valor_categoria=None,
+                    nome_icone="book.svg",
+                    ativo=True
+                ),
+                CategoriaModel(
+                    nome="Lazer",
+                    tipo_categoria="Variável",
+                    modelo_categoria="Despesa",
+                    id_usuario=novo_usuario.id_usuario,
+                    valor_categoria=None,
+                    nome_icone="happy.svg",
+                    ativo=True
+                ),
+                CategoriaModel(
+                    nome="Salário",
+                    tipo_categoria="Fixa",
+                    modelo_categoria="Receita",
+                    id_usuario=novo_usuario.id_usuario,
+                    valor_categoria=None,
+                    nome_icone="salary.svg",
+                    ativo=True
+                ),
+                CategoriaModel(
+                    nome="Extra",
+                    tipo_categoria="Variável",
+                    modelo_categoria="Receita",
+                    id_usuario=novo_usuario.id_usuario,
+                    valor_categoria=None,
+                    nome_icone="extra.svg",
+                    ativo=True
+                )
             ]
             session.add_all(categorias)
 
