@@ -7,7 +7,7 @@ class CategoriaSchema(BaseModel):
     nome: str
     tipo_categoria: TipoCategoria
     modelo_categoria: TipoMovimentacao
-    valor_categoria: Decimal
+    valor_categoria: Optional[Decimal] = None
     nome_icone: str
     ativo : Optional[bool] = True
     class Config:
