@@ -95,13 +95,15 @@ async def get_categorias ( db: AsyncSession = Depends(get_session),
       
         return categorias
 
-@router.get('/listar/receita', response_model=List[CategoriaSchemaId], status_code=status.HTTP_200_OK)
-async def get_categorias_receita(db: AsyncSession = Depends(get_session), 
+@router.get('/listar/receita/{somente_ativo}', response_model=List[CategoriaSchemaId], status_code=status.HTTP_200_OK)
+async def get_categorias_receita(somente_ativo: bool,db: AsyncSession = Depends(get_session), 
                                  usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
         query = select(CategoriaModel).where(
             CategoriaModel.id_usuario == usuario_logado.id_usuario,
-            CategoriaModel.modelo_categoria == TipoMovimentacao.RECEITA
+            CategoriaModel.modelo_categoria == TipoMovimentacao.RECEITA,
+                        CategoriaModel.ativo if somente_ativo else True
+
         ).order_by(CategoriaModel.nome)
         result = await session.execute(query)
         categorias_receita: List[CategoriaSchemaId] = result.scalars().unique().all()
@@ -109,13 +111,15 @@ async def get_categorias_receita(db: AsyncSession = Depends(get_session),
         return categorias_receita
 
 # Listar categorias onde modelo_categoria é igual a Despesa
-@router.get('/listar/despesa', response_model=List[CategoriaSchemaId], status_code=status.HTTP_200_OK)
-async def get_categorias_despesa(db: AsyncSession = Depends(get_session), 
+@router.get('/listar/despesa/{somente_ativo}', response_model=List[CategoriaSchemaId], status_code=status.HTTP_200_OK)
+async def get_categorias_despesa(somente_ativo: bool,db: AsyncSession = Depends(get_session), 
                                  usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
         query = select(CategoriaModel).where(
             CategoriaModel.id_usuario == usuario_logado.id_usuario,
-            CategoriaModel.modelo_categoria == TipoMovimentacao.DESPESA
+            CategoriaModel.modelo_categoria == TipoMovimentacao.DESPESA,
+            CategoriaModel.ativo if somente_ativo else True
+
         ).order_by(CategoriaModel.nome)
         result = await session.execute(query)
         categorias_despesa: List[CategoriaSchemaId] = result.scalars().unique().all()

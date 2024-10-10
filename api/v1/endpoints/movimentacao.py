@@ -71,6 +71,7 @@ async def create_movimentacao(
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao criar movimentação.")
 
+@router.post('/editar/{id_movimentacao}', response_model=MovimentacaoSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def update_movimentacao(
     id_movimentacao: int,
     movimentacao_update: MovimentacaoSchemaUpdate,
