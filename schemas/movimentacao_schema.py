@@ -12,9 +12,9 @@ class MovimentacaoSchema(BaseModel):
     condicao_pagamento: CondicaoPagamento
     datatime: Optional[datetime]
     quantidade_parcelas: Optional[int]
-    consolidado: str
+    consolidado: bool
     tipo_recorrencia: Optional[str]
-    recorrencia: Optional[str]
+    parcela_atual: Optional[str]
     data_pagamento: date
     id_conta: int
     id_categoria: int
@@ -31,9 +31,9 @@ class MovimentacaoSchemaUpdate(BaseModel):
     condicao_pagamento: Optional[CondicaoPagamento] = None
     datatime: Optional[datetime] = None
     quantidade_parcelas: Optional[int] = None
-    consolidado: Optional[str] = None
+    consolidado: Optional[bool] = None
     tipo_recorrencia: Optional[str] = None
-    recorrencia: Optional[str] = None
+    # parcela_atual: Optional[str] = None
     data_pagamento: Optional[date] = None
     id_conta: Optional[int] = None
     id_categoria: Optional[int] = None
@@ -61,7 +61,7 @@ class MovimentacaoSchemaReceita(BaseModel):
     id_conta: int
     condicao_pagamento : CondicaoPagamento
     tipo_recorrencia: TipoRecorrencia
-    recorrencia: str
+    # recorrencia: str
     datatime: datetime
     data_pagamento: date
     consolidado: bool

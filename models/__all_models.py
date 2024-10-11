@@ -6,6 +6,7 @@ from models.categoria_model import CategoriaModel
 from models.fatura_model import FaturaModel
 from models.movimentacao_model import MovimentacaoModel
 from models.associations_model import  divide_table
+from models.repeticao_model import RepeticaoModel
 
 
 from core.configs import settings
@@ -16,5 +17,5 @@ metadata = settings.DBBaseModel.metadata
 __all__ = [
     "reune_table", "divide_table",
     "CartaoCreditoModel", "CategoriaModel", "ContaModel",
-    "FaturaModel", "MovimentacaoModel", "ParenteModel",
+    "FaturaModel", "MovimentacaoModel", "ParenteModel", "RepeticaoModel"
 ]

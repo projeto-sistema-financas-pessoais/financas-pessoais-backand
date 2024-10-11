@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy import extract
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +14,7 @@ from models.conta_model import ContaModel
 from models.categoria_model import CategoriaModel
 from models.fatura_model import FaturaModel
 from typing import List
+from models.repeticao_model import RepeticaoModel
 
 router = APIRouter()
 
@@ -91,41 +93,87 @@ async def create_movimentacao(
 ):
     async with db as session:
         
-        movimentacao_cadastro: MovimentacaoSchema
+        # movimentacao_cadastro: MovimentacaoModel
+        # repeticao_cadastro: RepeticaoModel
 
-        movimentacao_cadastro.valor = movimentacao.valor
-        movimentacao_cadastro.descricao = movimentacao.descricao
-        movimentacao_cadastro.tipoMovimentacao = "Despesa"
-        movimentacao_cadastro.forma_pagamento = movimentacao.forma_pagamento
-        movimentacao_cadastro.condicao_pagamento = movimentacao.condicao_pagamento
-        movimentacao_cadastro.datatime = movimentacao.datatime
-        movimentacao_cadastro.data_pagamento = movimentacao.data_pagamento
+        # movimentacao_cadastro.valor = movimentacao.valor
+        # movimentacao_cadastro.descricao = movimentacao.descricao
+        # movimentacao_cadastro.tipoMovimentacao = "Despesa"
+        # movimentacao_cadastro.forma_pagamento = movimentacao.forma_pagamento
+        # movimentacao_cadastro.condicao_pagamento = movimentacao.condicao_pagamento
+        # movimentacao_cadastro.datatime = movimentacao.datatime
+        # movimentacao_cadastro.data_pagamento = movimentacao.data_pagamento
 
+        if movimentacao.quantidade_parcelas is None:
+            movimentacao.quantidade_parcelas = 1
         
         if movimentacao.forma_pagamento == "Débito" or movimentacao.forma_pagamento == "Dinheiro":
-            movimentacao_cadastro.id_conta = movimentacao.id_financeiro
-            movimentacao_cadastro.consolidado = movimentacao.consolidado
+            movimentacao.id_conta = movimentacao.id_financeiro
 
-            # if(movimentacao.consolidado):
-            #         #desconta da conta
         else:
-            movimentacao_cadastro.consolidado = False
+            movimentacao.consolidado = False
 
             fatura = find_fatura(movimentacao)            
-            if fatura:
-                movimentacao_cadastro.id_fatura = fatura.id_fatura
-            else:
+            
+            if fatura is None:
                 create_fatura_ano(session, usuario_logado, movimentacao.id_financeiro, movimentacao.data_pagamento.year, None, None )
                 fatura = find_fatura(movimentacao)        
 
-                if fatura:
-                    movimentacao_cadastro.id_fatura = fatura.id_fatura    
-                else:
+                if fatura is None:
                     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
 
 
-        if(movimentacao.condicao_pagamento == "Parcelado"):
-            movimentacao_cadastro.quantidade_parcelas = movimentacao.quantidade_parcelas
+            day =  movimentacao.forma_pagamento.day
+            mes =  movimentacao.forma_pagamento.mes
+            ano =  movimentacao.forma_pagamento.ano
+
+
+
+            valor_por_parcela = movimentacao.valor / movimentacao.quantidade_parcelas
+            
+            
+            if movimentacao.condicao_pagamento == "Parcelado" or movimentacao.condicao_pagamento == "Recorrente":
+                nova_repeticao = RepeticaoModel (
+                    quantidade_parcelas = movimentacao.quantidade_parcelas,
+                    tipo_recorrencia = movimentacao.tipo_recorrencia,
+                    valor_total = movimentacao.valor,
+                    data_inicio = movimentacao.data_pagamento,
+                    id_usuario = usuario_logado.id_usuario,
+                )
+                
+                db.add(nova_repeticao)
+                db.commit()
+                db.refresh(nova_repeticao)
+
+
+            for parcela_atual in range (1, movimentacao.quantidade_parcelas):
+                
+                
+                data_pagamento = date(ano, mes, day)                
+                nova_movimentacao = MovimentacaoModel(
+                    valor = valor_por_parcela,
+                    descricao = movimentacao.descricao,
+                    tipoMovimentacao = "Despesa",
+                    forma_pagamento = movimentacao.forma_pagamento,
+                    condicao_pagamento = movimentacao.condicao_pagamento,
+                    datatime = movimentacao.datatime,
+                    consolidado = movimentacao.consolidado,
+                    parcela_atual = parcela_atual,
+                    data_pagamento = data_pagamento,
+                    id_conta = movimentacao.id_conta,
+                    id_categoria = movimentacao.id_categoria,
+                    id_fatura = fatura.id_fatura,
+                    id_repeticao = nova_repeticao.id_repeticao
+                )
+                
+                db.add(nova_movimentacao)
+                ano = ano + 1 if mes == 12 else ano 
+                mes = mes + 1 if mes != 12 else 1 
+
+                
+                
+
+            
 
             ## 3 quantidade = 3
             # id_movimentacao 1  ===> setembro  1/3  não coloca (credito ou debito)

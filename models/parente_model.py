@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, String, BigInteger, ForeignKey, UniqueConstraint,Boolean
+from sqlalchemy import Column, String, BigInteger, ForeignKey,Boolean
 from core.configs import settings
 from sqlalchemy.orm import relationship
 from models.associations_model import divide_table
