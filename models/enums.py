@@ -30,11 +30,8 @@ class TipoConta(str, Enum):
 
 class TipoRecorrencia(str, Enum):
     ANUAL = "Anual"
-    SEMESTRAL = "Semestral"
-    TRIMESTRAL = "Trimestral"
-    BIMESTRAL = "Bimestral"
     MENSAL = "Mensal"
     QUINZENAL = "Quinzenal"
     SEMANAL = "Semanal"
-    DIÁRIO = "Diário"
+
     

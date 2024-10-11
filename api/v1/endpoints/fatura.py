@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -7,7 +8,7 @@ from models.cartao_credito_model import CartaoCreditoModel
 from schemas.fatura_schema import FaturaSchema, FaturaSchemaUpdate, FaturaSchemaId
 from core.deps import get_session, get_current_user
 from sqlalchemy.future import select
-from typing import List
+from typing import List, Optional
 
 
 router = APIRouter()
@@ -34,6 +35,82 @@ async def create_fatura(
         except IntegrityError:
             await session.rollback()  
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao criar a fatura. Verifique os dados fornecidos.')
+
+
+async def create_fatura_ano(
+    db: AsyncSession,
+    usuario_logado: UsuarioModel,
+    id_cartao_credito: int,
+    ano: int,
+    data_vencimento_usuario: Optional[date],
+    data_fechamento_usuario: Optional[date]
+):
+    query_cartao_credito = select(CartaoCreditoModel).where(
+        CartaoCreditoModel.id_cartao_credito == id_cartao_credito,
+        CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
+    )
+    result_cartao_credito = await db.execute(query_cartao_credito)
+    cartao_credito = result_cartao_credito.scalars().one_or_none()
+
+    if not cartao_credito:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Você não tem permissão para criar essa fatura"
+        )
+    
+    # Verificando se já existe uma fatura
+    if data_vencimento_usuario is None or data_fechamento_usuario is None:
+        fatura_anterior = await db.execute(
+            select(FaturaSchemaId).where(FaturaSchemaId.id_cartao_credito == id_cartao_credito)
+        )
+        fatura_anterior = fatura_anterior.scalars().one_or_none()
+
+        existe_uma_fatura = True
+
+        if fatura_anterior:
+            dia_vencimento = fatura_anterior.data_vencimento.day
+            dia_fechamento = fatura_anterior.data_pagamento.day
+
+            # Criar faturas para todos os meses do ano
+            for mes in range(1, 13):  # Meses de 1 a 12
+                data_vencimento = date(ano, mes, dia_vencimento)
+                data_fechamento = date(ano, mes, dia_fechamento)
+
+                nova_fatura = FaturaModel(
+                    data_vencimento=data_vencimento,
+                    data_fechamento=data_fechamento,
+                    id_conta=fatura_anterior.id_conta if existe_uma_fatura else None,
+                    id_cartao_credito=id_cartao_credito
+                )
+                db.add(nova_fatura)
+
+    else: 
+        dia_fechamento = data_fechamento_usuario.day
+        dia_vencimento = data_vencimento_usuario.day
+        existe_uma_fatura = False
+
+        # Criar a partir do mês atual até o final do ano
+        mes_atual = date.today().month
+
+        for mes in range(mes_atual, 13):  # Meses a partir do mês atual até 12
+            data_vencimento = date(ano, mes, dia_vencimento)
+            data_fechamento = date(ano, mes, dia_fechamento)
+
+            nova_fatura = FaturaModel(
+                data_vencimento=data_vencimento,
+                data_fechamento=data_fechamento,
+                id_conta=None,  # Assumindo que não há conta definida aqui
+                id_cartao_credito=id_cartao_credito
+            )
+            db.add(nova_fatura)
+
+    # Salvar todas as faturas criadas na sessão
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao criar as faturas. Verifique os dados fornecidos.')
+
 
 @router.put('/editar/{id_fatura}', response_model=FaturaSchemaId,status_code=status.HTTP_200_OK)
 async def put_fatura(

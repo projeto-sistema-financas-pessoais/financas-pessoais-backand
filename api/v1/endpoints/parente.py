@@ -17,12 +17,17 @@ async def post_parente(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
+    if parente.nome.lower() == usuario_logado.nome_completo.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Não é permitido cadastrar um parente com o nome do usuário."
+        )
+    
     novo_parente: ParenteModel = ParenteModel(
         nome=parente.nome,
         grau_parentesco=parente.grau_parentesco,
         id_usuario=usuario_logado.id_usuario,
         ativo=parente.ativo
-
     )
     
     async with db as session:
@@ -75,16 +80,38 @@ async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, d
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar o parente. Verifique os dados e tente novamente.")
         
 @router.get('/listar', response_model=list[ParenteSchemaId], status_code=status.HTTP_200_OK)
-async def get_parentes(db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+async def get_parentes(db: AsyncSession = Depends(get_session), 
+                       usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
-        query = select(ParenteModel).filter(ParenteModel.id_usuario == usuario_logado.id_usuario)
-        result = await session.execute(query)
-        parentes: List[ParenteSchemaId] = result.scalars().all()
+        try:
+            # Imprimindo detalhes do usuário logado para verificar a autenticação
+            print(f"Usuário logado: {usuario_logado.id_usuario}, {usuario_logado.nome_completo}")
 
-        if not parentes:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum parente encontrado.")
+            # Criando e executando a query para listar parentes do usuário
+            query = select(ParenteModel).where(ParenteModel.id_usuario == usuario_logado.id_usuario)
+            print(f"Query criada: {query}")
 
-        return parentes
+            result = await session.execute(query)
+            
+            # Imprimindo o resultado cru da query
+            print(f"Resultado da query: {result}")
+
+            parentes: List[ParenteSchemaId] = result.scalars().all()
+
+            # Imprimindo parentes encontrados
+            print(f"Parentes encontrados: {parentes}")
+
+            if not parentes:
+                print("Nenhum parente encontrado.")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum parente encontrado.")
+
+            return parentes
+
+        except Exception as e:
+            # Capturando e imprimindo qualquer erro que ocorrer
+            print(f"Erro durante a execução: {e}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar parentes.")
+
 
 @router.get('/visualizar/{id_parente}', response_model=ParenteSchemaId, status_code=status.HTTP_200_OK)
 async def get_parente(id_parente: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):

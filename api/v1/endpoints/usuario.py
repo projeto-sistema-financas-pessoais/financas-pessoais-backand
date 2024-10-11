@@ -8,6 +8,7 @@ from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 from models.categoria_model import CategoriaModel
 from models.conta_model import ContaModel
+from models.parente_model import ParenteModel
 from schemas.usuario_schema import UsuarioSchema, UpdateUsuarioSchema
 from fastapi.security import OAuth2PasswordRequestForm
 from core.auth import auth, generate_token_access
@@ -110,6 +111,14 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 saldo=0
             )
             session.add(conta_carteira)
+
+            parente_usuario = ParenteModel(
+                nome=novo_usuario.nome_completo,
+                grau_parentesco= "Eu",
+                ativo=True,
+                id_usuario=novo_usuario.id_usuario
+            )
+            session.add(parente_usuario)
 
             await session.commit()
 

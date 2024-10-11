@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from decimal import Decimal
-from typing import Optional
+from typing import List, Optional
 from datetime import date, datetime
-from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao
+from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
 
 class MovimentacaoSchema(BaseModel):
     valor: Decimal
@@ -18,7 +18,7 @@ class MovimentacaoSchema(BaseModel):
     data_pagamento: date
     id_conta: int
     id_categoria: int
-    # id_fatura: Optional[int] 
+    id_fatura: Optional[int] 
 
     class Config:
         from_attributes = True
@@ -43,3 +43,43 @@ class MovimentacaoSchemaId(MovimentacaoSchema):
     id_categoria: int
     id_conta: int
     id_movimentacao: int
+   
+class MovimentacaoSchemaTransferencia(BaseModel):
+    valor: int
+    descricao: str
+    id_conta_atual: int
+    id_conta_transferencia: int
+    datatime: datetime 
+    data_pagamento: date
+    class Config:
+        from_attributes = True
+
+class MovimentacaoSchemaReceita(BaseModel):
+    valor: int
+    descricao: str
+    id_categoria: int
+    id_conta: int
+    condicao_pagamento : CondicaoPagamento
+    tipo_recorrencia: TipoRecorrencia
+    recorrencia: str
+    datatime: datetime
+    data_pagamento: date
+    consolidado: bool
+
+    class Config:
+        from_attributes = True
+
+class ParenteResponse(BaseModel):
+    id_parente: int
+    nome_parente: str
+    valor_membro: int
+
+class MovimentacaoSchemaDespesa(MovimentacaoSchemaReceita):
+  forma_pagamento: str
+  id_financeiro: int
+  quantidade_parcelas : int
+  divide_parente: List[ParenteResponse]
+
+
+class IdMovimentacaoSchema(BaseModel):
+    id_categoria: int

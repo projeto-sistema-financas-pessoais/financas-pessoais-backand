@@ -1,13 +1,9 @@
-
-
-from sqlalchemy import Column, String, BigInteger, ForeignKey, DECIMAL, Enum as SqlEnum, Date, TIMESTAMP
+from sqlalchemy import Boolean, Column, String, BigInteger, ForeignKey, DECIMAL, Enum as SqlEnum, Date, TIMESTAMP
 from core.configs import settings
 from sqlalchemy.orm import relationship
 from models.associations_model import divide_table
 
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao
-
-
 class MovimentacaoModel(settings.DBBaseModel):
     __tablename__ = "MOVIMENTACAO"
 
@@ -21,7 +17,7 @@ class MovimentacaoModel(settings.DBBaseModel):
     quantidade_parcelas = Column(BigInteger)
     consolidado = Column(String(100), nullable=False)
     tipo_recorrencia = Column(String(100))
-    recorrencia = Column(String(100))
+    recorrencia = Column(Boolean(), nullable=False)
     data_pagamento = Column(Date, nullable=False)
     id_conta = Column(BigInteger, ForeignKey("CONTA.id_conta"))
     id_categoria = Column(BigInteger, ForeignKey("CATEGORIA.id_categoria"))
