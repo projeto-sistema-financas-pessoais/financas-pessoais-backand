@@ -13,4 +13,6 @@ class RepeticaoModel(settings.DBBaseModel):
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
 
     usuario = relationship("UsuarioModel", back_populates="repeticao")
+    movimentacoes = relationship("MovimentacaoModel", back_populates="repeticao")
+
  

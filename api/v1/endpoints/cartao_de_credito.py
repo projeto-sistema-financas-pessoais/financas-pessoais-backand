@@ -23,7 +23,8 @@ async def post_cartao_credito(
         limite=cartao_credito.limite,
         id_usuario=usuario_logado.id_usuario,
         nome_icone=cartao_credito.nome_icone,
-        ativo=cartao_credito.ativo if cartao_credito.ativo is not None else True  # Definindo o valor padrão como True
+        ativo=cartao_credito.ativo if cartao_credito.ativo is not None else True,  # Definindo o valor padrão como True]
+        limite_disponivel=cartao_credito.limite
     )
 
     async with db as session:

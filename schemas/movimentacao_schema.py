@@ -40,8 +40,7 @@ class MovimentacaoSchemaUpdate(BaseModel):
     id_fatura: Optional[int] = None
 
 class MovimentacaoSchemaId(MovimentacaoSchema):
-    id_categoria: int
-    id_conta: int
+
     id_movimentacao: int
    
 class MovimentacaoSchemaTransferencia(BaseModel):
@@ -71,11 +70,10 @@ class MovimentacaoSchemaReceita(BaseModel):
 
 class ParenteResponse(BaseModel):
     id_parente: int
-    nome_parente: str
-    valor_membro: int
+    valor_parente: int
 
 class MovimentacaoSchemaDespesa(MovimentacaoSchemaReceita):
-  forma_pagamento: str
+  forma_pagamento: FormaPagamento
   id_financeiro: int
   quantidade_parcelas : int
   divide_parente: List[ParenteResponse]
@@ -83,3 +81,4 @@ class MovimentacaoSchemaDespesa(MovimentacaoSchemaReceita):
 
 class IdMovimentacaoSchema(BaseModel):
     id_categoria: int
+

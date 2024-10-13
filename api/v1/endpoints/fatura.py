@@ -106,7 +106,9 @@ async def create_fatura_ano(
 
     # Salvar todas as faturas criadas na sessão
     try:
+        
         await db.commit()
+        return cartao_credito
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao criar as faturas. Verifique os dados fornecidos.')
