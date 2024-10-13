@@ -54,10 +54,10 @@ class MovimentacaoSchemaTransferencia(BaseModel):
         from_attributes = True
 
 class MovimentacaoSchemaReceita(BaseModel):
-    valor: int
+    valor: Decimal
     descricao: str
     id_categoria: int
-    id_conta: int
+    id_conta: Optional[int] = None
     condicao_pagamento : CondicaoPagamento
     tipo_recorrencia: TipoRecorrencia
     # recorrencia: str
@@ -70,7 +70,7 @@ class MovimentacaoSchemaReceita(BaseModel):
 
 class ParenteResponse(BaseModel):
     id_parente: int
-    valor_parente: int
+    valor_parente: Decimal
 
 class MovimentacaoSchemaDespesa(MovimentacaoSchemaReceita):
   forma_pagamento: FormaPagamento
