@@ -1,5 +1,4 @@
-from ast import Str
-import datetime
+
 from decimal import Decimal
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy import extract, insert
@@ -21,6 +20,7 @@ from models.repeticao_model import RepeticaoModel
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
 from datetime import date, timedelta
 from models.associations_model import  divide_table
+from sqlalchemy.orm import joinedload, selectinload
 
 router = APIRouter()
 
@@ -475,48 +475,51 @@ async def update_movimentacao(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar movimentação")
     
 
+from sqlalchemy.orm import joinedload  # Certifique-se de importar joinedload
+
 @router.get('/listar', response_model=List[MovimentacaoSchemaId])
 async def listar_movimentacoes(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    async with db as session:
-        # Listar todas as movimentações do usuário logado, incluindo dados de repetição
+    async with db:  # Adicione o gerenciador de contexto aqui
         query = (
             select(MovimentacaoModel)
-            .join(MovimentacaoModel.conta)
-            .outerjoin(MovimentacaoModel.repeticao)  # Junção para incluir os dados da repetição
+            .options(joinedload(MovimentacaoModel.conta), 
+                      joinedload(MovimentacaoModel.repeticao))  # Use options() para joinedload
             .filter(ContaModel.id_usuario == usuario_logado.id_usuario)
         )
-        result = await session.execute(query)
+        result = await db.execute(query)
         movimentacoes = result.scalars().all()
 
         if not movimentacoes:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhuma movimentação encontrada")
 
-        # Aqui você pode mapear as movimentações para o schema que inclui os campos da repetição
-        response = []
-        for mov in movimentacoes:
-            response.append(MovimentacaoSchemaId(
-                id_movimentacao= mov.id_movimentacao,
+        # Mapeando as movimentações para o schema
+        response = [
+            MovimentacaoSchemaId(
+                id_movimentacao=mov.id_movimentacao,
                 valor=mov.valor,
                 descricao=mov.descricao,
                 tipoMovimentacao=mov.tipoMovimentacao,
                 forma_pagamento=mov.forma_pagamento,
                 condicao_pagamento=mov.condicao_pagamento,
                 datatime=mov.datatime,
-                quantidade_parcelas=mov.repeticao.quantidade_parcelas if mov.repeticao else None,  # Incluindo o campo
+                quantidade_parcelas=mov.repeticao.quantidade_parcelas if mov.repeticao else None,
                 consolidado=mov.consolidado,
-                tipo_recorrencia=mov.repeticao.tipo_recorrencia if mov.repeticao else None,  # Incluindo o campo
+                tipo_recorrencia=mov.repeticao.tipo_recorrencia if mov.repeticao else None,
                 parcela_atual=mov.parcela_atual,
                 data_pagamento=mov.data_pagamento,
                 id_conta=mov.id_conta,
                 id_categoria=mov.id_categoria,
                 id_fatura=mov.id_fatura,
-                id_repeticao=mov.id_repeticao  # Se você tiver um id_repeticao definido
-            ))
+                id_repeticao=mov.id_repeticao
+            )
+            for mov in movimentacoes
+        ]
 
         return response
+
 
         
 @router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
