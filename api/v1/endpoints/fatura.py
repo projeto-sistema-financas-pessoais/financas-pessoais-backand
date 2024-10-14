@@ -60,8 +60,10 @@ async def create_fatura_ano(
     
     # Verificando se já existe uma fatura
     if data_vencimento_usuario is None or data_fechamento_usuario is None:
+        print(f"Entrou if create")
+
         fatura_anterior = await db.execute(
-            select(FaturaSchemaId).where(FaturaSchemaId.id_cartao_credito == id_cartao_credito)
+            select(FaturaModel).where(FaturaModel.id_cartao_credito == id_cartao_credito)
         )
         fatura_anterior = fatura_anterior.scalars().one_or_none()
 
@@ -85,6 +87,8 @@ async def create_fatura_ano(
                 db.add(nova_fatura)
 
     else: 
+        print(f"Entrou else create")
+
         dia_fechamento = data_fechamento_usuario.day
         dia_vencimento = data_vencimento_usuario.day
         existe_uma_fatura = False
@@ -99,7 +103,7 @@ async def create_fatura_ano(
             nova_fatura = FaturaModel(
                 data_vencimento=data_vencimento,
                 data_fechamento=data_fechamento,
-                id_conta=None,  # Assumindo que não há conta definida aqui
+                id_conta=None, 
                 id_cartao_credito=id_cartao_credito
             )
             db.add(nova_fatura)

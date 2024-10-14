@@ -27,10 +27,11 @@ router = APIRouter()
 
 
 async def find_fatura(movimentacao: MovimentacaoSchemaDespesa, db: AsyncSession):
-    query = select(FaturaSchemaId).filter(
-        FaturaSchemaId.id_cartao_credito == movimentacao.id_financeiro,
-        extract('month', FaturaSchemaId.data_fechamento) == movimentacao.data_pagamento.month,
-        extract('year', FaturaSchemaId.data_fechamento) == movimentacao.data_pagamento.year
+    
+    query = select(FaturaModel).filter(
+        FaturaModel.id_cartao_credito == movimentacao.id_financeiro,
+        extract('month', FaturaModel.data_fechamento) == movimentacao.data_pagamento.month,
+        extract('year', FaturaModel.data_fechamento) == movimentacao.data_pagamento.year
     )
     
     result = await db.execute(query)
@@ -70,13 +71,15 @@ async def create_movimentacao(
                 movimentacao.consolidado = False
                 fatura = await find_fatura(movimentacao, session)
                 if not fatura:
-                    cartao_credito =  create_fatura_ano(session, usuario_logado, movimentacao.id_financeiro, movimentacao.data_pagamento.year, None, None)
+                    cartao_credito =  await create_fatura_ano(session, usuario_logado, movimentacao.id_financeiro, movimentacao.data_pagamento.year, None, None)
                     fatura = await find_fatura(movimentacao, session)
+                    print(f"Fatura {fatura}")
+
                     if not fatura:
                         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
                 else:
                     query_cartao_credito = select(CartaoCreditoModel).where(
-                        CartaoCreditoModel.id_cartao_credito == movimentacao.id_conta,
+                        CartaoCreditoModel.id_cartao_credito == movimentacao.id_financeiro,
                         CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
                     )
                     result_cartao_credito = await db.execute(query_cartao_credito)
@@ -230,11 +233,7 @@ async def create_movimentacao(
         finally:
             await session.close()
 
-                
-
-    
-
-
+   
 @router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
     movimentacao: MovimentacaoSchemaDespesa,
@@ -242,6 +241,167 @@ async def create_movimentacao(
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
     async with db as session:
+        
+        query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == movimentacao.id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
+        result_categoria = await session.execute(query_categoria)
+        categoria = result_categoria.scalars().first()
+
+        if not categoria:
+            print(f"Categoria {movimentacao.id_categoria} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
+        # Validação da soma dos valores de parentes
+        soma = sum(divide.valor_parente for divide in movimentacao.divide_parente)
+        if soma != movimentacao.valor:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Valor total de parentes não pode ser diferente do valor.")
+        
+        # Ajuste de quantidade de parcelas se necessário
+        if movimentacao.condicao_pagamento != CondicaoPagamento.PARCELADO:
+            movimentacao.quantidade_parcelas = 1
+        
+        
+
+        # Ajuste da conta ou criação de fatura
+        if movimentacao.forma_pagamento in [FormaPagamento.DEBITO, FormaPagamento.DINHEIRO]:
+            movimentacao.id_conta = movimentacao.id_financeiro
+        else:
+            movimentacao.consolidado = False
+            fatura = await find_fatura(movimentacao, session)
+            if not fatura:
+                print(f"Entrou if")
+                cartao_credito =  create_fatura_ano(session, usuario_logado, movimentacao.id_financeiro, movimentacao.data_pagamento.year, None, None)
+                fatura = await find_fatura(movimentacao, session)
+                if not fatura:
+                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
+            else:
+                print(f"Entrou else")
+
+                query_cartao_credito = select(CartaoCreditoModel).where(
+                    CartaoCreditoModel.id_cartao_credito == movimentacao.id_conta,
+                    CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
+                )
+                result_cartao_credito = await db.execute(query_cartao_credito)
+                cartao_credito = result_cartao_credito.scalars().one_or_none()
+
+                if not cartao_credito:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN, 
+                        detail="Você não tem permissão para acessar esse cartão"
+                    )
+
+        if movimentacao.id_conta is not None:
+            query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
+            result_conta = await session.execute(query_conta)
+            conta = result_conta.scalars().first()
+
+            if not conta:
+                print(f"Conta {movimentacao.id_conta} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
+
+        # Preparação para criar movimentações parceladas
+        valor_por_parcela = movimentacao.valor / movimentacao.quantidade_parcelas
+        valor_por_parcela_ajustado = round(valor_por_parcela, 2)
+        valor_restante = round(movimentacao.valor - (valor_por_parcela_ajustado * movimentacao.quantidade_parcelas), 2)
+        print(valor_por_parcela, valor_restante, valor_por_parcela_ajustado )
+
+        data_pagamento = movimentacao.data_pagamento
+
+        if movimentacao.condicao_pagamento in [CondicaoPagamento.PARCELADO, CondicaoPagamento.RECORRENTE]:
+            
+            if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE: 
+                if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
+                    movimentacao.quantidade_parcelas = 2
+                else: 
+                    movimentacao.quantidade_parcelas = 8
+
+            nova_repeticao = RepeticaoModel(
+                quantidade_parcelas=movimentacao.quantidade_parcelas,
+                tipo_recorrencia=movimentacao.tipo_recorrencia,
+                valor_total=movimentacao.valor,
+                data_inicio=movimentacao.data_pagamento,
+                id_usuario=usuario_logado.id_usuario,
+            )
+            db.add(nova_repeticao)
+            await db.commit()
+            await db.refresh(nova_repeticao)
+            id_repeticao = nova_repeticao.id_repeticao
+
+        # Criação das movimentações parceladas
+        for parcela_atual in range(1, movimentacao.quantidade_parcelas + 1):
+            nova_movimentacao = MovimentacaoModel(
+                valor= valor_por_parcela_ajustado + valor_restante if  parcela_atual == 1 else valor_por_parcela_ajustado,
+                descricao=movimentacao.descricao,
+                tipoMovimentacao=TipoMovimentacao.DESPESA,
+                forma_pagamento=movimentacao.forma_pagamento,
+                condicao_pagamento=movimentacao.condicao_pagamento,
+                datatime=movimentacao.datatime,
+                consolidado=movimentacao.consolidado,
+                parcela_atual= str(parcela_atual),
+                data_pagamento=data_pagamento,
+                id_conta=movimentacao.id_conta,
+                id_categoria=movimentacao.id_categoria,
+                id_fatura= fatura.id_fatura if movimentacao.forma_pagamento == FormaPagamento.CREDITO else None,
+                id_repeticao= id_repeticao if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE else None
+            )
+            
+            
+            
+            db.add(nova_movimentacao)
+            await db.commit()
+            await db.refresh(nova_movimentacao)
+            
+            if movimentacao.consolidado and parcela_atual == 1:
+                conta.saldo = conta.saldo - Decimal(valor_por_parcela_ajustado + valor_restante)
+                
+            if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE and movimentacao.forma_pagamento == FormaPagamento.CREDITO :
+                if parcela_atual == 1:
+                    cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela
+            elif movimentacao.forma_pagamento == FormaPagamento.CREDITO:
+                cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela
+
+            # Criação dos relacionamentos com parentes
+            for divide in movimentacao.divide_parente:
+                if movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
+                    valor_parente = divide.valor_parente / movimentacao.quantidade_parcelas
+                    valor_parente_ajustado = round(valor_parente, 2)
+                    valor_parente_restante = round(divide.valor_parente - (valor_parente_ajustado * movimentacao.quantidade_parcelas), 2)
+                    
+                    valor = valor_parente_ajustado + valor_parente_restante if parcela_atual == 1 else valor_parente_ajustado
+                    print(valor_parente, valor_parente_ajustado, valor_parente_restante )
+
+                else:
+                    valor = divide.valor_parente
+                    
+
+                novo_divide_parente = insert(divide_table).values(
+                    id_parente=divide.id_parente,
+                    id_movimentacao=nova_movimentacao.id_movimentacao,
+                    valor= valor,
+                )
+                await db.execute(novo_divide_parente)
+
+            await db.commit()
+
+            movimentacao.consolidado = False
+            
+            if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE:
+                # Lógica para ajustar data_pagamento com base em recorrência
+                if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
+                    data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1)
+                elif movimentacao.tipo_recorrencia == TipoRecorrencia.QUINZENAL:
+                    data_pagamento += timedelta(days=15)
+                elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
+                    data_pagamento += timedelta(weeks=1)
+                elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
+                    if data_pagamento.month == 12:
+                        data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
+                    else:
+                        data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+            else:
+                if data_pagamento.month == 12:
+                    data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
+                else:
+                    data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+        return {"message": "Despesa cadastrada com sucesso."}
         
        
     

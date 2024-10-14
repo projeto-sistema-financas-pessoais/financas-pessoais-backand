@@ -1,3 +1,5 @@
+import datetime
+import api.v1.endpoints.fatura
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -9,6 +11,8 @@ from models.cartao_credito_model import CartaoCreditoModel
 from schemas.cartao_de_credito_schema import CartaoCreditoSchema, CartaoCreditoSchemaId, CartaoCreditoSchemaUpdate
 from models.usuario_model import UsuarioModel
 from models.fatura_model import FaturaModel
+from api.v1.endpoints.fatura import create_fatura_ano
+from datetime import date, timedelta
 
 router = APIRouter()
 
@@ -31,6 +35,8 @@ async def post_cartao_credito(
         try:
             session.add(novo_cartao)
             await session.commit()
+            await session.refresh(novo_cartao)
+            await create_fatura_ano(db, usuario_logado, novo_cartao.id_cartao_credito, date.today().year, date.today() + datetime.timedelta(days=5), date.today() )
             return novo_cartao
         except IntegrityError:
             await session.rollback()  
