@@ -82,7 +82,8 @@ async def create_fatura_ano(
                     data_vencimento=data_vencimento,
                     data_fechamento=data_fechamento,
                     id_conta=fatura_anterior.id_conta if existe_uma_fatura else None,
-                    id_cartao_credito=id_cartao_credito
+                    id_cartao_credito=id_cartao_credito,
+                    fatura_gastos = 0
                 )
                 db.add(nova_fatura)
 
@@ -104,7 +105,9 @@ async def create_fatura_ano(
                 data_vencimento=data_vencimento,
                 data_fechamento=data_fechamento,
                 id_conta=None, 
-                id_cartao_credito=id_cartao_credito
+                id_cartao_credito=id_cartao_credito,
+                fatura_gastos = 0
+
             )
             db.add(nova_fatura)
 
