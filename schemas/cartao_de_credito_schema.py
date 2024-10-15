@@ -1,3 +1,4 @@
+from datetime import date
 from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
@@ -11,6 +12,8 @@ class CartaoCreditoSchema(BaseModel):
     class Config:
         from_attributes = True
 
+ 
+
 class CartaoCreditoSchemaId(CartaoCreditoSchema):
     id_usuario: int
     id_cartao_credito: int
@@ -20,4 +23,8 @@ class CartaoCreditoSchemaUpdate(CartaoCreditoSchema):
     limite: Optional[Decimal] = None
     nome_icone: Optional[str] = None
     ativo: Optional[bool] = None
+
+class CartaoCreditoSchemaFatura(CartaoCreditoSchema):
+    data_fechamento: date
+    data_vencimento: date
 
