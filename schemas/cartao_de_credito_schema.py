@@ -12,11 +12,10 @@ class CartaoCreditoSchema(BaseModel):
     class Config:
         from_attributes = True
 
- 
-
 class CartaoCreditoSchemaId(CartaoCreditoSchema):
     id_usuario: int
     id_cartao_credito: int
+    limite_disponivel: Decimal
 
 class CartaoCreditoSchemaUpdate(CartaoCreditoSchema):
     nome: Optional[str] = None
