@@ -10,9 +10,9 @@ class RepeticaoModel(settings.DBBaseModel):
     tipo_recorrencia = Column(String(100), nullable=False)
     valor_total = Column(DECIMAL, nullable=False)
     data_inicio = Column(Date, nullable=False)
-    id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
+    # id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
 
-    usuario = relationship("UsuarioModel", back_populates="repeticao")
+    # usuario = relationship("UsuarioModel", back_populates="repeticao")
     movimentacoes = relationship("MovimentacaoModel", back_populates="repeticao")
 
  

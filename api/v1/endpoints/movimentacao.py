@@ -121,7 +121,7 @@ async def create_movimentacao(
                     tipo_recorrencia=movimentacao.tipo_recorrencia,
                     valor_total=movimentacao.valor,
                     data_inicio=movimentacao.data_pagamento,
-                    id_usuario=usuario_logado.id_usuario,
+                    # id_usuario=usuario_logado.id_usuario,
                 )
                 db.add(nova_repeticao)
                 await db.commit()
@@ -143,7 +143,8 @@ async def create_movimentacao(
                     id_conta=movimentacao.id_conta,
                     id_categoria=movimentacao.id_categoria,
                     id_fatura= fatura.id_fatura if movimentacao.forma_pagamento == FormaPagamento.CREDITO else None,
-                    id_repeticao= id_repeticao if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE else None
+                    id_repeticao= id_repeticao if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE else None,
+                    id_usuario=usuario_logado.id_usuario
                 )
                 
                 

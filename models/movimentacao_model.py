@@ -24,9 +24,12 @@ class MovimentacaoModel(settings.DBBaseModel):
     id_categoria = Column(BigInteger, ForeignKey("CATEGORIA.id_categoria"))
     id_fatura = Column(BigInteger, ForeignKey("FATURA.id_fatura"))
     id_repeticao = Column(BigInteger, ForeignKey("REPETICAO.id_repeticao"))
+    id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
 
     conta = relationship("ContaModel", back_populates="movimentacoes")
     categoria = relationship("CategoriaModel", back_populates="movimentacoes")
     fatura = relationship("FaturaModel", back_populates="movimentacoes")
     parentes = relationship("ParenteModel", secondary=divide_table, back_populates="movimentacoes")
     repeticao = relationship("RepeticaoModel", back_populates="movimentacoes")
+    usuario = relationship("UsuarioModel", back_populates="movimentacoes")
+
