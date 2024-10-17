@@ -1,3 +1,4 @@
+import api.v1.endpoints
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,15 +64,18 @@ async def create_fatura_ano(
         print(f"Entrou if create")
 
         fatura_anterior = await db.execute(
-            select(FaturaModel).where(FaturaModel.id_cartao_credito == id_cartao_credito)
+            select(FaturaModel)
+            .where(FaturaModel.id_cartao_credito == id_cartao_credito)
+            .order_by(FaturaModel.data_vencimento.desc())  
         )
-        fatura_anterior = fatura_anterior.scalars().one_or_none()
+        fatura_anterior = fatura_anterior.scalars().first()  
 
         existe_uma_fatura = True
+        
 
         if fatura_anterior:
             dia_vencimento = fatura_anterior.data_vencimento.day
-            dia_fechamento = fatura_anterior.data_pagamento.day
+            dia_fechamento = fatura_anterior.data_fechamento.day
 
             # Criar faturas para todos os meses do ano
             for mes in range(1, 13):  # Meses de 1 a 12

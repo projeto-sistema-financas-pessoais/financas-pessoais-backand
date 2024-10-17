@@ -23,20 +23,40 @@ from models.associations_model import  divide_table
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
+
 router = APIRouter()
 
 
-async def find_fatura(movimentacao: MovimentacaoSchemaDespesa, db: AsyncSession):
+async def find_fatura(id_cartao_credito: int, data_pagamento: date,   db: AsyncSession):
     
     query = select(FaturaModel).filter(
-        FaturaModel.id_cartao_credito == movimentacao.id_financeiro,
-        extract('month', FaturaModel.data_fechamento) == movimentacao.data_pagamento.month,
-        extract('year', FaturaModel.data_fechamento) == movimentacao.data_pagamento.year
+        FaturaModel.id_cartao_credito == id_cartao_credito,
+        extract('month', FaturaModel.data_fechamento) == data_pagamento.month,
+        extract('year', FaturaModel.data_fechamento) == data_pagamento.year
     )
     
     result = await db.execute(query)
     fatura = result.scalars().first()
     return fatura
+
+async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_pagamento):
+    # Tenta encontrar a fatura
+    fatura = await find_fatura(id_financeiro, data_pagamento, session)
+    cartao_credito = None  # Inicializa como None
+
+    if not fatura:
+        # Se não encontrar, cria uma nova fatura para o ano correspondente
+        cartao_credito = await create_fatura_ano(session, usuario_logado, id_financeiro, data_pagamento.year, None, None)
+        # Tenta buscar a fatura novamente
+        fatura = await find_fatura(id_financeiro, data_pagamento, session)
+        
+        if not fatura:
+            # Se ainda assim não encontrar, levanta uma exceção
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
+    
+    return fatura, cartao_credito
+
+
 
 @router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
@@ -69,14 +89,10 @@ async def create_movimentacao(
                 movimentacao.id_conta = movimentacao.id_financeiro
             else:
                 movimentacao.consolidado = False
-                fatura = await find_fatura(movimentacao, session)
-                if not fatura:
-                    cartao_credito =  await create_fatura_ano(session, usuario_logado, movimentacao.id_financeiro, movimentacao.data_pagamento.year, None, None)
-                    fatura = await find_fatura(movimentacao, session)
-                    print(f"Fatura {fatura}")
-
-                    if not fatura:
-                        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
+                fatura, cartao_credito = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, movimentacao.data_pagamento)
+                print(f"Fatura {fatura}")
+                if cartao_credito:
+                    print(f"Cartão de Crédito {cartao_credito}")
                 else:
                     query_cartao_credito = select(CartaoCreditoModel).where(
                         CartaoCreditoModel.id_cartao_credito == movimentacao.id_financeiro,
@@ -155,17 +171,7 @@ async def create_movimentacao(
                 
                 if movimentacao.consolidado and parcela_atual == 1:
                     conta.saldo = conta.saldo - Decimal(valor_por_parcela_ajustado + valor_restante)
-                    
-                # if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE and movimentacao.forma_pagamento == FormaPagamento.CREDITO :
-                #     if parcela_atual == 1:
-                #         cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado + valor_restante
-                #         fatura.fatura_gastos += fatura.fatura_gastos + valor_por_parcela_ajustado + valor_restante
-                # elif movimentacao.forma_pagamento == FormaPagamento.CREDITO:
-                #     cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado + valor_restante
-                #     if parcela_atual == 1:
-                #         fatura.fatura_gastos += fatura.fatura_gastos + valor_por_parcela_ajustado + valor_restante
-                #     elif movimentacao.forma_pagamento == CondicaoPagamento.PARCELADO: 
-                #         fatura.fatura_gastos += fatura.fatura_gastos + valor_por_parcela_ajustado
+        
                         
                 if movimentacao.forma_pagamento == FormaPagamento.CREDITO:
                     print(f"Fatura inicio ",valor_por_parcela_ajustado, valor_restante, fatura.fatura_gastos )
@@ -175,10 +181,8 @@ async def create_movimentacao(
                         fatura.fatura_gastos +=valor_por_parcela_ajustado + valor_restante
                     elif movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
                         cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado
+                        fatura.fatura_gastos +=valor_por_parcela_ajustado
                     print(f"Fatura final ",valor_por_parcela_ajustado, valor_restante, fatura.fatura_gastos )
-
-
-
 
 
                 # Criação dos relacionamentos com parentes
@@ -224,6 +228,9 @@ async def create_movimentacao(
                         data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
                     else:
                         data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                        
+                fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, data_pagamento)
+
             return {"message": "Despesa cadastrada com sucesso."}
         
         except IntegrityError as e:
@@ -347,7 +354,7 @@ async def listar_movimentacoes(
         query = (
             select(MovimentacaoModel)
             .options(joinedload(MovimentacaoModel.conta), 
-                      joinedload(MovimentacaoModel.repeticao))  # Use options() para joinedload
+                      joinedload(MovimentacaoModel.repeticao)) 
             .join(MovimentacaoModel.conta)  # Adicione a junção aqui
             .filter(ContaModel.id_usuario == usuario_logado.id_usuario)
         )
