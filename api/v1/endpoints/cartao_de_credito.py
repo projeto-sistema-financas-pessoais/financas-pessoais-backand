@@ -8,7 +8,7 @@ from typing import List
 
 from core.deps import get_session, get_current_user
 from models.cartao_credito_model import CartaoCreditoModel
-from schemas.cartao_de_credito_schema import CartaoCreditoSchema, CartaoCreditoSchemaId, CartaoCreditoSchemaUpdate
+from schemas.cartao_de_credito_schema import CartaoCreditoSchema, CartaoCreditoSchemaId, CartaoCreditoSchemaUpdate, CartaoCreditoSchemaFatura
 from models.usuario_model import UsuarioModel
 from models.fatura_model import FaturaModel
 from api.v1.endpoints.fatura import create_fatura_ano
@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.post('/cadastro', status_code=status.HTTP_201_CREATED)
 async def post_cartao_credito(
-    cartao_credito: CartaoCreditoSchema, 
+    cartao_credito: CartaoCreditoSchemaFatura, 
     db: AsyncSession = Depends(get_session), 
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -27,7 +27,7 @@ async def post_cartao_credito(
         limite=cartao_credito.limite,
         id_usuario=usuario_logado.id_usuario,
         nome_icone=cartao_credito.nome_icone,
-        ativo=cartao_credito.ativo if cartao_credito.ativo is not None else True,  # Definindo o valor padrão como True]
+        ativo=cartao_credito.ativo if cartao_credito.ativo is not None else True,
         limite_disponivel=cartao_credito.limite
     )
 
@@ -36,13 +36,21 @@ async def post_cartao_credito(
             session.add(novo_cartao)
             await session.commit()
             await session.refresh(novo_cartao)
-            await create_fatura_ano(db, usuario_logado, novo_cartao.id_cartao_credito, date.today().year, date.today() + datetime.timedelta(days=5), date.today() )
+            
+            await create_fatura_ano(
+                db, 
+                usuario_logado, 
+                novo_cartao.id_cartao_credito, 
+                date.today().year, 
+                cartao_credito.data_vencimento, 
+                cartao_credito.data_fechamento
+            )
+
             return novo_cartao
         except IntegrityError:
             await session.rollback()  
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Já existe um cartão de crédito com este nome para este usuário")
-
-
+        
 @router.put('/editar/{id_cartao_credito}', response_model=CartaoCreditoSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def update_cartao_credito(
     id_cartao_credito: int, 
