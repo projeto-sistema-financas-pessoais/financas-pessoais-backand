@@ -52,31 +52,29 @@ class MovimentacaoSchemaTransferencia(BaseModel):
     data_pagamento: date
     class Config:
         from_attributes = True
+        
+class ParenteResponse(BaseModel):
+    id_parente: int
+    valor_parente: Decimal
+  
 
-class MovimentacaoSchemaReceita(BaseModel):
+class MovimentacaoSchemaReceitaDespesa(BaseModel):
     valor: Decimal
     descricao: str
     id_categoria: int
     id_conta: Optional[int] = None
     condicao_pagamento : CondicaoPagamento
     tipo_recorrencia: TipoRecorrencia
-    # recorrencia: str
     datatime: datetime
     data_pagamento: date
     consolidado: bool
+    forma_pagamento: FormaPagamento
+    id_financeiro: int
+    quantidade_parcelas : int
+    divide_parente: List[ParenteResponse]
 
     class Config:
         from_attributes = True
-
-class ParenteResponse(BaseModel):
-    id_parente: int
-    valor_parente: Decimal
-
-class MovimentacaoSchemaDespesa(MovimentacaoSchemaReceita):
-  forma_pagamento: FormaPagamento
-  id_financeiro: int
-  quantidade_parcelas : int
-  divide_parente: List[ParenteResponse]
 
 
 class IdMovimentacaoSchema(BaseModel):
