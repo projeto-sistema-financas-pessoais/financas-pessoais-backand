@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from decimal import Decimal
+import sqlalchemy
 from typing import List, Optional
 from datetime import date, datetime
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
@@ -16,9 +17,11 @@ class MovimentacaoSchema(BaseModel):
     tipo_recorrencia: Optional[str]
     parcela_atual: Optional[str]
     data_pagamento: date
-    id_conta: int
+    id_conta: Optional[int] 
     id_categoria: int
     id_fatura: Optional[int] 
+    id_repeticao: Optional[int]
+
 
     class Config:
         from_attributes = True
@@ -40,7 +43,6 @@ class MovimentacaoSchemaUpdate(BaseModel):
     id_fatura: Optional[int] = None
 
 class MovimentacaoSchemaId(MovimentacaoSchema):
-
     id_movimentacao: int
    
 class MovimentacaoSchemaTransferencia(BaseModel):
@@ -56,6 +58,7 @@ class MovimentacaoSchemaTransferencia(BaseModel):
 class ParenteResponse(BaseModel):
     id_parente: int
     valor_parente: Decimal
+    nome_parente: Optional[str] = None
   
 
 class MovimentacaoSchemaReceitaDespesa(BaseModel):
@@ -80,3 +83,19 @@ class MovimentacaoSchemaReceitaDespesa(BaseModel):
 class IdMovimentacaoSchema(BaseModel):
     id_categoria: int
 
+
+class MovimentacaoRequestFilterSchema(BaseModel):
+    mes: int
+    ano: int
+    forma_pagamento: Optional[FormaPagamento] = None
+    tipo_movimentacao: Optional [TipoMovimentacao] = None
+    consolidado: Optional[bool] = None
+    id_categoria: Optional[int] = None
+    id_conta: Optional[int] = None
+    id_fatura: Optional[int] = None
+    id_parente: Optional[int] = None
+
+class MovimentacaoSchemaList(MovimentacaoSchema):
+    nome_icone_categoria: str
+    id_movimentacao: int
+    # divide_parente: List[ParenteResponse]

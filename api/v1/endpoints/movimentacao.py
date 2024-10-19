@@ -1,6 +1,6 @@
 
 from decimal import Decimal
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy import extract, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -11,13 +11,15 @@ from models.cartao_credito_model import CartaoCreditoModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
 from schemas.fatura_schema import FaturaSchemaId
-from schemas.movimentacao_schema import IdMovimentacaoSchema, MovimentacaoSchema, MovimentacaoSchemaReceitaDespesa, MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, MovimentacaoSchemaId
+from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoRequestFilterSchema,
+    MovimentacaoSchema, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
+    MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 from models.conta_model import ContaModel
 from models.categoria_model import CategoriaModel
 from models.fatura_model import FaturaModel
-from typing import List
+from typing import List, Optional
 from models.repeticao_model import RepeticaoModel
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
 from datetime import date, timedelta
@@ -501,21 +503,115 @@ async def update_movimentacao(
 
 from sqlalchemy.orm import joinedload  # Certifique-se de importar joinedload
 
+
+from sqlalchemy.orm import contains_eager
+
+@router.get('/listart', response_model=List[MovimentacaoSchemaId])
+async def listar_movimentacoes(
+    mes: int = Query(...),
+    ano: int = Query(...),
+    forma_pagamento: Optional[str] = Query(None),
+    tipo_movimentacao: Optional[str] = Query(None),
+    consolidado: Optional[bool] = Query(None),
+    id_categoria: Optional[int] = Query(None),
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+
+            query = (
+                select(MovimentacaoModel)
+                .join(MovimentacaoModel.categoria, isouter=True)
+                .join(MovimentacaoModel.conta, isouter=True)
+                .join(MovimentacaoModel.fatura, isouter=True)
+                .join(FaturaModel.cartao_credito, isouter=True)
+                .join(MovimentacaoModel.repeticao, isouter=True)
+                .where(
+                    MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+                    extract('month', MovimentacaoModel.data_pagamento) == mes,
+                    extract('year', MovimentacaoModel.data_pagamento) == ano
+                )
+            )
+
+
+            if forma_pagamento:
+                query = query.where(MovimentacaoModel.forma_pagamento == forma_pagamento)
+            if tipo_movimentacao:
+                query = query.where(MovimentacaoModel.tipoMovimentacao == tipo_movimentacao)
+            if consolidado is not None:
+                query = query.where(MovimentacaoModel.consolidado == consolidado)
+            if id_categoria:
+                query = query.where(MovimentacaoModel.id_categoria == id_categoria)
+            
+            query = query.options(
+                contains_eager(MovimentacaoModel.categoria),
+                contains_eager(MovimentacaoModel.conta),
+                contains_eager(MovimentacaoModel.fatura).contains_eager(FaturaModel.cartao_credito),
+                contains_eager(MovimentacaoModel.repeticao)
+            )
+
+            result = await db.execute(query)
+            movimentacoes = result.scalars().all()
+
+            response = []
+            for movimentacao in movimentacoes:
+                movimentacao_dict = {
+                    "id_movimentacao": movimentacao.id_movimentacao,
+                    "valor": movimentacao.valor,
+                    "descricao": movimentacao.descricao,
+                    "forma_pagamento": movimentacao.forma_pagamento,
+                    "condicao_pagamento": movimentacao.condicao_pagamento,
+                    "id_categoria": movimentacao.id_categoria,
+                    "categoria_nome_icone": movimentacao.categoria.nome,
+                    "tipo_movimentacao": movimentacao.tipoMovimentacao.value,
+                    "data_pagamento": movimentacao.data_pagamento,
+                    "consolidado": movimentacao.consolidado,
+                    "divide_parente": [{
+                        "id_parente": parente.id_parente,
+                        "nome_parente": parente.nome,
+                        "valor_membro": parente.divisao.valor_membro
+                    } for parente in movimentacao.parentes] if movimentacao.parentes else []
+                }
+                
+                # Adiciona os campos opcionais somente se não forem null
+                if movimentacao.id_conta:
+                    movimentacao_dict["id_conta"] = movimentacao.id_conta
+                    movimentacao_dict["nome_conta"] = movimentacao.conta.nome if movimentacao.conta else None
+
+                if movimentacao.id_fatura:
+                    movimentacao_dict["id_cartao_credito"] = movimentacao.fatura.id_cartao_credito if movimentacao.fatura else None
+                    movimentacao_dict["nome_cartao"] = movimentacao.fatura.cartao_credito.nome if movimentacao.fatura and movimentacao.fatura.cartao_credito else None
+
+                if movimentacao.id_repeticao:
+                    movimentacao_dict["id_repeticao"] = movimentacao.id_repeticao
+                    movimentacao_dict["quantidade_parcelas"] = movimentacao.repeticao.quantidade_parcelas if movimentacao.repeticao else None
+                    movimentacao_dict["parcela_atual"] = movimentacao.parcela_atual
+                    movimentacao_dict["tipo_recorrencia"] = movimentacao.repeticao.tipo_recorrencia if movimentacao.repeticao else None
+
+                response.append(movimentacao_dict)
+
+            return response
+        # except Exception as e:
+        #         await handle_db_exceptions(session, e)
+                
+        # finally:
+        #     await session.close()
+
 @router.get('/listar', response_model=List[MovimentacaoSchemaId])
 async def listar_movimentacoes(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    async with db:  # Adicione o gerenciador de contexto aqui
+    async with db:  
         query = (
             select(MovimentacaoModel)
             .options(joinedload(MovimentacaoModel.conta), 
                       joinedload(MovimentacaoModel.repeticao)) 
-            .join(MovimentacaoModel.conta)  # Adicione a junção aqui
+            .join(MovimentacaoModel.conta)
             .filter(ContaModel.id_usuario == usuario_logado.id_usuario)
         )
         result = await db.execute(query)
         movimentacoes = result.scalars().all()
+        
 
         if not movimentacoes:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhuma movimentação encontrada")
@@ -544,6 +640,91 @@ async def listar_movimentacoes(
         ]
 
         return response
+
+@router.post('/listarteste', response_model=List[MovimentacaoSchemaList])
+async def listar_movimentacoes(
+    requestFilter: MovimentacaoRequestFilterSchema,
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    async with db: 
+        
+        
+        condicoes = [
+            MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+            extract('month', MovimentacaoModel.data_pagamento) == requestFilter.mes,
+            extract('year', MovimentacaoModel.data_pagamento) == requestFilter.ano
+        ] 
+  
+        if requestFilter.forma_pagamento is not None: 
+            condicoes.append(MovimentacaoModel.forma_pagamento == requestFilter.forma_pagamento)
+                
+        if requestFilter.tipo_movimentacao is not None: 
+            condicoes.append(MovimentacaoModel.tipoMovimentacao == requestFilter.tipo_movimentacao)        
+
+        if requestFilter.consolidado is not None: 
+            condicoes.append(MovimentacaoModel.consolidado == requestFilter.consolidado)
+            
+        if requestFilter.id_categoria is not None: 
+            condicoes.append(MovimentacaoModel.id_categoria == requestFilter.id_categoria)
+            
+        if requestFilter.id_conta is not None: 
+            condicoes.append(MovimentacaoModel.id_conta == requestFilter.id_conta)
+            
+        if requestFilter.id_fatura is not None: 
+            condicoes.append(MovimentacaoModel.id_fatura == requestFilter.id_fatura)
+            
+    
+        query = (
+            select(MovimentacaoModel)
+            .options(
+                selectinload(MovimentacaoModel.categoria),
+                selectinload(MovimentacaoModel.repeticao),
+                selectinload(MovimentacaoModel.parentes)
+
+            ) 
+            .where(*condicoes)  
+        )
+        
+        
+        # if requestFilter.forma_pagamento != FormaPagamento.CREDITO:
+            
+        
+        result = await db.execute(query)
+        movimentacoes = result.scalars().all()
+
+        if not movimentacoes:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhuma movimentação encontrada")
+
+        # Mapeando as movimentações para o schema
+        response = [
+            MovimentacaoSchemaList(
+                id_movimentacao=mov.id_movimentacao,
+                valor=mov.valor,
+                descricao=mov.descricao,
+                tipoMovimentacao=mov.tipoMovimentacao,
+                forma_pagamento=mov.forma_pagamento,
+                condicao_pagamento=mov.condicao_pagamento,
+                datatime=mov.datatime,
+                quantidade_parcelas= mov.repeticao.quantidade_parcelas if mov.repeticao else None , 
+                consolidado=mov.consolidado,
+                tipo_recorrencia= mov.repeticao.tipo_recorrencia if mov.repeticao else None , 
+                parcela_atual=mov.parcela_atual,
+                data_pagamento=mov.data_pagamento,
+                id_conta=mov.id_conta,
+                id_categoria=mov.id_categoria,
+                nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
+                id_fatura=mov.id_fatura,
+                id_repeticao=mov.id_repeticao,
+            )
+        
+            for mov in movimentacoes
+        ]
+
+        return response
+
+
+
 
 
         

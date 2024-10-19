@@ -14,10 +14,7 @@ class MovimentacaoModel(settings.DBBaseModel):
     forma_pagamento = Column(SqlEnum(FormaPagamento), nullable=False)
     condicao_pagamento = Column(SqlEnum(CondicaoPagamento), nullable=False)
     datatime = Column(TIMESTAMP(timezone=True), nullable=True)
-    # quantidade_parcelas = Column(BigInteger)
     consolidado = Column(Boolean(), nullable=False)
-    # tipo_recorrencia = Column(String(100))
-    # recorrencia = Column(Boolean(), nullable=False)
     parcela_atual = Column(String(30), nullable=True)
     data_pagamento = Column(Date, nullable=False)
     id_conta = Column(BigInteger, ForeignKey("CONTA.id_conta"))
@@ -29,7 +26,9 @@ class MovimentacaoModel(settings.DBBaseModel):
     conta = relationship("ContaModel", back_populates="movimentacoes")
     categoria = relationship("CategoriaModel", back_populates="movimentacoes")
     fatura = relationship("FaturaModel", back_populates="movimentacoes")
-    parentes = relationship("ParenteModel", secondary=divide_table, back_populates="movimentacoes")
+    divisoes = relationship("DivideModel", back_populates="parente")  # Novo relacionamento
+
+    divisoes = relationship("DivideModel", back_populates="movimentacao")  # Novo relacionamento
     repeticao = relationship("RepeticaoModel", back_populates="movimentacoes")
     usuario = relationship("UsuarioModel", back_populates="movimentacoes")
 
