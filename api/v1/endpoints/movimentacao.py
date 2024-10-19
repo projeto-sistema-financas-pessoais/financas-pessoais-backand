@@ -137,10 +137,9 @@ async def create_movimentacao(
                     tipo_recorrencia=movimentacao.tipo_recorrencia,
                     valor_total=movimentacao.valor,
                     data_inicio=movimentacao.data_pagamento,
-                    # id_usuario=usuario_logado.id_usuario,
                 )
                 db.add(nova_repeticao)
-                await db.commit()
+                await db.flush()
                 await db.refresh(nova_repeticao)
                 id_repeticao = nova_repeticao.id_repeticao
 
@@ -159,14 +158,14 @@ async def create_movimentacao(
                     id_conta=movimentacao.id_conta,
                     id_categoria=movimentacao.id_categoria,
                     id_fatura= fatura.id_fatura if movimentacao.forma_pagamento == FormaPagamento.CREDITO else None,
-                    id_repeticao= id_repeticao if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE else None,
+                    id_repeticao= id_repeticao if movimentacao.condicao_pagamento != CondicaoPagamento.A_VISTA  else None,
                     id_usuario=usuario_logado.id_usuario
                 )
                 
                 
                 
                 db.add(nova_movimentacao)
-                await db.commit()
+                await db.flush()
                 await db.refresh(nova_movimentacao)
                 
                 if movimentacao.consolidado and parcela_atual == 1:
@@ -206,7 +205,7 @@ async def create_movimentacao(
                     )
                     await db.execute(novo_divide_parente)
 
-                await db.commit()
+                # await db.commit()
 
                 movimentacao.consolidado = False
                 
@@ -228,9 +227,10 @@ async def create_movimentacao(
                         data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
                     else:
                         data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
-                        
-                fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, data_pagamento)
-
+                    
+                if movimentacao.forma_pagamento == FormaPagamento.CREDITO:       
+                    fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, data_pagamento)
+            await db.commit()
             return {"message": "Despesa cadastrada com sucesso."}
         
         except IntegrityError as e:
