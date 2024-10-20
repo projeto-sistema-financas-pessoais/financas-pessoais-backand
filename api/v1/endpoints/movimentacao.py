@@ -1,4 +1,5 @@
 
+import api.v1.endpoints
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy import extract, insert
@@ -8,9 +9,10 @@ from sqlalchemy.exc import IntegrityError
 from api.v1.endpoints.fatura import create_fatura_ano
 from core.utils import handle_db_exceptions
 from models.cartao_credito_model import CartaoCreditoModel
+from models.divide_model import DivideModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
-from schemas.fatura_schema import FaturaSchemaId
+from schemas.fatura_schema import FaturaSchema, FaturaSchemaId
 from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoRequestFilterSchema,
     MovimentacaoSchema, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
     MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
@@ -23,7 +25,6 @@ from typing import List, Optional
 from models.repeticao_model import RepeticaoModel
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
 from datetime import date, timedelta
-from models.associations_model import  divide_table
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
@@ -160,10 +161,9 @@ async def create_movimentacao(
                 )
                 
                 
-                
+                nova_movimentacao.divisoes = []
+
                 db.add(nova_movimentacao)
-                await db.flush()
-                await db.refresh(nova_movimentacao)
                 
                 if movimentacao.consolidado and parcela_atual == 1:
                     conta.saldo = conta.saldo - Decimal(valor_por_parcela_ajustado + valor_restante)
@@ -193,14 +193,12 @@ async def create_movimentacao(
                         valor = divide.valor_parente
                         
 
-                    novo_divide_parente = insert(divide_table).values(
-                        id_parente=divide.id_parente,
-                        id_movimentacao=nova_movimentacao.id_movimentacao,
-                        valor= valor,
+                    novo_divide_parente = DivideModel(
+                        id_parente= divide.id_parente,
+                        valor= valor
                     )
-                    await db.execute(novo_divide_parente)
+                    nova_movimentacao.divisoes.append(novo_divide_parente)
 
-                # await db.commit()
 
                 movimentacao.consolidado = False
                 
@@ -259,7 +257,7 @@ async def create_movimentacao(
             if movimentacao.forma_pagamento in [FormaPagamento.DEBITO, FormaPagamento.DINHEIRO]:
                 movimentacao.id_conta = movimentacao.id_financeiro
             else:
-                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Só é aceito dinhiero ou débito para receita")
+                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Só é aceito dinheiro ou débito para receita")
 
             if len(movimentacao.divide_parente) > 1:
                 raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Só é um parente (o usuário) para receitas")
@@ -322,12 +320,10 @@ async def create_movimentacao(
                     id_usuario=usuario_logado.id_usuario
                 )
                 
-                
-                
+                nova_movimentacao.divisoes = []
+
                 db.add(nova_movimentacao)
-                await db.flush()
-                await db.refresh(nova_movimentacao)
-                
+
                 if movimentacao.consolidado and parcela_atual == 1:
                     conta.saldo = conta.saldo + Decimal(movimentacao.valor)
         
@@ -337,14 +333,12 @@ async def create_movimentacao(
                     
                     valor = divide.valor_parente
                         
-                    novo_divide_parente = insert(divide_table).values(
-                        id_parente=divide.id_parente,
-                        id_movimentacao=nova_movimentacao.id_movimentacao,
-                        valor= valor,
+                    novo_divide_parente = DivideModel(
+                        id_parente= divide.id_parente,
+                        valor= valor
                     )
-                    await db.execute(novo_divide_parente)
+                    nova_movimentacao.divisoes.append(novo_divide_parente)
 
-                # await db.commit()
 
                 movimentacao.consolidado = False
                 
@@ -503,99 +497,6 @@ async def update_movimentacao(
 
 from sqlalchemy.orm import joinedload  # Certifique-se de importar joinedload
 
-
-from sqlalchemy.orm import contains_eager
-
-@router.get('/listart', response_model=List[MovimentacaoSchemaId])
-async def listar_movimentacoes(
-    mes: int = Query(...),
-    ano: int = Query(...),
-    forma_pagamento: Optional[str] = Query(None),
-    tipo_movimentacao: Optional[str] = Query(None),
-    consolidado: Optional[bool] = Query(None),
-    id_categoria: Optional[int] = Query(None),
-    db: AsyncSession = Depends(get_session),
-    usuario_logado: UsuarioModel = Depends(get_current_user)
-):
-
-            query = (
-                select(MovimentacaoModel)
-                .join(MovimentacaoModel.categoria, isouter=True)
-                .join(MovimentacaoModel.conta, isouter=True)
-                .join(MovimentacaoModel.fatura, isouter=True)
-                .join(FaturaModel.cartao_credito, isouter=True)
-                .join(MovimentacaoModel.repeticao, isouter=True)
-                .where(
-                    MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
-                    extract('month', MovimentacaoModel.data_pagamento) == mes,
-                    extract('year', MovimentacaoModel.data_pagamento) == ano
-                )
-            )
-
-
-            if forma_pagamento:
-                query = query.where(MovimentacaoModel.forma_pagamento == forma_pagamento)
-            if tipo_movimentacao:
-                query = query.where(MovimentacaoModel.tipoMovimentacao == tipo_movimentacao)
-            if consolidado is not None:
-                query = query.where(MovimentacaoModel.consolidado == consolidado)
-            if id_categoria:
-                query = query.where(MovimentacaoModel.id_categoria == id_categoria)
-            
-            query = query.options(
-                contains_eager(MovimentacaoModel.categoria),
-                contains_eager(MovimentacaoModel.conta),
-                contains_eager(MovimentacaoModel.fatura).contains_eager(FaturaModel.cartao_credito),
-                contains_eager(MovimentacaoModel.repeticao)
-            )
-
-            result = await db.execute(query)
-            movimentacoes = result.scalars().all()
-
-            response = []
-            for movimentacao in movimentacoes:
-                movimentacao_dict = {
-                    "id_movimentacao": movimentacao.id_movimentacao,
-                    "valor": movimentacao.valor,
-                    "descricao": movimentacao.descricao,
-                    "forma_pagamento": movimentacao.forma_pagamento,
-                    "condicao_pagamento": movimentacao.condicao_pagamento,
-                    "id_categoria": movimentacao.id_categoria,
-                    "categoria_nome_icone": movimentacao.categoria.nome,
-                    "tipo_movimentacao": movimentacao.tipoMovimentacao.value,
-                    "data_pagamento": movimentacao.data_pagamento,
-                    "consolidado": movimentacao.consolidado,
-                    "divide_parente": [{
-                        "id_parente": parente.id_parente,
-                        "nome_parente": parente.nome,
-                        "valor_membro": parente.divisao.valor_membro
-                    } for parente in movimentacao.parentes] if movimentacao.parentes else []
-                }
-                
-                # Adiciona os campos opcionais somente se não forem null
-                if movimentacao.id_conta:
-                    movimentacao_dict["id_conta"] = movimentacao.id_conta
-                    movimentacao_dict["nome_conta"] = movimentacao.conta.nome if movimentacao.conta else None
-
-                if movimentacao.id_fatura:
-                    movimentacao_dict["id_cartao_credito"] = movimentacao.fatura.id_cartao_credito if movimentacao.fatura else None
-                    movimentacao_dict["nome_cartao"] = movimentacao.fatura.cartao_credito.nome if movimentacao.fatura and movimentacao.fatura.cartao_credito else None
-
-                if movimentacao.id_repeticao:
-                    movimentacao_dict["id_repeticao"] = movimentacao.id_repeticao
-                    movimentacao_dict["quantidade_parcelas"] = movimentacao.repeticao.quantidade_parcelas if movimentacao.repeticao else None
-                    movimentacao_dict["parcela_atual"] = movimentacao.parcela_atual
-                    movimentacao_dict["tipo_recorrencia"] = movimentacao.repeticao.tipo_recorrencia if movimentacao.repeticao else None
-
-                response.append(movimentacao_dict)
-
-            return response
-        # except Exception as e:
-        #         await handle_db_exceptions(session, e)
-                
-        # finally:
-        #     await session.close()
-
 @router.get('/listar', response_model=List[MovimentacaoSchemaId])
 async def listar_movimentacoes(
     db: AsyncSession = Depends(get_session),
@@ -641,7 +542,7 @@ async def listar_movimentacoes(
 
         return response
 
-@router.post('/listarteste', response_model=List[MovimentacaoSchemaList])
+@router.post('/listar/filtro', response_model=List[MovimentacaoSchemaList])
 async def listar_movimentacoes(
     requestFilter: MovimentacaoRequestFilterSchema,
     db: AsyncSession = Depends(get_session),
@@ -674,21 +575,23 @@ async def listar_movimentacoes(
         if requestFilter.id_fatura is not None: 
             condicoes.append(MovimentacaoModel.id_fatura == requestFilter.id_fatura)
             
-    
         query = (
             select(MovimentacaoModel)
             .options(
                 selectinload(MovimentacaoModel.categoria),
+                selectinload(MovimentacaoModel.conta),
                 selectinload(MovimentacaoModel.repeticao),
-                selectinload(MovimentacaoModel.parentes)
-
-            ) 
-            .where(*condicoes)  
+                selectinload(MovimentacaoModel.divisoes),
+                selectinload(MovimentacaoModel.divisoes, DivideModel.parentes),
+                selectinload(MovimentacaoModel.fatura),
+                selectinload(MovimentacaoModel.fatura, FaturaModel.cartao_credito)
+            )
+            .where(*condicoes)  # Suas outras condições
         )
-        
-        
-        # if requestFilter.forma_pagamento != FormaPagamento.CREDITO:
-            
+
+        if requestFilter.id_parente is not None:
+            query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
+
         
         result = await db.execute(query)
         movimentacoes = result.scalars().all()
@@ -696,7 +599,6 @@ async def listar_movimentacoes(
         if not movimentacoes:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhuma movimentação encontrada")
 
-        # Mapeando as movimentações para o schema
         response = [
             MovimentacaoSchemaList(
                 id_movimentacao=mov.id_movimentacao,
@@ -714,10 +616,27 @@ async def listar_movimentacoes(
                 id_conta=mov.id_conta,
                 id_categoria=mov.id_categoria,
                 nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
+                nome_conta = mov.conta.nome if mov.conta else None,
+                nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
                 id_fatura=mov.id_fatura,
                 id_repeticao=mov.id_repeticao,
+                divide_parente=[
+                    ParenteResponse(
+                        id_parente=divide.id_parente,
+                        valor_parente=divide.valor, 
+                        nome_parente= divide.parentes.nome
+                    )
+                    for divide in mov.divisoes 
+                ],
+                fatura_info = 
+                    FaturaSchema(
+                        data_vencimento= mov.fatura.data_vencimento,
+                        data_fechamento = mov.fatura.data_fechamento,
+                        data_pagamento = mov.fatura.data_pagamento,
+                        id_cartao_credito = mov.fatura.id_cartao_credito,
+                        id_conta = mov.fatura.id_conta
+                    ) if requestFilter.id_fatura is not None else None
             )
-        
             for mov in movimentacoes
         ]
 

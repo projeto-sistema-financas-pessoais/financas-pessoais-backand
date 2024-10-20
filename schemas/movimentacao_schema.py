@@ -4,6 +4,7 @@ import sqlalchemy
 from typing import List, Optional
 from datetime import date, datetime
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
+from schemas.fatura_schema import FaturaSchema
 
 class MovimentacaoSchema(BaseModel):
     valor: Decimal
@@ -94,8 +95,13 @@ class MovimentacaoRequestFilterSchema(BaseModel):
     id_conta: Optional[int] = None
     id_fatura: Optional[int] = None
     id_parente: Optional[int] = None
+    
+
 
 class MovimentacaoSchemaList(MovimentacaoSchema):
     nome_icone_categoria: str
+    nome_conta: Optional[str]
+    nome_cartao_credito: Optional[str]
     id_movimentacao: int
-    # divide_parente: List[ParenteResponse]
+    divide_parente: List[ParenteResponse]
+    fatura_info: Optional[FaturaSchema] 

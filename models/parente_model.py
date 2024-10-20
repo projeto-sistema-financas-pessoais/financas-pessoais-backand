@@ -2,7 +2,6 @@
 from sqlalchemy import Column, String, BigInteger, ForeignKey,Boolean
 from core.configs import settings
 from sqlalchemy.orm import relationship
-from models.associations_model import divide_table
 
 
 class ParenteModel(settings.DBBaseModel):
@@ -15,4 +14,5 @@ class ParenteModel(settings.DBBaseModel):
     ativo = Column(Boolean(), default=True)
 
     usuario = relationship("UsuarioModel", back_populates="parentes")
-    movimentacoes = relationship("MovimentacaoModel", secondary=divide_table, back_populates="parentes")
+    divisoes = relationship("DivideModel", back_populates="parentes")
+

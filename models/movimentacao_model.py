@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, String, BigInteger, ForeignKey, DECIMAL, Enum as SqlEnum, Date, TIMESTAMP
 from core.configs import settings
 from sqlalchemy.orm import relationship
-from models.associations_model import divide_table
 
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao
 class MovimentacaoModel(settings.DBBaseModel):
@@ -26,9 +25,7 @@ class MovimentacaoModel(settings.DBBaseModel):
     conta = relationship("ContaModel", back_populates="movimentacoes")
     categoria = relationship("CategoriaModel", back_populates="movimentacoes")
     fatura = relationship("FaturaModel", back_populates="movimentacoes")
-    divisoes = relationship("DivideModel", back_populates="parente")  # Novo relacionamento
-
-    divisoes = relationship("DivideModel", back_populates="movimentacao")  # Novo relacionamento
+    divisoes = relationship("DivideModel", back_populates="movimentacoes", cascade="all, delete-orphan")
     repeticao = relationship("RepeticaoModel", back_populates="movimentacoes")
     usuario = relationship("UsuarioModel", back_populates="movimentacoes")
 
