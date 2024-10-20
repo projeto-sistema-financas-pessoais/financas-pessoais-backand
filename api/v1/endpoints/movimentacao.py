@@ -666,18 +666,40 @@ async def visualizar_movimentacao(
 @router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_movimentacao(
     id_movimentacao: int,
+    id_repeticao: Optional[int],
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
     async with db as session:
-        query = select(MovimentacaoModel).join(MovimentacaoModel.conta).filter(MovimentacaoModel.id_movimentacao == id_movimentacao, ContaModel.id_usuario == usuario_logado.id_usuario)
+        query = select(MovimentacaoModel).where(MovimentacaoModel.id_movimentacao == id_movimentacao, MovimentacaoModel.id_usuario ==  usuario_logado.id_usuario)
+        
         result = await session.execute(query)
         movimentacao = result.scalars().one_or_none()
+        
+        #se id_repeticao for diferente de null tem que acessar a repeticao associada e deletar e todas as movimentacoes associadas, retirando de fatura e cartao ou de conta
+        
+        
+        if movimentacao.consolidado and movimentacao.id_conta is not None:
+            conta = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta, ContaModel.id_usuario ==  usuario_logado.id_usuario)
+            if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
+                conta.saldo = conta.saldo + Decimal(movimentacao.valor) 
+            elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
+                conta.saldo = conta.saldo - Decimal(movimentacao.valor)
+
+        
+        # if(movimentacao.id_conta is not None):
+        #     # verificar se é receita ou despesa e se foi consolidada para remover do saldo da conta
+        
+        # if(movimentacao.id_fatura is not None):
+        #     # verificar se é despesa e se foi consolidada para remover do saldo da conta
+        #     # verificar se precisa remover da fatura gastos (se é a 1 parcela da recorrencia ou se é do tipo parcelado (ai todas estao na fatura gastos)
+        #     # remover do limite disponivel (se foi parcelado ou se é a primeira parcela de uma recorrencia)
+
 
         if not movimentacao:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada ou não pertence ao usuário")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada.")
 
         await session.delete(movimentacao)
         await session.commit()
 
-        return
+        return {"message": "Deletado com sucesso."}
