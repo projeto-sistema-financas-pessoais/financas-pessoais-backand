@@ -46,15 +46,15 @@ class MovimentacaoSchemaUpdate(BaseModel):
 class MovimentacaoSchemaId(MovimentacaoSchema):
     id_movimentacao: int
    
+
 class MovimentacaoSchemaTransferencia(BaseModel):
-    valor: int
-    descricao: str
+    valor: float
+    descricao: Optional[str] = None
     id_conta_atual: int
     id_conta_transferencia: int
-    datatime: datetime 
-    data_pagamento: date
     class Config:
-        from_attributes = True
+        orm_mode = True
+
         
 class ParenteResponse(BaseModel):
     id_parente: int

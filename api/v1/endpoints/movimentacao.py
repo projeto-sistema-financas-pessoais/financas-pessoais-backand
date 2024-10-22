@@ -24,7 +24,7 @@ from models.fatura_model import FaturaModel
 from typing import List, Optional
 from models.repeticao_model import RepeticaoModel
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
@@ -373,26 +373,20 @@ async def create_movimentacao(
 
 @router.post('/cadastro/transferencia', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
-    movimentacao: MovimentacaoSchemaTransferencia
-,
+    movimentacao: MovimentacaoSchemaTransferencia,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
     async with db as session:
         try:
-            
             if movimentacao.id_conta_transferencia == movimentacao.id_conta_atual:
-                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="As contas devem ter ids diferentes")
-
+                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="As contas devem ter IDs diferentes")
             
-            contas_a_verificar = []
-
-            contas_a_verificar.append(movimentacao.id_conta_atual)
-            contas_a_verificar.append(movimentacao.id_conta_transferencia)
+            contas_a_verificar = [movimentacao.id_conta_atual, movimentacao.id_conta_transferencia]
             
             query = select(ContaModel).where(
                 ContaModel.id_usuario == usuario_logado.id_usuario,
-                ContaModel.id_conta.in_(contas_a_verificar)  # Verifica se id_conta está na lista
+                ContaModel.id_conta.in_(contas_a_verificar)
             )
             result = await session.execute(query)
             contas_encontradas = result.scalars().all()
@@ -401,18 +395,34 @@ async def create_movimentacao(
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contas não encontradas ou não pertencem ao usuário.")
 
             for conta in contas_encontradas:
-                if(conta.id_conta == movimentacao.id_conta_atual):
+                if conta.id_conta == movimentacao.id_conta_atual:
                     conta.saldo = conta.saldo - Decimal(movimentacao.valor)
-                elif (conta.id_conta == movimentacao.id_conta_transferencia):
+                elif conta.id_conta == movimentacao.id_conta_transferencia:
                     conta.saldo = conta.saldo + Decimal(movimentacao.valor)
-            await db.commit()
-            return {"message": "Transferencia realizada com sucesso."}
+            
+            nova_movimentacao = MovimentacaoModel(
+                valor=Decimal(movimentacao.valor),
+                descricao=movimentacao.descricao,
+                id_conta=movimentacao.id_conta_atual,
+                id_conta_destino=movimentacao.id_conta_transferencia,
+                tipoMovimentacao="Transferencia",  
+                forma_pagamento="Débito",           
+                consolidado=True,                   
+                condicao_pagamento="À vista",       
+                datatime=datetime.now(),            
+                data_pagamento=datetime.now().date(), 
+                id_usuario=usuario_logado.id_usuario
+            )
+            
+            session.add(nova_movimentacao)
+            await session.commit()
+            return {nova_movimentacao.id_movimentacao}
+        
         except Exception as e:
             await handle_db_exceptions(session, e)
-            
+        
         finally:
             await session.close()
-
 
 @router.post('/editar/{id_movimentacao}', response_model=MovimentacaoSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def update_movimentacao(
