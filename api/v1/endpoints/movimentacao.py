@@ -13,8 +13,8 @@ from models.divide_model import DivideModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
 from schemas.fatura_schema import FaturaSchema, FaturaSchemaId
-from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoRequestFilterSchema,
-    MovimentacaoSchema, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
+from schemas.movimentacao_schema import ( MovimentacaoRequestFilterSchema,
+     MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
     MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
@@ -590,14 +590,16 @@ async def listar_movimentacoes(
             .options(
                 selectinload(MovimentacaoModel.categoria),
                 selectinload(MovimentacaoModel.conta),
-                selectinload(MovimentacaoModel.conta_destino),  # Conta de destino
+                selectinload(MovimentacaoModel.conta_destino),  
                 selectinload(MovimentacaoModel.repeticao),
                 selectinload(MovimentacaoModel.divisoes),
                 selectinload(MovimentacaoModel.divisoes, DivideModel.parentes),
                 selectinload(MovimentacaoModel.fatura),
                 selectinload(MovimentacaoModel.fatura, FaturaModel.cartao_credito)
             )
-            .where(*condicoes)  # Suas outras condições
+            .where(*condicoes)  
+            .order_by(MovimentacaoModel.data_pagamento)  
+
         )
 
         if requestFilter.id_parente is not None:
@@ -608,50 +610,51 @@ async def listar_movimentacoes(
         movimentacoes = result.scalars().all()
 
         if not movimentacoes:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhuma movimentação encontrada")
+            response = []
+        else:
 
-        response = [
-            MovimentacaoSchemaList(
-                id_movimentacao=mov.id_movimentacao,
-                valor=mov.valor,
-                descricao=mov.descricao,
-                tipoMovimentacao=mov.tipoMovimentacao,
-                forma_pagamento=mov.forma_pagamento,
-                condicao_pagamento=mov.condicao_pagamento,
-                datatime=mov.datatime,
-                quantidade_parcelas= mov.repeticao.quantidade_parcelas if mov.repeticao else None , 
-                consolidado=mov.consolidado,
-                tipo_recorrencia= mov.repeticao.tipo_recorrencia if mov.repeticao else None , 
-                parcela_atual=mov.parcela_atual,
-                data_pagamento=mov.data_pagamento,
-                id_conta=mov.id_conta,
-                id_conta_destino= mov.id_conta_destino,
-                nome_conta_destino= mov.conta_destino.nome if mov.conta_destino else None,
-                id_categoria=mov.id_categoria if mov.categoria else None,
-                nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
-                nome_conta = mov.conta.nome if mov.conta else None,
-                nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
-                id_fatura=mov.id_fatura,
-                id_repeticao=mov.id_repeticao,
-                divide_parente=[
-                    ParenteResponse(
-                        id_parente=divide.id_parente,
-                        valor_parente=divide.valor, 
-                        nome_parente= divide.parentes.nome
-                    )
-                    for divide in mov.divisoes 
-                ],
-                fatura_info = 
-                    FaturaSchema(
-                        data_vencimento= mov.fatura.data_vencimento,
-                        data_fechamento = mov.fatura.data_fechamento,
-                        data_pagamento = mov.fatura.data_pagamento,
-                        id_cartao_credito = mov.fatura.id_cartao_credito,
-                        id_conta = mov.fatura.id_conta
-                    ) if requestFilter.id_fatura is not None else None
-            )
-            for mov in movimentacoes
-        ]
+            response = [
+                MovimentacaoSchemaList(
+                    id_movimentacao=mov.id_movimentacao,
+                    valor=mov.valor,
+                    descricao=mov.descricao,
+                    tipoMovimentacao=mov.tipoMovimentacao,
+                    forma_pagamento=mov.forma_pagamento,
+                    condicao_pagamento=mov.condicao_pagamento,
+                    datatime=mov.datatime,
+                    quantidade_parcelas= mov.repeticao.quantidade_parcelas if mov.repeticao else None , 
+                    consolidado=mov.consolidado,
+                    tipo_recorrencia= mov.repeticao.tipo_recorrencia if mov.repeticao else None , 
+                    parcela_atual=mov.parcela_atual,
+                    data_pagamento=mov.data_pagamento,
+                    id_conta=mov.id_conta,
+                    id_conta_destino= mov.id_conta_destino,
+                    nome_conta_destino= mov.conta_destino.nome if mov.conta_destino else None,
+                    id_categoria=mov.id_categoria if mov.categoria else None,
+                    nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
+                    nome_conta = mov.conta.nome if mov.conta else None,
+                    nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
+                    id_fatura=mov.id_fatura,
+                    id_repeticao=mov.id_repeticao,
+                    divide_parente=[
+                        ParenteResponse(
+                            id_parente=divide.id_parente,
+                            valor_parente=divide.valor, 
+                            nome_parente= divide.parentes.nome
+                        )
+                        for divide in mov.divisoes 
+                    ],
+                    fatura_info = 
+                        FaturaSchema(
+                            data_vencimento= mov.fatura.data_vencimento,
+                            data_fechamento = mov.fatura.data_fechamento,
+                            data_pagamento = mov.fatura.data_pagamento,
+                            id_cartao_credito = mov.fatura.id_cartao_credito,
+                            id_conta = mov.fatura.id_conta
+                        ) if requestFilter.id_fatura is not None else None
+                )
+                for mov in movimentacoes
+            ]
 
         return response
 
