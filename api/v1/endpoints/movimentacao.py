@@ -590,6 +590,7 @@ async def listar_movimentacoes(
             .options(
                 selectinload(MovimentacaoModel.categoria),
                 selectinload(MovimentacaoModel.conta),
+                selectinload(MovimentacaoModel.conta_destino),  # Conta de destino
                 selectinload(MovimentacaoModel.repeticao),
                 selectinload(MovimentacaoModel.divisoes),
                 selectinload(MovimentacaoModel.divisoes, DivideModel.parentes),
@@ -624,7 +625,9 @@ async def listar_movimentacoes(
                 parcela_atual=mov.parcela_atual,
                 data_pagamento=mov.data_pagamento,
                 id_conta=mov.id_conta,
-                id_categoria=mov.id_categoria,
+                id_conta_destino= mov.id_conta_destino,
+                nome_conta_destino= mov.conta_destino.nome if mov.conta_destino else None,
+                id_categoria=mov.id_categoria if mov.categoria else None,
                 nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
                 nome_conta = mov.conta.nome if mov.conta else None,
                 nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
