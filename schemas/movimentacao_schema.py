@@ -9,9 +9,9 @@ from schemas.fatura_schema import FaturaSchema
 class MovimentacaoSchema(BaseModel):
     valor: Decimal
     descricao: Optional[str]
-    tipoMovimentacao: TipoMovimentacao
-    forma_pagamento: FormaPagamento
-    condicao_pagamento: CondicaoPagamento
+    tipoMovimentacao: Optional[TipoMovimentacao]
+    forma_pagamento: Optional[FormaPagamento]
+    condicao_pagamento: Optional[CondicaoPagamento]
     datatime: Optional[datetime]
     quantidade_parcelas: Optional[int]
     consolidado: bool
@@ -19,7 +19,7 @@ class MovimentacaoSchema(BaseModel):
     parcela_atual: Optional[str]
     data_pagamento: date
     id_conta: Optional[int] 
-    id_categoria: int
+    id_categoria: Optional[int]
     id_fatura: Optional[int] 
     id_repeticao: Optional[int]
 
@@ -94,14 +94,17 @@ class MovimentacaoRequestFilterSchema(BaseModel):
     id_categoria: Optional[int] = None
     id_conta: Optional[int] = None
     id_fatura: Optional[int] = None
+    id_cartao_credito: Optional[int] = None
     id_parente: Optional[int] = None
     
 
 
 class MovimentacaoSchemaList(MovimentacaoSchema):
-    nome_icone_categoria: str
+    nome_icone_categoria: Optional[str]
     nome_conta: Optional[str]
     nome_cartao_credito: Optional[str]
     id_movimentacao: int
+    id_conta_destino: Optional[int]
+    nome_conta_destino : Optional[str]
     divide_parente: List[ParenteResponse]
     fatura_info: Optional[FaturaSchema] 

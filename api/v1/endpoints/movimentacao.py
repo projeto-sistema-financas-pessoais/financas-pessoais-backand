@@ -582,8 +582,8 @@ async def listar_movimentacoes(
         if requestFilter.id_conta is not None: 
             condicoes.append(MovimentacaoModel.id_conta == requestFilter.id_conta)
             
-        if requestFilter.id_fatura is not None: 
-            condicoes.append(MovimentacaoModel.id_fatura == requestFilter.id_fatura)
+        # if requestFilter.id_fatura is not None: 
+        #     condicoes.append(MovimentacaoModel.id_fatura == requestFilter.id_fatura)
             
         query = (
             select(MovimentacaoModel)
@@ -604,6 +604,9 @@ async def listar_movimentacoes(
 
         if requestFilter.id_parente is not None:
             query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
+            
+        if requestFilter.id_cartao_credito is not None:
+            query = query.join(FaturaModel, MovimentacaoModel.fatura).join(CartaoCreditoModel, FaturaModel.cartao_credito).where(CartaoCreditoModel.id_cartao_credito == requestFilter.id_cartao_credito)
 
         
         result = await db.execute(query)
