@@ -16,14 +16,18 @@ class CartaoCreditoSchemaId(CartaoCreditoSchema):
     id_usuario: int
     id_cartao_credito: int
     limite_disponivel: Decimal
+    dia_fechamento: Optional[int] = None
+    dia_vencimento: Optional[int] = None
 
 class CartaoCreditoSchemaUpdate(CartaoCreditoSchema):
     nome: Optional[str] = None
     limite: Optional[Decimal] = None
     nome_icone: Optional[str] = None
     ativo: Optional[bool] = None
+    dia_fechamento: Optional[int] = None
+    dia_vencimento: Optional[int] = None
 
 class CartaoCreditoSchemaFatura(CartaoCreditoSchema):
-    data_fechamento: date
-    data_vencimento: date
+    dia_fechamento: int
+    dia_vencimento: int
 

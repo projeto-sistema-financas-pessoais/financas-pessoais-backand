@@ -108,3 +108,7 @@ class MovimentacaoSchemaList(MovimentacaoSchema):
     nome_conta_destino : Optional[str]
     divide_parente: List[ParenteResponse]
     fatura_info: Optional[FaturaSchema] 
+
+class MovimentacaoSchemaConsolida(BaseModel):
+    id_movimentacao: int
+    id_conta: int
