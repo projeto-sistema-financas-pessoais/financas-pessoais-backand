@@ -86,10 +86,14 @@ async def update_cartao_credito(
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Já existe um cartão com este nome para este usuário")
         
 
-@router.get('/listar', response_model=list[CartaoCreditoSchemaId], status_code=status.HTTP_200_OK)
-async def listar_cartoes_credito(db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+@router.get('/listar/{somente_ativo}', response_model=list[CartaoCreditoSchemaId], status_code=status.HTTP_200_OK)
+async def listar_cartoes_credito(somente_ativo: bool,db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
-        query = select(CartaoCreditoModel).where(CartaoCreditoModel.id_usuario == usuario_logado.id_usuario)
+        query = select(CartaoCreditoModel).where(
+            CartaoCreditoModel.id_usuario == usuario_logado.id_usuario,
+            CartaoCreditoModel.ativo if somente_ativo else True
+
+        )
         result = await session.execute(query)
         cartoes_credito: List[CartaoCreditoSchemaId] = result.scalars().unique().all()
 

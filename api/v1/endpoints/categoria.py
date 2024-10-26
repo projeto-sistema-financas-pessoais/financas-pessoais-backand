@@ -85,11 +85,14 @@ async def put_categoria(
                 detail='Já existe uma categoria com este nome para o usuário.'
             )
 
-@router.get('/listar/', response_model=List[CategoriaSchemaId])
-async def get_categorias ( db: AsyncSession = Depends(get_session),
+@router.get('/listar/{somente_ativo}', response_model=List[CategoriaSchemaId])
+async def get_categorias ( somente_ativo: bool, db: AsyncSession = Depends(get_session),
                       usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
-        query = select(CategoriaModel).where(CategoriaModel.id_usuario == usuario_logado.id_usuario)
+        query = select(CategoriaModel).where(
+            CategoriaModel.id_usuario == usuario_logado.id_usuario,
+            CategoriaModel.ativo if somente_ativo else True
+        )
         result = await session.execute(query)
         categorias: List[CategoriaSchemaId] = result.scalars().unique().all()
       
