@@ -683,8 +683,11 @@ async def consolidar_movimentacao(
 
     if conta is None:
         raise HTTPException(status_code=404, detail="Conta não encontrada")
-
-    conta.saldo -= movimentacao.valor 
+    
+    if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
+        conta.saldo -= movimentacao.valor
+    elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
+        conta.saldo += movimentacao.valor
 
     db.add(movimentacao)
     db.add(conta)
