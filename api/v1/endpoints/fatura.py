@@ -16,6 +16,8 @@ from typing import List, Optional
 
 router = APIRouter()
 
+from datetime import timedelta
+
 async def create_fatura_ano(
     db: AsyncSession,
     usuario_logado: UsuarioModel,
@@ -50,48 +52,45 @@ async def create_fatura_ano(
             dia_vencimento = fatura_anterior.data_vencimento.day
             dia_fechamento = fatura_anterior.data_fechamento.day
 
-
             for mes in range(1, 13):  # Meses de 1 a 12
                 try:
                     data_vencimento = date(ano, mes, dia_vencimento)
                     data_fechamento = date(ano, mes, dia_fechamento)
-
-
-                    nova_fatura = FaturaModel(
-                        data_vencimento=data_vencimento,
-                        data_fechamento=data_fechamento,
-                        id_conta=fatura_anterior.id_conta,
-                        id_cartao_credito=id_cartao_credito,
-                        fatura_gastos=0
-                    )
-                    db.add(nova_fatura)
-                except ValueError as e:
-                    print(f"Erro ao criar data de fatura: {e}")
-
-    else:
-
-        dia_fechamento = dia_fechamento_usuario
-        dia_vencimento = dia_vencimento_usuario
-
-
-        mes_atual = date.today().month
-
-        for mes in range(mes_atual, 13):  # Meses a partir do mês atual até 12
-            try:
-                data_vencimento = date(ano, mes, dia_vencimento)
-                data_fechamento = date(ano, mes, dia_fechamento)
-
+                except ValueError:
+                    data_vencimento = adjust_to_valid_date(ano, mes, dia_vencimento)
+                    data_fechamento = adjust_to_valid_date(ano, mes, dia_fechamento)
 
                 nova_fatura = FaturaModel(
                     data_vencimento=data_vencimento,
                     data_fechamento=data_fechamento,
-                    id_conta=None,
+                    id_conta=fatura_anterior.id_conta,
                     id_cartao_credito=id_cartao_credito,
                     fatura_gastos=0
                 )
                 db.add(nova_fatura)
-            except ValueError as e:
-                print(f"Erro ao criar data de fatura: {e}")
+
+    else:
+        dia_fechamento = dia_fechamento_usuario
+        dia_vencimento = dia_vencimento_usuario
+
+        mes_atual = date.today().month
+
+        for mes in range(mes_atual, 13):  
+            try:
+                data_vencimento = date(ano, mes, dia_vencimento)
+                data_fechamento = date(ano, mes, dia_fechamento)
+            except ValueError:
+                data_vencimento = adjust_to_valid_date(ano, mes, dia_vencimento)
+                data_fechamento = adjust_to_valid_date(ano, mes, dia_fechamento)
+
+            nova_fatura = FaturaModel(
+                data_vencimento=data_vencimento,
+                data_fechamento=data_fechamento,
+                id_conta=None,
+                id_cartao_credito=id_cartao_credito,
+                fatura_gastos=0
+            )
+            db.add(nova_fatura)
 
     try:
         await db.commit()
@@ -99,6 +98,22 @@ async def create_fatura_ano(
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao criar as faturas. Verifique os dados fornecidos.')
+
+import calendar
+
+def adjust_to_valid_date(ano: int, mes: int, dia: int) -> date:
+    """
+    Ajusta para o próximo dia válido no mês, caso o dia especificado não exista.
+    Se o dia estiver fora do limite para o mês, ajusta para o último dia do mês.
+    """
+    ultimo_dia_mes = calendar.monthrange(ano, mes)[1]
+    
+    if dia > ultimo_dia_mes:
+        dia = ultimo_dia_mes
+
+    return date(ano, mes, dia)
+
+
 
 @router.post("/fechar/{id_fatura}")
 async def fechar_fatura(

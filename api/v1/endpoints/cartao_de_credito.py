@@ -25,8 +25,8 @@ async def post_cartao_credito(
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
 
-    if cartao_credito.dia_fechamento >= cartao_credito.dia_vencimento:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A data de venciomento deve ser maior que a data de fechamento")
+    if cartao_credito.dia_fechamento == cartao_credito.dia_vencimento:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A data de venciomento deve ser diferente da data de fechamento")
             
     novo_cartao: CartaoCreditoModel = CartaoCreditoModel(
         nome=cartao_credito.nome,
@@ -125,14 +125,11 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                        CartaoCreditoModel.ativo if somente_ativo else True)
             )
 
-            print("Executing query to fetch credit cards")
             result = await session.execute(query)
             cartoes_credito: List[CartaoCreditoModel] = result.scalars().unique().all()
 
-            print(f"Number of credit cards fetched: {len(cartoes_credito)}")
             cartoes_credito_response = []
             for cartao in cartoes_credito:
-                print(f"Processing card ID: {cartao.id_cartao_credito}")
 
                 proximas_faturas = sorted(
                     [f for f in cartao.faturas if f.data_vencimento >= datetime.now().date()],
@@ -140,7 +137,6 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                 )
 
                 proxima_fatura = proximas_faturas[0] if proximas_faturas else None
-                print(f"Next bill for card {cartao.id_cartao_credito}: {proxima_fatura}")
 
                 cartao_data = {
                     "id_cartao_credito": cartao.id_cartao_credito,
