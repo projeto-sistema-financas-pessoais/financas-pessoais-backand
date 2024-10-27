@@ -25,6 +25,7 @@ async def post_parente(
     
     novo_parente: ParenteModel = ParenteModel(
         nome=parente.nome,
+        email=parente.email,
         grau_parentesco=parente.grau_parentesco,
         id_usuario=usuario_logado.id_usuario,
         ativo=parente.ativo
@@ -64,13 +65,12 @@ async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, d
 
         if parente_update.nome is not None:
             parente.nome = parente_update.nome
+
+        if parente_update.email is not None:
+            parente.email = parente_update.email
             
         if parente_update.ativo is not None:
             parente.ativo = bool(parente_update.ativo)
-
-            
-            
-     
 
         try:
             await session.commit()
@@ -95,12 +95,9 @@ async def get_parentes(somente_ativo: bool, db: AsyncSession = Depends(get_sessi
             if not parentes:
                 print("Nenhum parente encontrado.")
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum parente encontrado.")
-
             return parentes
 
         except Exception as e:
-            # Capturando e imprimindo qualquer erro que ocorrer
-            print(f"Erro durante a execução: {e}")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar parentes.")
 
 

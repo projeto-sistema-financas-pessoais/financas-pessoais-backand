@@ -8,6 +8,7 @@ class ParenteModel(settings.DBBaseModel):
     __tablename__ = "PARENTE"
 
     id_parente = Column(BigInteger, primary_key=True)
+    email = Column(String(50), nullable=False, unique=True)    
     grau_parentesco = Column(String(100), nullable=False)
     nome = Column(String(60), nullable=False)
     id_usuario = Column(BigInteger, ForeignKey("USUARIO.id_usuario"), nullable=False)
