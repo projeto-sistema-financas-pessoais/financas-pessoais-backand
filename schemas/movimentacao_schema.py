@@ -64,7 +64,7 @@ class ParenteResponse(BaseModel):
 
 class MovimentacaoSchemaReceitaDespesa(BaseModel):
     valor: Decimal
-    descricao: str
+    descricao: Optional[str] = None
     id_categoria: int
     id_conta: Optional[int] = None
     condicao_pagamento : CondicaoPagamento
