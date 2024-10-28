@@ -13,8 +13,8 @@ from models.divide_model import DivideModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
 from schemas.fatura_schema import FaturaSchema, FaturaSchemaId
-from schemas.movimentacao_schema import ( MovimentacaoRequestFilterSchema,
-     MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
+from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoRequestFilterSchema,
+    MovimentacaoSchemaConsolida, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
     MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
@@ -26,7 +26,7 @@ from models.repeticao_model import RepeticaoModel
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
 from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload, selectinload
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.exc import IntegrityError
 
 
 router = APIRouter()
@@ -56,8 +56,6 @@ async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_paga
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
     
     return fatura, cartao_credito
-
-
 
 @router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
@@ -229,7 +227,6 @@ async def create_movimentacao(
             await handle_db_exceptions(session, e)
         finally:
             await session.close()
-            
             
 @router.post('/cadastro/receita', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
@@ -504,9 +501,6 @@ async def update_movimentacao(
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar movimentação")
     
-
-from sqlalchemy.orm import joinedload  # Certifique-se de importar joinedload
-
 @router.get('/listar', response_model=List[MovimentacaoSchemaId])
 async def listar_movimentacoes(
     db: AsyncSession = Depends(get_session),
@@ -660,9 +654,47 @@ async def listar_movimentacoes(
             ]
 
         return response
+    
+@router.post("/consolidar/{id_movimentacao}")
+async def consolidar_movimentacao(
+    movimentacoes: MovimentacaoSchemaConsolida, 
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)):
+
+    movimentacao_query = select(MovimentacaoModel).where(MovimentacaoModel.id_movimentacao == movimentacoes.id_movimentacao, 
+                                                         MovimentacaoModel.id_usuario == usuario_logado.id_usuario)
+    movimentacao_result = await db.execute(movimentacao_query)
+    movimentacao = movimentacao_result.scalar_one_or_none()
+
+    if not movimentacao:
+        raise HTTPException(status_code=404, detail="Movimentação não encontrada")
 
 
+    if movimentacao.id_fatura is not None:
+        raise HTTPException(status_code=400, detail="Não é possível consolidar uma movimentação com fatura relacionada")
 
+    movimentacao.consolidado = True
+    movimentacao.data_pagamento = date.today()  
+    movimentacao.id_conta = movimentacoes.id_conta
+
+    conta_query = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta)
+    conta_result = await db.execute(conta_query)
+    conta = conta_result.scalar_one_or_none()
+
+    if conta is None:
+        raise HTTPException(status_code=404, detail="Conta não encontrada")
+    
+    if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
+        conta.saldo -= movimentacao.valor
+    elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
+        conta.saldo += movimentacao.valor
+
+    db.add(movimentacao)
+    db.add(conta)
+    
+    await db.commit()
+
+    return {"detail": "Movimentação consolidada com sucesso", "movimentacao": movimentacao}
 
 
         

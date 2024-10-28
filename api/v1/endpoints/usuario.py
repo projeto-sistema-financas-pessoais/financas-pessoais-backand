@@ -114,6 +114,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
 
             parente_usuario = ParenteModel(
                 nome=novo_usuario.nome_completo,
+                email=novo_usuario.email,
                 grau_parentesco= "Eu",
                 ativo=True,
                 id_usuario=novo_usuario.id_usuario
@@ -151,10 +152,13 @@ async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSess
         content={
             "access_token": generate_token_access(sub=usuario.id_usuario),
             "token_type": "bearer",
-            "name": usuario.nome_completo
+            "name": usuario.nome_completo,
+            "date_user": str(usuario.data_nascimento)
         },
         status_code=status.HTTP_200_OK
     )
+
+
 
 @router.put('/editar/{id_usuario}', status_code=status.HTTP_200_OK)
 async def update_usuario(
