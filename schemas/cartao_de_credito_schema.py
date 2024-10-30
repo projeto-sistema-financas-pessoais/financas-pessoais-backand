@@ -18,6 +18,7 @@ class CartaoCreditoSchemaId(CartaoCreditoSchema):
     limite_disponivel: Decimal
     dia_fechamento: Optional[int] = None
     dia_vencimento: Optional[int] = None
+    fatura_gastos: Optional[Decimal] = None
 
 class CartaoCreditoSchemaUpdate(CartaoCreditoSchema):
     nome: Optional[str] = None

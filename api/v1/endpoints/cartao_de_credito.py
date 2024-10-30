@@ -147,7 +147,8 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                     "nome_icone": cartao.nome_icone,
                     "ativo": cartao.ativo,
                     "id_usuario": cartao.id_usuario,
-                    "limite": cartao.limite
+                    "limite": cartao.limite,
+                    "fatura_gastos": proxima_fatura.fatura_gastos
                 }
                 cartoes_credito_response.append(cartao_data)
 
