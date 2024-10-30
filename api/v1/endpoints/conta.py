@@ -92,7 +92,8 @@ async def get_contas (somente_ativo: bool, db: AsyncSession = Depends(get_sessio
             ContaModel.id_usuario == usuario_logado.id_usuario,
             ContaModel.ativo if somente_ativo else True
 
-        )
+        ).order_by(ContaModel.nome)
+
         result = await session.execute(query)
         contas: List[ContaSchemaId] = result.scalars().unique().all()
       

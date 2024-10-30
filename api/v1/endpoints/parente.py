@@ -7,6 +7,7 @@ from models.parente_model import ParenteModel
 from schemas.parente_schema import ParenteSchema, ParenteSchemaUpdate, ParenteSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
+from sqlalchemy import case, select
 
 
 router = APIRouter()
@@ -87,6 +88,9 @@ async def get_parentes(somente_ativo: bool, db: AsyncSession = Depends(get_sessi
             query = select(ParenteModel).where(
                 ParenteModel.id_usuario == usuario_logado.id_usuario,
                 ParenteModel.ativo if somente_ativo else True
+            ).order_by(
+                case((ParenteModel.nome == usuario_logado.nome_completo, 0), else_=1),  # Prioriza o nome igual ao de `usuario.nome`
+                ParenteModel.nome 
             )
 
             result = await session.execute(query)

@@ -655,7 +655,7 @@ async def listar_movimentacoes(
 
         return response
     
-@router.post("/consolidar/{id_movimentacao}")
+@router.post("/consolidar")
 async def consolidar_movimentacao(
     movimentacoes: MovimentacaoSchemaConsolida, 
     db: AsyncSession = Depends(get_session),
@@ -673,9 +673,9 @@ async def consolidar_movimentacao(
     if movimentacao.id_fatura is not None:
         raise HTTPException(status_code=400, detail="Não é possível consolidar uma movimentação com fatura relacionada")
 
-    movimentacao.consolidado = True
-    movimentacao.data_pagamento = date.today()  
-    movimentacao.id_conta = movimentacoes.id_conta
+    movimentacao.consolidado = movimentacoes.consolidado
+    # movimentacao.data_pagamento = date.today()  
+ 
 
     conta_query = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta)
     conta_result = await db.execute(conta_query)
@@ -685,9 +685,16 @@ async def consolidar_movimentacao(
         raise HTTPException(status_code=404, detail="Conta não encontrada")
     
     if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
-        conta.saldo -= movimentacao.valor
+        if movimentacoes.consolidado:
+             conta.saldo -= movimentacao.valor
+        else:
+            conta.saldo += movimentacao.valor
     elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
-        conta.saldo += movimentacao.valor
+        if(movimentacao.consolidado):
+            conta.saldo += movimentacao.valor
+        else: 
+            conta.saldo -= movimentacao.valor
+
 
     db.add(movimentacao)
     db.add(conta)

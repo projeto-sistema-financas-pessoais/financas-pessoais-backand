@@ -123,7 +123,7 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                 .options(joinedload(CartaoCreditoModel.faturas))
                 .where(CartaoCreditoModel.id_usuario == usuario_logado.id_usuario,
                        CartaoCreditoModel.ativo if somente_ativo else True)
-            )
+            ).order_by(CartaoCreditoModel.nome)
 
             result = await session.execute(query)
             cartoes_credito: List[CartaoCreditoModel] = result.scalars().unique().all()
