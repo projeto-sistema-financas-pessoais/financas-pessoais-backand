@@ -213,3 +213,15 @@ async def delete_usuario(
         await session.commit()
         
         return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get('/listar_usuario', status_code=status.HTTP_200_OK)
+async def get_usuario(
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    async with db as session:
+        usuario = {
+            "nome": usuario_logado.nome_completo,
+            "data_nascimento": usuario_logado.data_nascimento
+        }
+        return usuario
