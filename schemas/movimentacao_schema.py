@@ -111,4 +111,4 @@ class MovimentacaoSchemaList(MovimentacaoSchema):
 
 class MovimentacaoSchemaConsolida(BaseModel):
     id_movimentacao: int
-    id_conta: int
+    consolidado: bool
