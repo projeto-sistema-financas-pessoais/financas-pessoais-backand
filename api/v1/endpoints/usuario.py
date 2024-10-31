@@ -12,6 +12,8 @@ from models.parente_model import ParenteModel
 from schemas.usuario_schema import UsuarioSchema, UpdateUsuarioSchema
 from fastapi.security import OAuth2PasswordRequestForm
 from core.auth import auth, generate_token_access
+from sqlalchemy.future import select
+from fastapi import Response, HTTPException, status, Depends
 
 router = APIRouter()
 
@@ -167,7 +169,6 @@ async def update_usuario(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    # Verificar se o id_usuario é o mesmo do usuário logado
     if usuario_logado.id_usuario != id_usuario:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -180,7 +181,6 @@ async def update_usuario(
         if not usuario:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
         
-        # Atualizar os campos
         usuario.nome_completo = usuario_update.nome_completo
         usuario.data_nascimento = usuario_update.data_nascimento
         
@@ -190,27 +190,36 @@ async def update_usuario(
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao atualizar os dados do usuário')
         
-@router.delete('/deletar/{id_usuario}', status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete('/deletar/{email}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_usuario(
-    id_usuario: int, 
+    email: str, 
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    # Verificar se o id_usuario é o mesmo do usuário logado
-    if usuario_logado.id_usuario != id_usuario:
+    if usuario_logado.email != email:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Você não tem permissão para deletar este usuário."
         )
 
     async with db as session:
-        usuario = await session.get(UsuarioModel, id_usuario)
+        try:
+            query = select(UsuarioModel).where(UsuarioModel.email == email)
+            result = await session.execute(query)
+            usuario = result.scalars().first()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro interno ao buscar usuário")
         
         if not usuario:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
         
-        await session.delete(usuario)
-        await session.commit()
+        try:
+            await session.delete(usuario)
+            await session.commit()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro interno ao deletar usuário")
         
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
