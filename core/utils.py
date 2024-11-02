@@ -1,10 +1,14 @@
 from fastapi import HTTPException, status
+import traceback
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 
 async def handle_db_exceptions(session, exc):
     # Rollback da sessão em caso de erro
     await session.rollback()
+    
+    traceback.print_exc()
+
 
     # Tratamento específico para IntegrityError
     if isinstance(exc, IntegrityError):

@@ -53,7 +53,7 @@ class MovimentacaoSchemaTransferencia(BaseModel):
     id_conta_atual: int
     id_conta_transferencia: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
         
 class ParenteResponse(BaseModel):
