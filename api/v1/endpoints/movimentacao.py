@@ -724,7 +724,6 @@ async def visualizar_movimentacao(
 @router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_movimentacao(
     id_movimentacao: int,
-    id_repeticao: Optional[int] = None,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -735,12 +734,15 @@ async def deletar_movimentacao(
         )
         
         result = await session.execute(query)
-        movimentacao = result.scalars().one_or_none()
+        movimentacao = result.scalars().first() 
 
         if not movimentacao:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada.")
         
-        if id_repeticao and movimentacao.id_repeticao == id_repeticao:
+        if movimentacao.id_repeticao:
+            id_repeticao = movimentacao.id_repeticao
+
+        if id_repeticao:
             repetidas_query = select(MovimentacaoModel).where(
                 MovimentacaoModel.id_repeticao == id_repeticao,
                 MovimentacaoModel.id_usuario == usuario_logado.id_usuario
@@ -750,10 +752,11 @@ async def deletar_movimentacao(
             movimentacoes_repetidas = repetidas_result.scalars().all()
 
             repeticao_query = select(RepeticaoModel).where(
-                    RepeticaoModel.id_repeticao == id_repeticao
+                RepeticaoModel.id_repeticao == id_repeticao
             )
+
             repeticao_result = await session.execute(repeticao_query)
-            repeticao = repeticao_result.scalars().one_or_none()
+            repeticao = repeticao_result.scalars().first()
 
             if movimentacoes_repetidas and movimentacoes_repetidas[0].id_movimentacao == id_movimentacao:
                 for mov_repetida in movimentacoes_repetidas:
@@ -764,14 +767,13 @@ async def deletar_movimentacao(
             else:
                 subsequentes = [
                     mov for mov in movimentacoes_repetidas 
-                    if mov.data_pagamento >= movimentacao.data_pagamento  
+                    if mov.data_pagamento >= movimentacao.data_pagamento
                 ]
                 for mov_subsequente in subsequentes:
                     await processar_delecao_movimentacao(mov_subsequente, session, usuario_logado)
                     repeticao.valor_total -= movimentacao.valor
 
                 repeticao.quantidade_parcelas -= len(subsequentes)
-                
 
         else:
             await processar_delecao_movimentacao(movimentacao, session, usuario_logado)
@@ -789,40 +791,36 @@ async def processar_delecao_movimentacao(movimentacao: MovimentacaoModel, sessio
         )
         conta_result = await session.execute(conta_query)
         conta = conta_result.scalars().one_or_none()
+
         if conta:
             if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
                 conta.saldo += Decimal(movimentacao.valor)
             elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
                 conta.saldo -= Decimal(movimentacao.valor)
-            session.add(conta)  
-
+            session.add(conta)
 
     if movimentacao.id_fatura is not None:
-        fatura_query = select(FaturaModel).join(MovimentacaoModel).where(
+        fatura_query = select(FaturaModel).where(
             FaturaModel.id_fatura == movimentacao.id_fatura,
-        )
 
+        )
         fatura_result = await session.execute(fatura_query)
-        fatura = fatura_result.scalars().one_or_none()
+        fatura = fatura_result.scalars().one_or_none()  
 
         if fatura and movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
-
-            fatura.fatura_gastos-= Decimal(movimentacao.valor)
-            session.add(fatura)  
-
+            if movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
+                fatura.fatura_gastos -= Decimal(movimentacao.valor)
+                session.add(fatura)
 
             if movimentacao.id_fatura is not None:
                 cartao_query = select(CartaoCreditoModel).join(FaturaModel).where(
                     FaturaModel.id_fatura == movimentacao.id_fatura,
                     CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
-            )
-
+                )
                 cartao_result = await session.execute(cartao_query)
-                cartao = cartao_result.scalars().one_or_none()
+                cartao = cartao_result.scalars().one_or_none()  
 
                 if cartao:
                     cartao.limite_disponivel += Decimal(movimentacao.valor)
-                    session.add(cartao)  
-
-
-    await session.delete(movimentacao)
+                    session.add(cartao)
+                    await session.delete(movimentacao)
