@@ -147,7 +147,6 @@ async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSess
             "access_token": generate_token_access(sub=usuario.id_usuario),
             "token_type": "bearer",
             "name": usuario.nome_completo,
-            "date_user": str(usuario.data_nascimento)
         },
         status_code=status.HTTP_200_OK
     )
