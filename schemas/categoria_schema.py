@@ -24,4 +24,6 @@ class CategoriaSchemaUpdate(BaseModel):
 class CategoriaSchemaId(CategoriaSchema):
     id_usuario: int
     id_categoria: int
+    valor_categoria: Optional[Decimal] = None
+
 

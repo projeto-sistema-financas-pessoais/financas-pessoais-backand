@@ -7,6 +7,7 @@ from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 from models.categoria_model import CategoriaModel
 from models.conta_model import ContaModel
+from models.parente_model import ParenteModel
 from schemas.usuario_schema import UsuarioSchema, UpdateUsuarioSchema
 from schemas.resetPasswordRequest import ResetPasswordRequest
 from schemas.recoverPasswordRequest import RecoverPasswordRequest
@@ -15,7 +16,6 @@ from core.auth import auth, generate_token_access, decoded_token, send_email_to_
 import jwt
 from smtplib import SMTPException  # Para tratamento do envio de email
 from sqlalchemy.future import select
-
 
 router = APIRouter()
 
@@ -42,7 +42,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=None,
-                    nome_icone="health.svg",
+                    nome_icone="health2.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -60,7 +60,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=None,
-                    nome_icone="car.svg",
+                    nome_icone="transport.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -69,7 +69,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                     modelo_categoria="Despesa",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=None,
-                    nome_icone="book.svg",
+                    nome_icone="schooll.svg",
                     ativo=True
                 ),
                 CategoriaModel(
@@ -114,6 +114,15 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
             )
             session.add(conta_carteira)
 
+            parente_usuario = ParenteModel(
+                nome=novo_usuario.nome_completo,
+                email=novo_usuario.email,
+                grau_parentesco= "Eu",
+                ativo=True,
+                id_usuario=novo_usuario.id_usuario
+            )
+            session.add(parente_usuario)
+
             await session.commit()
             return novo_usuario
         except IntegrityError:
@@ -134,7 +143,8 @@ async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSess
         content={
             "access_token": generate_token_access(sub=usuario.id_usuario),
             "token_type": "bearer",
-            "name": usuario.nome_completo
+            "name": usuario.nome_completo,
+            "date_user": str(usuario.data_nascimento)
         },
         status_code=status.HTTP_200_OK
     )
@@ -213,6 +223,8 @@ async def recover_password(schema: RecoverPasswordRequest,
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={'message': 'e-mail not found in database'})
 
 
+
+
 @router.put('/editar/{id_usuario}', status_code=status.HTTP_200_OK)
 async def update_usuario(
     id_usuario: int, 
@@ -232,7 +244,6 @@ async def update_usuario(
         if not usuario:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
         
-        # Atualizar os campos
         usuario.nome_completo = usuario_update.nome_completo
         usuario.data_nascimento = usuario_update.data_nascimento
         
@@ -244,7 +255,7 @@ async def update_usuario(
 
 @router.delete('/deletar/{id_usuario}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_usuario(
-    id_usuario: int, 
+    email: str, 
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
@@ -255,12 +266,32 @@ async def delete_usuario(
         )
 
     async with db as session:
-        usuario = await session.get(UsuarioModel, id_usuario)
+        try:
+            query = select(UsuarioModel).where(UsuarioModel.email == email)
+            result = await session.execute(query)
+            usuario = result.scalars().first()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro interno ao buscar usuário")
         
         if not usuario:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
         
-        await session.delete(usuario)
-        await session.commit()
+        try:
+            await session.delete(usuario)
+            await session.commit()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro interno ao deletar usuário")
         
         return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get('/listar_usuario', status_code=status.HTTP_200_OK)
+async def get_usuario(
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    async with db as session:
+        usuario = {
+            "nome": usuario_logado.nome_completo,
+            "data_nascimento": usuario_logado.data_nascimento
+        }
+        return usuario

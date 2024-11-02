@@ -84,15 +84,22 @@ async def put_conta (conta_id: int,
             raise HTTPException (detail= 'Conta não encontrada.', status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.get('/listar', response_model=List[ContaSchemaId])
-async def get_contas ( db: AsyncSession = Depends(get_session),
+@router.get('/listar/{somente_ativo}', response_model=List[ContaSchemaId])
+async def get_contas (somente_ativo: bool, db: AsyncSession = Depends(get_session),
                       usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
-        query = select(ContaModel).where(ContaModel.id_usuario == usuario_logado.id_usuario)
+        query = select(ContaModel).where(
+            ContaModel.id_usuario == usuario_logado.id_usuario,
+            ContaModel.ativo if somente_ativo else True
+
+        ).order_by(ContaModel.nome)
+
         result = await session.execute(query)
         contas: List[ContaSchemaId] = result.scalars().unique().all()
       
         return contas
+    
+
     
 @router.get('/visualizar/{conta_id}', response_model=ContaSchemaId, status_code= status.HTTP_200_OK)
 async def get_conta (conta_id: int,  db: AsyncSession = Depends(get_session),

@@ -7,6 +7,7 @@ from models.parente_model import ParenteModel
 from schemas.parente_schema import ParenteSchema, ParenteSchemaUpdate, ParenteSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
+from sqlalchemy import case, select
 
 
 router = APIRouter()
@@ -17,12 +18,18 @@ async def post_parente(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
+    if parente.nome.lower() == usuario_logado.nome_completo.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Não é permitido cadastrar um parente com o nome do usuário."
+        )
+    
     novo_parente: ParenteModel = ParenteModel(
         nome=parente.nome,
+        email=parente.email,
         grau_parentesco=parente.grau_parentesco,
         id_usuario=usuario_logado.id_usuario,
         ativo=parente.ativo
-
     )
     
     async with db as session:
@@ -59,13 +66,12 @@ async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, d
 
         if parente_update.nome is not None:
             parente.nome = parente_update.nome
+
+        if parente_update.email is not None:
+            parente.email = parente_update.email
             
         if parente_update.ativo is not None:
             parente.ativo = bool(parente_update.ativo)
-
-            
-            
-     
 
         try:
             await session.commit()
@@ -74,17 +80,30 @@ async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, d
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar o parente. Verifique os dados e tente novamente.")
         
-@router.get('/listar', response_model=list[ParenteSchemaId], status_code=status.HTTP_200_OK)
-async def get_parentes(db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+@router.get('/listar/{somente_ativo}', response_model=list[ParenteSchemaId], status_code=status.HTTP_200_OK)
+async def get_parentes(somente_ativo: bool, db: AsyncSession = Depends(get_session), 
+                       usuario_logado: UsuarioModel = Depends(get_current_user)):
     async with db as session:
-        query = select(ParenteModel).filter(ParenteModel.id_usuario == usuario_logado.id_usuario)
-        result = await session.execute(query)
-        parentes: List[ParenteSchemaId] = result.scalars().all()
+        try:
+            query = select(ParenteModel).where(
+                ParenteModel.id_usuario == usuario_logado.id_usuario,
+                ParenteModel.ativo if somente_ativo else True
+            ).order_by(
+                case((ParenteModel.nome == usuario_logado.nome_completo, 0), else_=1),  # Prioriza o nome igual ao de `usuario.nome`
+                ParenteModel.nome 
+            )
 
-        if not parentes:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum parente encontrado.")
+            result = await session.execute(query)
+            
+            parentes: List[ParenteSchemaId] = result.scalars().all()
+            if not parentes:
+                print("Nenhum parente encontrado.")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum parente encontrado.")
+            return parentes
 
-        return parentes
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar parentes.")
+
 
 @router.get('/visualizar/{id_parente}', response_model=ParenteSchemaId, status_code=status.HTTP_200_OK)
 async def get_parente(id_parente: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
