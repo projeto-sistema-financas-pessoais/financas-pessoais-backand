@@ -823,4 +823,5 @@ async def processar_delecao_movimentacao(movimentacao: MovimentacaoModel, sessio
                 if cartao:
                     cartao.limite_disponivel += Decimal(movimentacao.valor)
                     session.add(cartao)
-                    await session.delete(movimentacao)
+    
+    await session.delete(movimentacao)
