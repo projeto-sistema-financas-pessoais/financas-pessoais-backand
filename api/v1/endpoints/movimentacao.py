@@ -283,9 +283,9 @@ async def create_movimentacao(
                 
                 if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE: 
                     if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
-                        movimentacao.quantidade_parcelas = 2
+                        movimentacao.quantidade_parcelas = 10
                     else: 
-                        movimentacao.quantidade_parcelas = 8
+                        movimentacao.quantidade_parcelas = 48
 
                 nova_repeticao = RepeticaoModel(
                     quantidade_parcelas=movimentacao.quantidade_parcelas,
@@ -739,12 +739,10 @@ async def deletar_movimentacao(
         if not movimentacao:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada.")
         
-        if movimentacao.id_repeticao:
-            id_repeticao = movimentacao.id_repeticao
 
-        if id_repeticao:
+        if movimentacao.id_repeticao is not None:
             repetidas_query = select(MovimentacaoModel).where(
-                MovimentacaoModel.id_repeticao == id_repeticao,
+                MovimentacaoModel.id_repeticao == movimentacao.id_repeticao,
                 MovimentacaoModel.id_usuario == usuario_logado.id_usuario
             ).order_by(MovimentacaoModel.data_pagamento)  
 
@@ -752,7 +750,7 @@ async def deletar_movimentacao(
             movimentacoes_repetidas = repetidas_result.scalars().all()
 
             repeticao_query = select(RepeticaoModel).where(
-                RepeticaoModel.id_repeticao == id_repeticao
+                RepeticaoModel.id_repeticao == movimentacao.id_repeticao
             )
 
             repeticao_result = await session.execute(repeticao_query)
@@ -797,6 +795,14 @@ async def processar_delecao_movimentacao(movimentacao: MovimentacaoModel, sessio
                 conta.saldo += Decimal(movimentacao.valor)
             elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
                 conta.saldo -= Decimal(movimentacao.valor)
+            elif movimentacao.tipoMovimentacao == TipoMovimentacao.TRANSFERENCIA:
+                conta_destino = await session.get(ContaModel, movimentacao.id_conta_destino)
+                
+                if conta_destino:
+                    conta.saldo += Decimal(movimentacao.valor)
+                    conta_destino.saldo -= Decimal(movimentacao.valor)
+                    session.add(conta_destino)
+
             session.add(conta)
 
     if movimentacao.id_fatura is not None:
