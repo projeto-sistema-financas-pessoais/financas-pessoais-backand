@@ -1,3 +1,4 @@
+import api.v1.endpoints
 import datetime
 import api.v1.endpoints.fatura
 from fastapi import APIRouter, Depends, HTTPException, status, Response
@@ -148,7 +149,7 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                     "ativo": cartao.ativo,
                     "id_usuario": cartao.id_usuario,
                     "limite": cartao.limite,
-                    "fatura_gastos": None # não usar pois seria só do mês atual, pegar do listar movimentacao
+                    "fatura_gastos": proxima_fatura.fatura_gastos
                 }
                 cartoes_credito_response.append(cartao_data)
 
@@ -195,7 +196,7 @@ async def listar_cartao_credito(
             "ativo": cartao_credito.ativo,
             "id_usuario": cartao_credito.id_usuario,
             "limite": cartao_credito.limite,
-            "fatura_gastos": proxima_fatura.fatura_gastos
+            "fatura_gastos": None # não usar pois seria só do mês atual, pegar do listar movimentacao
         }
 
     

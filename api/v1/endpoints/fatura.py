@@ -178,10 +178,11 @@ async def fechar_fatura(
                 )
             
             conta.saldo -= fatura.fatura_gastos  
-
             cartao = fatura.cartao_credito
             cartao.limite_disponivel += fatura.fatura_gastos
+            fatura.fatura_gastos = 0
             
+
             await session.commit()
 
             return {"message": "Fatura fechada com sucesso"}
