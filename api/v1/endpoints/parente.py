@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
+from core.utils import handle_db_exceptions
 from models.parente_model import ParenteModel
 from schemas.parente_schema import ParenteSchema, ParenteSchemaUpdate, ParenteSchemaId
 from core.deps import get_session, get_current_user
@@ -18,7 +19,7 @@ async def post_parente(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    if parente.nome.lower() == usuario_logado.nome_completo.lower():
+    if parente.nome.lower() == str(usuario_logado.nome_completo).lower():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Não é permitido cadastrar um parente com o nome do usuário."
@@ -37,8 +38,10 @@ async def post_parente(
             session.add(novo_parente)
             await session.commit()
             return novo_parente
-        except IntegrityError:
-            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Parente já cadastrada para este usuário")
+        except Exception as e:
+            await handle_db_exceptions(session, e)
+        finally:
+            await session.close()
 
 @router.put('/editar/{id_parente}', response_model=ParenteSchemaId, status_code=status.HTTP_202_ACCEPTED)
 async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
