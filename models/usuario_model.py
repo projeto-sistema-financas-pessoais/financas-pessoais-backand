@@ -17,4 +17,4 @@ class UsuarioModel(settings.DBBaseModel):
     categorias = relationship("CategoriaModel", cascade= "all, delete-orphan", back_populates="usuarios")
     movimentacoes = relationship("MovimentacaoModel", cascade= "all, delete-orphan", back_populates="usuario")
 
-    # repeticao = relationship("RepeticaoModel", cascade= "all, delete-orphan", back_populates="usuario")
+    repeticao = relationship("RepeticaoModel", cascade= "all, delete-orphan", back_populates="usuario")

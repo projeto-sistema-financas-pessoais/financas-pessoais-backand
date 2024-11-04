@@ -3,6 +3,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from core.utils import handle_db_exceptions
 from models.fatura_model import FaturaModel
 from models.usuario_model import UsuarioModel
 from models.cartao_credito_model import CartaoCreditoModel
@@ -12,6 +13,7 @@ from schemas.fatura_schema import FaturaSchema, FaturaSchemaUpdate, FaturaSchema
 from core.deps import get_session, get_current_user
 from sqlalchemy.future import select
 from typing import List, Optional
+from sqlalchemy.orm import joinedload
 
 
 router = APIRouter()
@@ -115,7 +117,7 @@ def adjust_to_valid_date(ano: int, mes: int, dia: int) -> date:
 
 
 
-@router.post("/fechar/{id_fatura}")
+@router.post("/fechar")
 async def fechar_fatura(
     faturas: FaturaSchemaId,
     usuario_logado: UsuarioModel = Depends(get_current_user),
@@ -124,10 +126,14 @@ async def fechar_fatura(
     
     async with db as session:
         try:
-            query = (select(FaturaModel).join(CartaoCreditoModel, FaturaModel.id_cartao_credito == CartaoCreditoModel.id_cartao_credito)
-                    .where(FaturaModel.id_fatura == faturas.id_fatura,
-                    CartaoCreditoModel.id_usuario == usuario_logado.id_usuario)
-                    )
+            query = (
+                select(FaturaModel)
+                .options(joinedload(FaturaModel.cartao_credito))
+                .where(
+                    FaturaModel.id_fatura == faturas.id_fatura,
+                    FaturaModel.cartao_credito.has(id_usuario=usuario_logado.id_usuario)
+                )
+            )
             result = await session.execute(query)
             fatura: FaturaModel = result.scalar_one_or_none()
             
@@ -141,19 +147,21 @@ async def fechar_fatura(
             fatura.id_conta = faturas.id_conta
 
             movimentacoes = await session.execute(
-                select(MovimentacaoModel).where(MovimentacaoModel.id_fatura == faturas.id_fatura)
+                select(MovimentacaoModel).where(
+                    MovimentacaoModel.id_fatura == faturas.id_fatura,
+                    MovimentacaoModel.participa_limite_fatura_gastos == True
+                )
             )
             movimentacoes = movimentacoes.scalars().all()
             
             if not movimentacoes:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Nenhuma movimentação encontrada para esta fatura"
+                    detail="Nenhuma movimentação confirmada para esta fatura"
                 )
 
             for movimentacao in movimentacoes:
                 movimentacao.consolidado = True
-                movimentacao.data_pagamento = data_hoje
 
             conta = await session.execute(
                 select(ContaModel).where(
@@ -171,29 +179,20 @@ async def fechar_fatura(
             
             conta.saldo -= fatura.fatura_gastos  
 
-            cartao = await session.execute(
-                select(CartaoCreditoModel).where(CartaoCreditoModel.id_cartao_credito == fatura.id_cartao_credito)
-            )
-            cartao = cartao.scalar_one_or_none()
-            
-            if not cartao:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Cartão de crédito associado à fatura não encontrado"
-                )
-            
+            cartao = fatura.cartao_credito
             cartao.limite_disponivel += fatura.fatura_gastos
-
+            
             await session.commit()
 
             return {"message": "Fatura fechada com sucesso"}
 
-        except IntegrityError:
-            await session.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro ao fechar a fatura"
-            )
+        except Exception as e:
+            await handle_db_exceptions(session, e)
+        
+        finally:
+            await session.close()
+
+
 
 @router.put('/editar/{id_fatura}', response_model=FaturaSchemaId,status_code=status.HTTP_200_OK)
 async def put_fatura(
@@ -241,37 +240,37 @@ async def put_fatura(
             await session.rollback()  # Garantir rollback em caso de erro
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao atualizar a fatura. Verifique os dados fornecidos.')
         
-@router.get('/visualizar/{id_fatura}', response_model=FaturaSchema, status_code=status.HTTP_200_OK)
-async def get_fatura(id_fatura: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
-    async with db as session:
-        query = select(FaturaModel).join(CartaoCreditoModel).where(
-            FaturaModel.id_fatura == id_fatura,
-            CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
-        )
-        result = await session.execute(query)
-        fatura = result.scalars().unique().one_or_none()
+# @router.get('/visualizar/{id_fatura}', response_model=FaturaSchema, status_code=status.HTTP_200_OK)
+# async def get_fatura(id_fatura: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+#     async with db as session:
+#         query = select(FaturaModel).join(CartaoCreditoModel).where(
+#             FaturaModel.id_fatura == id_fatura,
+#             CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
+#         )
+#         result = await session.execute(query)
+#         fatura = result.scalars().unique().one_or_none()
 
-        if not fatura:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="fatura não encontrada ou não pertence ao usuário logado")
+#         if not fatura:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="fatura não encontrada ou não pertence ao usuário logado")
 
-        return fatura
+#         return fatura
 
    
-@router.get('/cartaoCredito/{id_cartao_credito}/fatura', response_model=List[FaturaSchema], status_code=status.HTTP_200_OK)
-async def get_faturas_by_cartao(id_cartao_credito: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
-    async with db as session:
-        query_cartao_credito = select(CartaoCreditoModel).where(CartaoCreditoModel.id_cartao_credito == id_cartao_credito, CartaoCreditoModel.id_usuario == usuario_logado.id_usuario)
-        result_cartao_credito = await session.execute(query_cartao_credito)
-        cartao_credito = result_cartao_credito.scalars().one_or_none()
+# @router.get('/cartaoCredito/{id_cartao_credito}/fatura', response_model=List[FaturaSchema], status_code=status.HTTP_200_OK)
+# async def get_faturas_by_cartao(id_cartao_credito: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
+#     async with db as session:
+#         query_cartao_credito = select(CartaoCreditoModel).where(CartaoCreditoModel.id_cartao_credito == id_cartao_credito, CartaoCreditoModel.id_usuario == usuario_logado.id_usuario)
+#         result_cartao_credito = await session.execute(query_cartao_credito)
+#         cartao_credito = result_cartao_credito.scalars().one_or_none()
 
-        if not cartao_credito:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de crédito não encontrada ou não pertence ao usuário logado")
+#         if not cartao_credito:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de crédito não encontrada ou não pertence ao usuário logado")
         
-        query_faturas = select(FaturaModel).where(FaturaModel.id_cartao_credito == id_cartao_credito)
-        result_faturas = await session.execute(query_faturas)
-        faturas = result_faturas.scalars().all()
+#         query_faturas = select(FaturaModel).where(FaturaModel.id_cartao_credito == id_cartao_credito)
+#         result_faturas = await session.execute(query_faturas)
+#         faturas = result_faturas.scalars().all()
 
-        return faturas
+#         return faturas
     
 @router.delete('/deletar/{id_fatura}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_fatura(id_fatura: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
