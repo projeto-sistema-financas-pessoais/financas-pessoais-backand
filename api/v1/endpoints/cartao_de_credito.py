@@ -148,7 +148,7 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                     "ativo": cartao.ativo,
                     "id_usuario": cartao.id_usuario,
                     "limite": cartao.limite,
-                    "fatura_gastos": proxima_fatura.fatura_gastos
+                    "fatura_gastos": None # não usar pois seria só do mês atual, pegar do listar movimentacao
                 }
                 cartoes_credito_response.append(cartao_data)
 
@@ -158,7 +158,7 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error while fetching credit cards")
     
-@router.get('/visualizar/{id_cartao_credito}', response_model=CartaoCreditoSchemaFatura, status_code=status.HTTP_200_OK)
+@router.get('/visualizar/{id_cartao_credito}', response_model=CartaoCreditoSchemaId, status_code=status.HTTP_200_OK)
 async def listar_cartao_credito(
     id_cartao_credito: int, 
     db: AsyncSession = Depends(get_session), 
@@ -173,26 +173,29 @@ async def listar_cartao_credito(
                 CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
             )
         )
-        result = await session.execute(query)
+        result = (await session.execute(query)).unique()
         cartao_credito = result.scalars().one_or_none()
 
         if not cartao_credito:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de crédito não encontrado ou você não tem permissão para visualizá-lo")
 
         proxima_fatura = (
-            sorted ([f for f in cartao_credito.faturas if f.data_vencimento >= datetime.now().date()], key=lambda f: f.data_vencimento)[0] if cartao_credito.faturas else None
+            sorted (
+                [f for f in cartao_credito.faturas if f.data_vencimento >= datetime.now().date()], 
+                key=lambda f: f.data_vencimento)[0] if cartao_credito.faturas else None
         )
 
         return {
             "id_cartao_credito": cartao_credito.id_cartao_credito,
             "nome": cartao_credito.nome,
-            "limite": cartao_credito.limite,
+            "limite_disponivel": cartao_credito.limite_disponivel,
+            "dia_fechamento": proxima_fatura.data_fechamento.day if proxima_fatura else None,
+            "dia_vencimento": proxima_fatura.data_vencimento.day if proxima_fatura else None,
             "nome_icone": cartao_credito.nome_icone,
             "ativo": cartao_credito.ativo,
             "id_usuario": cartao_credito.id_usuario,
-            "limite_disponivel": cartao_credito.limite_disponivel,
-            "dia_fechamento": proxima_fatura.data_fechamento.day if proxima_fatura else None,
-            "dia_vencimento": proxima_fatura.data_vencimento.day if proxima_fatura else None
+            "limite": cartao_credito.limite,
+            "fatura_gastos": proxima_fatura.fatura_gastos
         }
 
     
