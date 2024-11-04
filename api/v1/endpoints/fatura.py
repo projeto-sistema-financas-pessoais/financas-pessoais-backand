@@ -182,7 +182,6 @@ async def fechar_fatura(
             cartao.limite_disponivel += fatura.fatura_gastos
             fatura.fatura_gastos = 0
             
-            print(f"fatura, limite: {fatura.fatura_gastos, cartao.limite_disponivel}")
 
             await session.commit()
 
