@@ -26,4 +26,5 @@ class FaturaSchemaInfo(FaturaSchema):
     data_pagamento: Optional[date]
     id_cartao_credito: int
     fatura_gastos: Decimal
+    nome_conta: Optional[str] = None
 

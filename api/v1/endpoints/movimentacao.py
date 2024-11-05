@@ -595,10 +595,10 @@ async def listar_movimentacoes(
             condicoes.append(MovimentacaoModel.id_categoria == requestFilter.id_categoria)
             
         if requestFilter.id_conta is not None: 
-            condicoes.append(MovimentacaoModel.id_conta == requestFilter.id_conta)
-            
-        # if requestFilter.id_fatura is not None: 
-        #     condicoes.append(MovimentacaoModel.id_fatura == requestFilter.id_fatura)
+            condicoes.append(
+                    (MovimentacaoModel.id_conta == requestFilter.id_conta) | 
+                    (MovimentacaoModel.id_conta_destino == requestFilter.id_conta)
+                )        
             
         query = (
             select(MovimentacaoModel)
@@ -610,7 +610,9 @@ async def listar_movimentacoes(
                 selectinload(MovimentacaoModel.divisoes),
                 selectinload(MovimentacaoModel.divisoes, DivideModel.parentes),
                 selectinload(MovimentacaoModel.fatura),
-                selectinload(MovimentacaoModel.fatura, FaturaModel.cartao_credito)
+                selectinload(MovimentacaoModel.fatura, FaturaModel.cartao_credito),
+                selectinload(MovimentacaoModel.fatura, FaturaModel.conta)
+
             )
             .where(*condicoes)  
             .order_by(
@@ -673,6 +675,7 @@ async def listar_movimentacoes(
                             data_pagamento = mov.fatura.data_pagamento or None,
                             id_cartao_credito = mov.fatura.id_cartao_credito,
                             id_conta = mov.fatura.id_conta,
+                            nome_conta = mov.fatura.conta.nome if mov.fatura.conta else None,
                             fatura_gastos= mov.fatura.fatura_gastos
                         ) if requestFilter.id_cartao_credito is not None else None
                 )
