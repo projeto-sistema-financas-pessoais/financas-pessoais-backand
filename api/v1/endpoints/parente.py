@@ -143,7 +143,7 @@ async def delete_parente(id_parente: int, db: AsyncSession = Depends(get_session
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao tentar deletar o parente.")
 
-@router.post("/send-invoice/", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/enviar-cobranca", status_code=status.HTTP_202_ACCEPTED)
 async def send_invoice(
     cobranca: ParenteSchemaCobranca,
     request: Request,
@@ -171,7 +171,7 @@ async def send_invoice(
                 MovimentacaoModel.valor, 
             ).join(MovimentacaoModel).filter(
                 DivideModel.id_parente == cobranca.id_parente,
-                MovimentacaoModel.consolidado == "false",
+                MovimentacaoModel.consolidado == False,
                 ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
                  (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
             )
@@ -186,7 +186,7 @@ async def send_invoice(
 
             query_total = select(func.sum(MovimentacaoModel.valor)).join(DivideModel).filter(
                 DivideModel.id_parente == cobranca.id_parente, 
-                MovimentacaoModel.consolidado == "false",
+                MovimentacaoModel.consolidado == False,
                 ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
                  (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
             )
@@ -239,4 +239,5 @@ async def send_invoice(
             return {"message": "Cobrança enviada por email com sucesso."}
 
         except Exception as e:
+            await handle_db_exceptions(session, e)
             return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'Erro ao enviar cobrança'})
