@@ -91,20 +91,22 @@ async def update_cartao_credito(
         if cartao_credito_update.dia_fechamento or cartao_credito_update.dia_vencimento:
             fatura_query = select(FaturaModel).where(
                 FaturaModel.id_cartao_credito == id_cartao_credito,
-                FaturaModel.dia_fechamento >= date.today()  
+                FaturaModel.data_fechamento >= date.today()  
             )
+
             fatura_result = await session.execute(fatura_query)
             faturas: List[FaturaModel] = fatura_result.scalars().all()
 
             for fatura in faturas:
                 if cartao_credito_update.dia_fechamento:
-                    fatura.dia_fechamento = fatura.dia_fechamento.replace(
+                    fatura.data_fechamento = fatura.data_fechamento.replace(
                         day=cartao_credito_update.dia_fechamento
                     )
                 if cartao_credito_update.dia_vencimento:
-                    fatura.dia_vencimento = fatura.dia_vencimento.replace(
+                    fatura.data_vencimento = fatura.data_vencimento.replace(
                         day=cartao_credito_update.dia_vencimento
-                    )
+            )
+
         try:
             await session.commit()
             await session.refresh(cartao_credito)  
