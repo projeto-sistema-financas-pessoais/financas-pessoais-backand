@@ -15,10 +15,10 @@ from schemas.recoverPasswordRequest import RecoverPasswordRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from core.auth import auth, generate_token_access, decoded_token, send_email_to_reset_password
 import jwt
-from smtplib import SMTPException  # Para tratamento do envio de email
+from smtplib import SMTPException 
 from sqlalchemy.future import select
-from fastapi import BackgroundTasks  # Importar BackgroundTasks
-
+from fastapi import BackgroundTasks 
+from sqlalchemy import text  
 
 router = APIRouter()
 
@@ -150,14 +150,7 @@ async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSess
         },
         status_code=status.HTTP_200_OK
     )
-from sqlalchemy import text  # Certifique-se de importar a função text
 
-from sqlalchemy.future import select
-from fastapi import HTTPException
-from models import UsuarioModel  # Certifique-se de que sua model está corretamente importada
-
-from sqlalchemy.future import select
-from models import UsuarioModel
 
 @router.post('/reset-password/{token}')
 async def reset_password(token: str, 
@@ -175,10 +168,8 @@ async def reset_password(token: str,
 
     async with db as session:
         try:
-            # Recupera o ID do usuário do token e converte para inteiro
-            user_id = int(decoded_data['sub'])  # Converte para inteiro
+            user_id = int(decoded_data['sub']) 
 
-            # Faz a consulta através da model
             result = await session.execute(select(UsuarioModel).where(UsuarioModel.id_usuario == user_id))
             user_data = result.scalars().first()
         except Exception as e:
@@ -186,7 +177,6 @@ async def reset_password(token: str,
             raise HTTPException(status_code=500, detail="Database query failed")
 
         if user_data:
-            # Atualiza a senha usando o valor do schema
             user_data.senha = generate_hash(schema.password)
             await session.commit()
             return JSONResponse(status_code=status.HTTP_200_OK, content={"message": f"Password for user ID {user_data.id_usuario} updated successfully"})
@@ -204,8 +194,6 @@ async def recover_password(schema: RecoverPasswordRequest,
     
     async with db as session:
         try:
-            print(f"E-mail recebido no schema: {schema.email}")
-
             query = await session.execute(select(UsuarioModel).filter(UsuarioModel.email == schema.email))
             user_data = query.scalars().first()
 
@@ -213,14 +201,10 @@ async def recover_password(schema: RecoverPasswordRequest,
                 token = generate_token_access(user_data.id_usuario)
                 background_tasks.add_task(send_email_to_reset_password, request, user_data, token)           
             else:
-                print(f"Erro durante a execução da função 2: {e}")
-
                 return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={'message': 'e-mail not found in database'})
 
         except Exception as e:
-            print(f"Erro durante a execução da função: {e}")
             return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'erro ao enviar'})
-
 
 @router.put('/editar', status_code=status.HTTP_200_OK)
 async def update_usuario(

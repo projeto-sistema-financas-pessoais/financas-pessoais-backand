@@ -19,3 +19,8 @@ class ParenteSchemaUpdate(ParenteSchema):
     nome: Optional[str] = None
     email: Optional[str] = None
     ativo : Optional[bool] = True
+
+class ParenteSchemaCobranca(BaseModel):
+    mes: int
+    ano: int
+    id_parente: int

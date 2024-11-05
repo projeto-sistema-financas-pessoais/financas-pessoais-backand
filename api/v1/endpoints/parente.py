@@ -1,14 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from datetime import datetime  # Corrigido para importar 'datetime' diretamente
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status, Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
+from core.auth import send_email
 from core.utils import handle_db_exceptions
 from models.parente_model import ParenteModel
-from schemas.parente_schema import ParenteSchema, ParenteSchemaUpdate, ParenteSchemaId
+from models.divide_model import  DivideModel
+from models.movimentacao_model import MovimentacaoModel
+from schemas.parente_schema import ParenteSchema, ParenteSchemaCobranca, ParenteSchemaUpdate, ParenteSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
-from sqlalchemy import case, select
+from sqlalchemy import case, extract, func, select
 
 
 router = APIRouter()
@@ -137,3 +142,101 @@ async def delete_parente(id_parente: int, db: AsyncSession = Depends(get_session
         except Exception as e:
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao tentar deletar o parente.")
+
+@router.post("/send-invoice/", status_code=status.HTTP_202_ACCEPTED)
+async def send_invoice(
+    cobranca: ParenteSchemaCobranca,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    
+    async with db as session:
+        try:
+            query = select(ParenteModel).filter(
+                ParenteModel.id_parente == cobranca.id_parente,
+                ParenteModel.id_usuario == usuario_logado.id_usuario
+            )
+            result = await session.execute(query)
+            parente = result.scalars().one_or_none()
+
+            if not parente:
+                return {"message": "Parente não encontrado."}
+            
+            query = select(
+                DivideModel,
+                MovimentacaoModel.descricao,
+                MovimentacaoModel.data_pagamento,
+                MovimentacaoModel.valor, 
+            ).join(MovimentacaoModel).filter(
+                DivideModel.id_parente == cobranca.id_parente,
+                MovimentacaoModel.consolidado == "false",
+                ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
+                 (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
+            )
+            result = await session.execute(query)
+            movimentacoes_nao_consolidadas = result.all()
+
+            if not movimentacoes_nao_consolidadas:
+                return {"message": "Nenhuma movimentação não consolidada encontrada para este parente."}
+
+
+            total_movimentacoes = sum(divide.valor for divide, _, _, _ in movimentacoes_nao_consolidadas)
+
+            query_total = select(func.sum(MovimentacaoModel.valor)).join(DivideModel).filter(
+                DivideModel.id_parente == cobranca.id_parente, 
+                MovimentacaoModel.consolidado == "false",
+                ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
+                 (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
+            )
+
+            total_geral_result = await session.execute(query_total)
+            total_geral_movimentacoes = total_geral_result.scalar() or 0  # Caso retorne None
+
+            email_data = {
+                "email_subject": "Cobrança de Movimentações não Consolidadas",
+                "email_body": (
+                    f"Olá, {parente.nome},<br><br>"
+                    f"Essas são as suas movimentações não consolidadas com {usuario_logado.nome_completo} no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+                    f"<table style='border-collapse: collapse; width: 100%;'>"
+                    f"<thead>"
+                    f"<tr style='background-color: #f2f2f2;'>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor da Movimentação</th>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor Dividido</th>"
+                    f"</tr>"
+                    f"</thead>"
+                    f"<tbody>"
+                ) + "".join(
+                    f"<tr>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{descricao}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{data_pagamento.strftime('%d/%m/%Y')}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacao_valor}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{divide.valor}</td>"
+                    f"</tr>"
+                    for divide, descricao, data_pagamento, movimentacao_valor in movimentacoes_nao_consolidadas
+                ) +
+                f"</tbody>"
+                f"</table><br>"
+                f"<h4>Resumo da Cobrança:</h4>"
+                f"<table style='border-collapse: collapse; width: 100%;'>"
+                f"<tr style='background-color: #f2f2f2;'>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
+                f"</tr>"
+                f"<tr>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_geral_movimentacoes}</td>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_movimentacoes}</td>"
+                f"</tr>"
+                f"</table><br>"
+                f"Por favor, entre em contato para mais informações."
+            }
+
+            background_tasks.add_task(send_email, email_data, parente.email)
+
+            return {"message": "Cobrança enviada por email com sucesso."}
+
+        except Exception as e:
+            return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'Erro ao enviar cobrança'})
