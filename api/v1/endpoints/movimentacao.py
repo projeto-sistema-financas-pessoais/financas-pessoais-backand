@@ -12,7 +12,7 @@ from models.cartao_credito_model import CartaoCreditoModel
 from models.divide_model import DivideModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
-from schemas.fatura_schema import FaturaSchema, FaturaSchemaId
+from schemas.fatura_schema import FaturaSchema, FaturaSchemaId, FaturaSchemaInfo
 from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoRequestFilterSchema,
     MovimentacaoSchemaConsolida, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
     MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
@@ -65,6 +65,7 @@ async def create_movimentacao(
 ):
     async with db as session:
         try:
+            today = date.today()
             query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == movimentacao.id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
             result_categoria = await session.execute(query_categoria)
             categoria = result_categoria.scalars().first()
@@ -124,15 +125,17 @@ async def create_movimentacao(
                 
                 if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE: 
                     if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
-                        movimentacao.quantidade_parcelas = 2
+                        movimentacao.quantidade_parcelas = 4
                     else: 
-                        movimentacao.quantidade_parcelas = 8
+                        movimentacao.quantidade_parcelas = 48
 
                 nova_repeticao = RepeticaoModel(
                     quantidade_parcelas=movimentacao.quantidade_parcelas,
                     tipo_recorrencia=movimentacao.tipo_recorrencia,
                     valor_total=movimentacao.valor,
                     data_inicio=movimentacao.data_pagamento,
+                    id_usuario = usuario_logado.id_usuario
+
                 )
                 db.add(nova_repeticao)
                 await db.flush()
@@ -169,12 +172,27 @@ async def create_movimentacao(
                         
                 if movimentacao.forma_pagamento == FormaPagamento.CREDITO:
 
-                    if parcela_atual == 1:
+                    if parcela_atual == 1 :
                         cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado + valor_restante
                         fatura.fatura_gastos +=valor_por_parcela_ajustado + valor_restante
+                        nova_movimentacao.participa_limite_fatura_gastos = True
                     elif movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
                         cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado
                         fatura.fatura_gastos +=valor_por_parcela_ajustado
+                        nova_movimentacao.participa_limite_fatura_gastos = True
+
+                    elif parcela_atual > 1: 
+                        if(data_pagamento.month == today.month and data_pagamento.year == today.year):
+                            cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado 
+                            fatura.fatura_gastos +=valor_por_parcela_ajustado
+                            nova_movimentacao.participa_limite_fatura_gastos = True
+                    else: 
+                        nova_movimentacao.participa_limite_fatura_gastos = False if movimentacao.forma_pagamento == FormaPagamento.CREDITO else None
+
+
+
+                    
+                    
 
 
                 # Criação dos relacionamentos com parentes
@@ -283,7 +301,7 @@ async def create_movimentacao(
                 
                 if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE: 
                     if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
-                        movimentacao.quantidade_parcelas = 10
+                        movimentacao.quantidade_parcelas = 4
                     else: 
                         movimentacao.quantidade_parcelas = 48
 
@@ -292,6 +310,7 @@ async def create_movimentacao(
                     tipo_recorrencia=movimentacao.tipo_recorrencia,
                     valor_total=movimentacao.valor,
                     data_inicio=movimentacao.data_pagamento,
+                    id_usuario = usuario_logado.id_usuario
                 )
                 db.add(nova_repeticao)
                 await db.flush()
@@ -314,7 +333,9 @@ async def create_movimentacao(
                     id_categoria=movimentacao.id_categoria,
                     id_fatura= None,
                     id_repeticao= id_repeticao if movimentacao.condicao_pagamento != CondicaoPagamento.A_VISTA  else None,
-                    id_usuario=usuario_logado.id_usuario
+                    id_usuario=usuario_logado.id_usuario,
+                    participa_limite_fatura_gastos = None
+
                 )
                 
                 nova_movimentacao.divisoes = []
@@ -340,7 +361,6 @@ async def create_movimentacao(
                 movimentacao.consolidado = False
                 
                 if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE:
-                    # Lógica para ajustar data_pagamento com base em recorrência
                     if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
                         data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1)
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.QUINZENAL:
@@ -408,7 +428,8 @@ async def create_movimentacao(
                 condicao_pagamento="À vista",       
                 datatime=datetime.now(),            
                 data_pagamento=datetime.now().date(), 
-                id_usuario=usuario_logado.id_usuario
+                id_usuario=usuario_logado.id_usuario,
+                participa_limite_fatura_gastos = None
             )
             
             session.add(nova_movimentacao)
@@ -592,8 +613,10 @@ async def listar_movimentacoes(
                 selectinload(MovimentacaoModel.fatura, FaturaModel.cartao_credito)
             )
             .where(*condicoes)  
-            .order_by(MovimentacaoModel.data_pagamento)  
-
+            .order_by(
+                    MovimentacaoModel.data_pagamento,
+                    MovimentacaoModel.datatime 
+                )
         )
 
         if requestFilter.id_parente is not None:
@@ -633,6 +656,8 @@ async def listar_movimentacoes(
                     nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
                     id_fatura=mov.id_fatura,
                     id_repeticao=mov.id_repeticao,
+                    participa_limite_fatura_gastos = mov.participa_limite_fatura_gastos,
+
                     divide_parente=[
                         ParenteResponse(
                             id_parente=divide.id_parente,
@@ -642,84 +667,131 @@ async def listar_movimentacoes(
                         for divide in mov.divisoes 
                     ],
                     fatura_info = 
-                        FaturaSchema(
+                        FaturaSchemaInfo(
                             data_vencimento= mov.fatura.data_vencimento,
                             data_fechamento = mov.fatura.data_fechamento,
-                            data_pagamento = mov.fatura.data_pagamento,
+                            data_pagamento = mov.fatura.data_pagamento or None,
                             id_cartao_credito = mov.fatura.id_cartao_credito,
-                            id_conta = mov.fatura.id_conta
-                        ) if requestFilter.id_fatura is not None else None
+                            id_conta = mov.fatura.id_conta,
+                            fatura_gastos= mov.fatura.fatura_gastos
+                        ) if requestFilter.id_cartao_credito is not None else None
                 )
                 for mov in movimentacoes
             ]
 
         return response
     
+
 @router.post("/consolidar")
 async def consolidar_movimentacao(
     movimentacoes: MovimentacaoSchemaConsolida, 
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)):
 
-    movimentacao_query = select(MovimentacaoModel).where(MovimentacaoModel.id_movimentacao == movimentacoes.id_movimentacao, 
-                                                         MovimentacaoModel.id_usuario == usuario_logado.id_usuario)
+    movimentacao_query = (
+        select(MovimentacaoModel)
+        .options(joinedload(MovimentacaoModel.conta))
+        .where(
+            MovimentacaoModel.id_movimentacao == movimentacoes.id_movimentacao,
+            MovimentacaoModel.id_usuario == usuario_logado.id_usuario
+        )
+    )
     movimentacao_result = await db.execute(movimentacao_query)
     movimentacao = movimentacao_result.scalar_one_or_none()
 
     if not movimentacao:
         raise HTTPException(status_code=404, detail="Movimentação não encontrada")
 
-
     if movimentacao.id_fatura is not None:
         raise HTTPException(status_code=400, detail="Não é possível consolidar uma movimentação com fatura relacionada")
 
     movimentacao.consolidado = movimentacoes.consolidado
-    # movimentacao.data_pagamento = date.today()  
- 
 
-    conta_query = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta)
-    conta_result = await db.execute(conta_query)
-    conta = conta_result.scalar_one_or_none()
-
+    conta = movimentacao.conta
     if conta is None:
         raise HTTPException(status_code=404, detail="Conta não encontrada")
-    
+
     if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
         if movimentacoes.consolidado:
-             conta.saldo -= movimentacao.valor
+            conta.saldo -= movimentacao.valor
         else:
             conta.saldo += movimentacao.valor
     elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
-        if(movimentacao.consolidado):
+        if movimentacoes.consolidado:
             conta.saldo += movimentacao.valor
-        else: 
+        else:
             conta.saldo -= movimentacao.valor
 
-
-    db.add(movimentacao)
-    db.add(conta)
-    
     await db.commit()
 
     return {"detail": "Movimentação consolidada com sucesso", "movimentacao": movimentacao}
 
 
-        
-@router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
-async def visualizar_movimentacao(
+@router.post("/participa_limite_faturas_gastos")
+async def alterar_limite_fatura_gastos(
     id_movimentacao: int,
+    participa_limite_fatura_gastos: bool,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    async with db as session:
-        query = select(MovimentacaoModel).join(MovimentacaoModel.conta).filter(MovimentacaoModel.id_movimentacao == id_movimentacao, MovimentacaoModel.conta.id_usuario == usuario_logado.id_usuario)
-        result = await session.execute(query)
-        movimentacao = result.scalars().one_or_none()
+    movimentacao_query = (
+        select(MovimentacaoModel)
+        .options(
+            joinedload(MovimentacaoModel.fatura).joinedload(FaturaModel.cartao_credito)
+        )
+        .where(
+            MovimentacaoModel.id_movimentacao == id_movimentacao,
+            MovimentacaoModel.id_usuario == usuario_logado.id_usuario
+        )
+    )
+    movimentacao_result = await db.execute(movimentacao_query)
+    movimentacao = movimentacao_result.scalar_one_or_none()
 
-        if not movimentacao:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada ou não pertence ao usuário")
+    if not movimentacao:
+        raise HTTPException(status_code=404, detail="Movimentação não encontrada")
 
-        return movimentacao
+    if movimentacao.id_fatura is None:
+        raise HTTPException(status_code=400, detail="Não é possível alterar limite e gastos de uma movimentação que não tem id_fatura")
+
+    fatura = movimentacao.fatura
+    if not fatura:
+        raise HTTPException(status_code=404, detail="Fatura não encontrada")
+
+    cartao_credito = fatura.cartao_credito
+    if not cartao_credito:
+        raise HTTPException(status_code=404, detail="Cartão de crédito não encontrado")
+
+    if participa_limite_fatura_gastos is False:
+        cartao_credito.limite_disponivel -= movimentacao.valor
+        fatura.fatura_gastos -= movimentacao.valor
+        movimentacao.participa_limite_fatura_gastos = False
+    elif participa_limite_fatura_gastos is True:
+        cartao_credito.limite_disponivel += movimentacao.valor
+        fatura.fatura_gastos += movimentacao.valor
+        movimentacao.participa_limite_fatura_gastos = True
+
+    await db.commit()
+
+    return {"detail": "Limite de fatura e gastos atualizados com sucesso"}
+        
+
+
+        
+# @router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
+# async def visualizar_movimentacao(
+#     id_movimentacao: int,
+#     db: AsyncSession = Depends(get_session),
+#     usuario_logado: UsuarioModel = Depends(get_current_user)
+# ):
+#     async with db as session:
+#         query = select(MovimentacaoModel).join(MovimentacaoModel.conta).filter(MovimentacaoModel.id_movimentacao == id_movimentacao, MovimentacaoModel.conta.id_usuario == usuario_logado.id_usuario)
+#         result = await session.execute(query)
+#         movimentacao = result.scalars().one_or_none()
+
+#         if not movimentacao:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada ou não pertence ao usuário")
+
+#         return movimentacao
 
 @router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_movimentacao(

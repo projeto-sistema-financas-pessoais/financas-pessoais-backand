@@ -17,6 +17,7 @@ class MovimentacaoModel(settings.DBBaseModel):
     consolidado = Column(Boolean(), nullable=False)
     parcela_atual = Column(String(30), nullable=True)
     data_pagamento = Column(Date, nullable=False)
+    participa_limite_fatura_gastos = Column(Boolean(), nullable=True)
     id_conta = Column(BigInteger, ForeignKey("CONTA.id_conta"))
     id_categoria = Column(BigInteger, ForeignKey("CATEGORIA.id_categoria"))
     id_fatura = Column(BigInteger, ForeignKey("FATURA.id_fatura"))

@@ -16,7 +16,7 @@ class CartaoCreditoModel(settings.DBBaseModel):
     limite_disponivel = Column(DECIMAL(10,2))
 
     usuario = relationship("UsuarioModel", back_populates="cartoes_credito")
-    faturas = relationship("FaturaModel", back_populates="cartao_credito")
+    faturas = relationship("FaturaModel", back_populates="cartao_credito", cascade= "all, delete-orphan")
     
     __table_args__ = (
     UniqueConstraint('nome', 'id_usuario', name='unique_nome_cartao'),

@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import date
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 class UsuarioSchema(BaseModel):
     nome_completo: str
-    data_nascimento: datetime
+    data_nascimento: date
     email: EmailStr
     senha: str
 
@@ -14,7 +14,7 @@ class LoginDataSchema(BaseModel):
 
 class UpdateUsuarioSchema(BaseModel):
     nome_completo: Optional[str] = None
-    data_nascimento: Optional[datetime] = None
+    data_nascimento: Optional[date] = None
 
     class Config:
         from_attributes = True

@@ -4,7 +4,7 @@ import sqlalchemy
 from typing import List, Optional
 from datetime import date, datetime
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
-from schemas.fatura_schema import FaturaSchema
+from schemas.fatura_schema import FaturaSchemaInfo
 
 class MovimentacaoSchema(BaseModel):
     valor: Decimal
@@ -22,6 +22,8 @@ class MovimentacaoSchema(BaseModel):
     id_categoria: Optional[int]
     id_fatura: Optional[int] 
     id_repeticao: Optional[int]
+    participa_limite_fatura_gastos: Optional[bool]
+
 
 
     class Config:
@@ -42,6 +44,8 @@ class MovimentacaoSchemaUpdate(BaseModel):
     id_conta: Optional[int] = None
     id_categoria: Optional[int] = None
     id_fatura: Optional[int] = None
+    participa_limite_fatura_gastos: Optional[bool] = None
+
 
 class MovimentacaoSchemaId(MovimentacaoSchema):
     id_movimentacao: int
@@ -93,7 +97,7 @@ class MovimentacaoRequestFilterSchema(BaseModel):
     consolidado: Optional[bool] = None
     id_categoria: Optional[int] = None
     id_conta: Optional[int] = None
-    id_fatura: Optional[int] = None
+    # id_fatura: Optional[int] = None
     id_cartao_credito: Optional[int] = None
     id_parente: Optional[int] = None
     
@@ -107,7 +111,8 @@ class MovimentacaoSchemaList(MovimentacaoSchema):
     id_conta_destino: Optional[int]
     nome_conta_destino : Optional[str]
     divide_parente: List[ParenteResponse]
-    fatura_info: Optional[FaturaSchema] 
+    fatura_info: Optional[FaturaSchemaInfo] 
+    
 
 class MovimentacaoSchemaConsolida(BaseModel):
     id_movimentacao: int

@@ -16,6 +16,8 @@ from datetime import datetime, timedelta
 from core.configs import settings
 from jose import jwt, JWTError
 from decouple import config
+import asyncio
+
 
 
 oauth2_schema = OAuth2PasswordBearer(
@@ -93,7 +95,7 @@ def send_email(email_data: dict, user_email: str) -> None:
         raise Exception(f"Error occurred while sending email: {e}")
 
 
-def send_email_to_reset_password(request: Request, user_data, token: str, from_scfp_web: bool=True) -> None:
+async def send_email_to_reset_password(request: Request, user_data, token: str, from_scfp_web: bool=True) -> None:
     
     if from_scfp_web:
         base_url = config('URL_WEB')
@@ -111,7 +113,8 @@ def send_email_to_reset_password(request: Request, user_data, token: str, from_s
                     """,
     }
     try:
-        send_email(email_data, user_data.email)
+        await asyncio.to_thread(send_email, email_data, user_data.email)
+
     except Exception as e:
         raise Exception(f"Error occurred while sending email: {e}")
 

@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from core.security import generate_hash
 from core.deps import get_session, get_current_user
+from core.utils import handle_db_exceptions
 from models.usuario_model import UsuarioModel
 from models.categoria_model import CategoriaModel
 from models.conta_model import ContaModel
@@ -146,7 +147,6 @@ async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSess
             "access_token": generate_token_access(sub=usuario.id_usuario),
             "token_type": "bearer",
             "name": usuario.nome_completo,
-            "date_user": str(usuario.data_nascimento)
         },
         status_code=status.HTTP_200_OK
     )
@@ -188,7 +188,9 @@ async def reset_password(token: str,
 @router.post("/recover-password", status_code=status.HTTP_202_ACCEPTED)
 async def recover_password(schema: RecoverPasswordRequest, 
                            request: Request, 
-                           db: AsyncSession = Depends(get_session)):
+                           background_tasks: BackgroundTasks,
+                           db: AsyncSession = Depends(get_session), 
+):
     
     async with db as session:
         try:
@@ -196,36 +198,23 @@ async def recover_password(schema: RecoverPasswordRequest,
             user_data = query.scalars().first()
 
             if user_data:
-                try:
-                    token = generate_token_access(user_data.id_usuario)
-                    send_email_to_reset_password(request, user_data, token, True)
-                    print("E-mail enviado com sucesso")
-
-                    return JSONResponse(status_code=status.HTTP_200_OK, content={'message': 'success'})
-                except SMTPException as e:
-                    print(f"Erro ao enviar e-mail: {e}")
-                    return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'message': 'Error while sending e-mail'})
+                token = generate_token_access(user_data.id_usuario)
+                background_tasks.add_task(send_email_to_reset_password, request, user_data, token)           
             else:
                 return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={'message': 'e-mail not found in database'})
 
         except Exception as e:
             return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'erro ao enviar'})
 
-@router.put('/editar/{id_usuario}', status_code=status.HTTP_200_OK)
+@router.put('/editar', status_code=status.HTTP_200_OK)
 async def update_usuario(
-    id_usuario: int, 
     usuario_update: UpdateUsuarioSchema, 
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    if usuario_logado.id_usuario != id_usuario:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Você não tem permissão para editar este usuário."
-        )
 
     async with db as session:
-        usuario = await session.get(UsuarioModel, id_usuario)
+        usuario = await session.get(UsuarioModel, usuario_logado.id_usuario)
         
         if not usuario:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
@@ -233,42 +222,38 @@ async def update_usuario(
         usuario.nome_completo = usuario_update.nome_completo
         usuario.data_nascimento = usuario_update.data_nascimento
         
+        query = await session.execute(select(ParenteModel).filter(ParenteModel.nome == usuario_logado.nome_completo))
+        parente = query.scalars().one_or_none()
+        
+        if parente:
+            parente.nome = usuario_update.nome_completo
+        
         try:
             await session.commit()
             return usuario
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao atualizar os dados do usuário')
 
-@router.delete('/deletar/{id_usuario}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/deletar', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_usuario(
-    email: str, 
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    if usuario_logado.id_usuario != id_usuario:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Você não tem permissão para deletar este usuário."
-        )
 
     async with db as session:
+
         try:
-            query = select(UsuarioModel).where(UsuarioModel.email == email)
-            result = await session.execute(query)
-            usuario = result.scalars().first()
-        except Exception as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro interno ao buscar usuário")
-        
-        if not usuario:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
-        
-        try:
-            await session.delete(usuario)
+            await session.delete(usuario_logado)
             await session.commit()
-        except Exception as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro interno ao deletar usuário")
+            return {"message": "Deletando usuário com sucesso com sucesso."}
         
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        
+        except Exception as e:
+            await handle_db_exceptions(session, e)
+
+        finally:
+            await session.close()
+        
 
 @router.get('/listar_usuario', status_code=status.HTTP_200_OK)
 async def get_usuario(
@@ -277,7 +262,7 @@ async def get_usuario(
 ):
     async with db as session:
         usuario = {
-            "nome": usuario_logado.nome_completo,
+            "nome_completo": usuario_logado.nome_completo,
             "data_nascimento": usuario_logado.data_nascimento
         }
         return usuario
