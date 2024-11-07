@@ -3,7 +3,7 @@ from typing import Optional
 
 class ParenteSchema(BaseModel):
     nome: str
-    email: str
+    email: Optional[str] = None
     grau_parentesco: str
     ativo : Optional[bool] = True
 
