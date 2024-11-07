@@ -1,10 +1,14 @@
+from datetime import datetime, date
+from decimal import Decimal
 import api.v1.endpoints
-from datetime import date
+from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from core.utils import handle_db_exceptions
+from models.divide_model import DivideModel
 from models.fatura_model import FaturaModel
+from models.parente_model import ParenteModel
 from models.usuario_model import UsuarioModel
 from models.cartao_credito_model import CartaoCreditoModel
 from models.movimentacao_model import MovimentacaoModel
@@ -54,7 +58,7 @@ async def create_fatura_ano(
             dia_vencimento = fatura_anterior.data_vencimento.day
             dia_fechamento = fatura_anterior.data_fechamento.day
 
-            for mes in range(1, 13):  # Meses de 1 a 12
+            for mes in range(1, 13):  
                 try:
                     data_vencimento = date(ano, mes, dia_vencimento)
                     data_fechamento = date(ano, mes, dia_fechamento)
@@ -115,8 +119,6 @@ def adjust_to_valid_date(ano: int, mes: int, dia: int) -> date:
 
     return date(ano, mes, dia)
 
-
-
 @router.post("/fechar")
 async def fechar_fatura(
     faturas: FaturaSchemaId,
@@ -142,6 +144,7 @@ async def fechar_fatura(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Fatura não encontrada"
                 )
+
             data_hoje = date.today()
             fatura.data_pagamento = data_hoje
             fatura.id_conta = faturas.id_conta
@@ -176,12 +179,45 @@ async def fechar_fatura(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Conta associada à fatura não encontrada"
                 )
-            
+
+            mes_ano_fatura = data_hoje.strftime("%m/%Y")
+
+            descricao = f"Pagamento de fatura - Referente a {mes_ano_fatura}"
+
+            nova_movimentacao = MovimentacaoModel(
+                valor=Decimal(fatura.fatura_gastos),  
+                descricao="Pagamento de fatura ",
+                id_categoria=None,
+                id_conta=fatura.id_conta,
+                condicao_pagamento="À vista",
+                datatime=datetime.now(),
+                data_pagamento=data_hoje,
+                consolidado=True,
+                forma_pagamento="Débito",
+                id_usuario = usuario_logado.id_usuario,
+                tipoMovimentacao="Fatura",
+            )
+
+            parente_query = (
+                select(ParenteModel)
+                .where(ParenteModel.nome == usuario_logado.nome_completo)
+            )
+            parente_result = await session.execute(parente_query)
+            parente = parente_result.scalar_one_or_none()
+
+            if parente:
+                novo_divide_parente = DivideModel(
+                    id_parente=parente.id_parente,
+                    valor=nova_movimentacao.valor
+                )
+                nova_movimentacao.divisoes.append(novo_divide_parente)
+
+            session.add(nova_movimentacao)
+
             conta.saldo -= fatura.fatura_gastos  
             cartao = fatura.cartao_credito
             cartao.limite_disponivel += fatura.fatura_gastos
             fatura.fatura_gastos = 0
-            
 
             await session.commit()
 
@@ -192,8 +228,6 @@ async def fechar_fatura(
         
         finally:
             await session.close()
-
-
 
 @router.put('/editar/{id_fatura}', response_model=FaturaSchemaId,status_code=status.HTTP_200_OK)
 async def put_fatura(
