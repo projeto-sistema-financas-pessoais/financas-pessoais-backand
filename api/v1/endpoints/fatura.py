@@ -58,7 +58,7 @@ async def create_fatura_ano(
             dia_vencimento = fatura_anterior.data_vencimento.day
             dia_fechamento = fatura_anterior.data_fechamento.day
 
-            for mes in range(1, 13):  # Meses de 1 a 12
+            for mes in range(1, 13):  
                 try:
                     data_vencimento = date(ano, mes, dia_vencimento)
                     data_fechamento = date(ano, mes, dia_fechamento)
@@ -118,8 +118,6 @@ def adjust_to_valid_date(ano: int, mes: int, dia: int) -> date:
         dia = ultimo_dia_mes
 
     return date(ano, mes, dia)
-
-
 
 @router.post("/fechar")
 async def fechar_fatura(
@@ -200,7 +198,6 @@ async def fechar_fatura(
                 tipoMovimentacao="Fatura",
             )
 
-            # Buscar o parente com o mesmo nome do usuário logado
             parente_query = (
                 select(ParenteModel)
                 .where(ParenteModel.nome == usuario_logado.nome_completo)
@@ -208,7 +205,6 @@ async def fechar_fatura(
             parente_result = await session.execute(parente_query)
             parente = parente_result.scalar_one_or_none()
 
-            # Se o parente for encontrado, cria um registro de divisão
             if parente:
                 novo_divide_parente = DivideModel(
                     id_parente=parente.id_parente,
@@ -216,10 +212,8 @@ async def fechar_fatura(
                 )
                 nova_movimentacao.divisoes.append(novo_divide_parente)
 
-            # Adicionar a nova movimentação à sessão
             session.add(nova_movimentacao)
 
-            # Atualizar saldo da conta e limite do cartão
             conta.saldo -= fatura.fatura_gastos  
             cartao = fatura.cartao_credito
             cartao.limite_disponivel += fatura.fatura_gastos
@@ -234,9 +228,6 @@ async def fechar_fatura(
         
         finally:
             await session.close()
-
-
-
 
 @router.put('/editar/{id_fatura}', response_model=FaturaSchemaId,status_code=status.HTTP_200_OK)
 async def put_fatura(
