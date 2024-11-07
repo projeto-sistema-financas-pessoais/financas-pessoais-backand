@@ -1,3 +1,4 @@
+from sqlalchemy import extract
 import api.v1.endpoints
 import datetime
 import api.v1.endpoints.fatura
@@ -90,9 +91,14 @@ async def update_cartao_credito(
             cartao_credito.ativo = cartao_credito_update.ativo
 
         if cartao_credito_update.dia_fechamento or cartao_credito_update.dia_vencimento:
+            hoje = datetime.now()
+            mes_atual = hoje.month
+            ano_atual = hoje.year
+
             fatura_query = select(FaturaModel).where(
                 FaturaModel.id_cartao_credito == id_cartao_credito,
-                FaturaModel.data_fechamento >= date.today()  
+                extract('year', FaturaModel.data_fechamento) >= ano_atual,
+                extract('month', FaturaModel.data_fechamento) >= mes_atual
             )
 
             fatura_result = await session.execute(fatura_query)
