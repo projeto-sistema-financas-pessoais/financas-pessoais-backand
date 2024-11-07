@@ -6,6 +6,7 @@ class TipoMovimentacao(str, Enum):
     DESPESA = "Despesa"
     RECEITA = "Receita"
     TRANSFERENCIA = "Transferencia"
+    FATURA = "Fatura"
 
 class FormaPagamento(str, Enum):
     DEBITO = "Débito"
