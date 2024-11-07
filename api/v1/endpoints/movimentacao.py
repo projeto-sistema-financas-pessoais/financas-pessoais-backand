@@ -956,26 +956,25 @@ async def calcular_orcamento_mensal(
         despesas_result = await session.execute(query_despesas_total)
         despesas = {row.id_categoria: row.valor_despesa for row in despesas_result.fetchall()}
         
-        orcamento_gastos = [
-            {
-                "valor_categoria": categoria.valor_categoria,
-                "valor_despesa": despesas.get(categoria.id_categoria, Decimal(0)),
+        resultado = []
+        soma_despesas_totais = Decimal(0)
+        
+        for categoria in categorias:
+            valor_despesa = despesas.get(categoria.id_categoria, Decimal(0))
+            soma_despesas_totais += valor_despesa
+            resultado.append({
                 "nome_categoria": categoria.nome,
                 "nome_icone_categoria": categoria.nome_icone,
-            }
-            for categoria in categorias
-        ]
+                "valor_categoria": categoria.valor_categoria,
+                "valor_despesa": valor_despesa
+            })
         
-        for item in orcamento_gastos:
-            print(f"Categoria: {item['nome_categoria']}, "
-                  f"Valor Categoria: {item['valor_categoria']}, "
-                  f"Valor Despesa: {item['valor_despesa']}, "
-                  f"Ícone Categoria: {item['nome_icone_categoria']}")
-        
-    return {
-        "orcamento_total": orcamento_total,
-        "orcamento_gastos": orcamento_gastos
-    }
+        return {
+            "orcamento_total": str(orcamento_total),
+            "despesas_totais": str(soma_despesas_totais),
+            "detalhes_categorias": resultado
+        }
+
 
 @router.get("/gastos-receitas-por-categoria", status_code=status.HTTP_200_OK)
 async def calcular_gastos_receitas_por_categoria(
