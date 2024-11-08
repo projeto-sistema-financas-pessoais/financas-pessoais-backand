@@ -190,12 +190,6 @@ async def create_movimentacao(
                     else: 
                         nova_movimentacao.participa_limite_fatura_gastos = False if movimentacao.forma_pagamento == FormaPagamento.CREDITO else None
 
-
-
-                    
-                    
-
-
                 # Criação dos relacionamentos com parentes
                 for divide in movimentacao.divide_parente:
                     if movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
@@ -685,7 +679,6 @@ async def listar_movimentacoes(
 
         return response
     
-
 @router.post("/consolidar")
 async def consolidar_movimentacao(
     movimentacoes: MovimentacaoSchemaConsolida, 
@@ -766,20 +759,17 @@ async def alterar_limite_fatura_gastos(
         raise HTTPException(status_code=404, detail="Cartão de crédito não encontrado")
 
     if participa_limite_fatura_gastos is False:
-        cartao_credito.limite_disponivel -= movimentacao.valor
+        cartao_credito.limite_disponivel += movimentacao.valor
         fatura.fatura_gastos -= movimentacao.valor
         movimentacao.participa_limite_fatura_gastos = False
     elif participa_limite_fatura_gastos is True:
-        cartao_credito.limite_disponivel += movimentacao.valor
+        cartao_credito.limite_disponivel -= movimentacao.valor
         fatura.fatura_gastos += movimentacao.valor
         movimentacao.participa_limite_fatura_gastos = True
 
     await db.commit()
 
     return {"detail": "Limite de fatura e gastos atualizados com sucesso"}
-        
-
-
         
 # @router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
 # async def visualizar_movimentacao(
@@ -814,8 +804,11 @@ async def deletar_movimentacao(
 
         if not movimentacao:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada.")
-        
 
+        # Verificar se a movimentação tem id_fatura e está consolidada
+        if movimentacao.id_fatura is not None and movimentacao.consolidado:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Movimentação consolidada em fatura não pode ser deletada.")
+        
         if movimentacao.id_repeticao is not None:
             repetidas_query = select(MovimentacaoModel).where(
                 MovimentacaoModel.id_repeticao == movimentacao.id_repeticao,
@@ -857,7 +850,6 @@ async def deletar_movimentacao(
         return {"message": "Deletado com sucesso."}
 
 async def processar_delecao_movimentacao(movimentacao: MovimentacaoModel, session: AsyncSession, usuario_logado: UsuarioModel):
-
     if movimentacao.consolidado and movimentacao.id_conta is not None:
         conta_query = select(ContaModel).where(
             ContaModel.id_conta == movimentacao.id_conta,
@@ -879,34 +871,31 @@ async def processar_delecao_movimentacao(movimentacao: MovimentacaoModel, sessio
                     conta_destino.saldo -= Decimal(movimentacao.valor)
                     session.add(conta_destino)
 
-            session.add(conta)
+            session.add(conta)     
+                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+    if movimentacao.participa_limite_fatura_gastos:
 
-    if movimentacao.id_fatura is not None:
         fatura_query = select(FaturaModel).where(
-            FaturaModel.id_fatura == movimentacao.id_fatura,
-
+            FaturaModel.id_fatura == movimentacao.id_fatura
         )
         fatura_result = await session.execute(fatura_query)
-        fatura = fatura_result.scalars().one_or_none()  
+        fatura = fatura_result.scalars().one_or_none()
 
-        if fatura and movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
-            if movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
-                fatura.fatura_gastos -= Decimal(movimentacao.valor)
-                session.add(fatura)
+        if fatura:
+            fatura.fatura_gastos -= Decimal(movimentacao.valor)
 
-            if movimentacao.id_fatura is not None:
-                cartao_query = select(CartaoCreditoModel).join(FaturaModel).where(
-                    FaturaModel.id_fatura == movimentacao.id_fatura,
-                    CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
-                )
-                cartao_result = await session.execute(cartao_query)
-                cartao = cartao_result.scalars().one_or_none()  
+        cartao_query = select(CartaoCreditoModel).where(
+            CartaoCreditoModel.id_cartao_credito == fatura.id_cartao_credito,
+        )
+        cartao_result = await session.execute(cartao_query)
+        cartao = cartao_result.scalars().one_or_none()
 
-                if cartao:
-                    cartao.limite_disponivel += Decimal(movimentacao.valor)
-                    session.add(cartao)
-    
+        if cartao:
+            cartao.limite_disponivel += Decimal(movimentacao.valor)
+
     await session.delete(movimentacao)
+
+
 
 @router.get("/orcamento-mensal", status_code=status.HTTP_200_OK)
 async def calcular_orcamento_mensal(
