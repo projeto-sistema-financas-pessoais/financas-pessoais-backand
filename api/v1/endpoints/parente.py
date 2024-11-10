@@ -7,6 +7,7 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from core.auth import send_email
 from core.utils import handle_db_exceptions
+from models.enums import TipoMovimentacao
 from models.parente_model import ParenteModel
 from models.divide_model import  DivideModel
 from models.movimentacao_model import MovimentacaoModel
@@ -172,6 +173,7 @@ async def send_invoice(
             ).join(MovimentacaoModel).filter(
                 DivideModel.id_parente == cobranca.id_parente,
                 MovimentacaoModel.consolidado == False,
+                MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
                 ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
                  (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
             )
@@ -187,6 +189,7 @@ async def send_invoice(
             query_total = select(func.sum(MovimentacaoModel.valor)).join(DivideModel).filter(
                 DivideModel.id_parente == cobranca.id_parente, 
                 MovimentacaoModel.consolidado == False,
+                MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
                 ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
                  (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
             )
@@ -194,46 +197,86 @@ async def send_invoice(
             total_geral_result = await session.execute(query_total)
             total_geral_movimentacoes = total_geral_result.scalar() or 0  # Caso retorne None
 
-            email_data = {
-                "email_subject": "Cobrança de Movimentações não Consolidadas",
-                "email_body": (
-                    f"Olá, {parente.nome},<br><br>"
-                    f"Essas são as suas movimentações não consolidadas com {usuario_logado.nome_completo} no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+            if parente.nome == usuario_logado.nome_completo:
+                email_data = {
+                    "email_subject": "Lembrete de Movimentações não Consolidadas",
+                    "email_body": (
+                        f"Olá, {usuario_logado.nome_completo},<br><br>"
+                        f"Essas são as suas movimentações não consolidadas no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+                        f"<table style='border-collapse: collapse; width: 100%;'>"
+                        f"<thead>"
+                        f"<tr style='background-color: #f2f2f2;'>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor da Movimentação</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor a pagar</th>"
+                        f"</tr>"
+                        f"</thead>"
+                        f"<tbody>"
+                    ) + "".join(
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{descricao}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{data_pagamento.strftime('%d/%m/%Y')}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacao_valor}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{divide.valor}</td>"
+                        f"</tr>"
+                        for divide, descricao, data_pagamento, movimentacao_valor in movimentacoes_nao_consolidadas
+                    ) +
+                    f"</tbody>"
+                    f"</table><br>"
+                    f"<h4>Resumo da Cobrança:</h4>"
                     f"<table style='border-collapse: collapse; width: 100%;'>"
-                    f"<thead>"
                     f"<tr style='background-color: #f2f2f2;'>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor da Movimentação</th>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor Dividido</th>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
                     f"</tr>"
-                    f"</thead>"
-                    f"<tbody>"
-                ) + "".join(
                     f"<tr>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{descricao}</td>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{data_pagamento.strftime('%d/%m/%Y')}</td>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacao_valor}</td>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{divide.valor}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_geral_movimentacoes}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_movimentacoes}</td>"
                     f"</tr>"
-                    for divide, descricao, data_pagamento, movimentacao_valor in movimentacoes_nao_consolidadas
-                ) +
-                f"</tbody>"
-                f"</table><br>"
-                f"<h4>Resumo da Cobrança:</h4>"
-                f"<table style='border-collapse: collapse; width: 100%;'>"
-                f"<tr style='background-color: #f2f2f2;'>"
-                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
-                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
-                f"</tr>"
-                f"<tr>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_geral_movimentacoes}</td>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_movimentacoes}</td>"
-                f"</tr>"
-                f"</table><br>"
-                f"Por favor, entre em contato para mais informações."
-            }
-
+                    f"</table><br>"
+                    f"Por favor, entre em contato para mais informações."
+                }
+            else:
+                 email_data = { 
+                    "email_subject": "Cobrança de Movimentações não Consolidadas",
+                    "email_body": (
+                        f"Olá, {parente.nome},<br><br>"
+                        f"Essas são as suas movimentações não consolidadas com {usuario_logado.nome_completo} no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+                        f"<table style='border-collapse: collapse; width: 100%;'>"
+                        f"<thead>"
+                        f"<tr style='background-color: #f2f2f2;'>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor da Movimentação</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor a pagar</th>"
+                        f"</tr>"
+                        f"</thead>"
+                        f"<tbody>"
+                    ) + "".join(
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{descricao}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{data_pagamento.strftime('%d/%m/%Y')}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacao_valor}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{divide.valor}</td>"
+                        f"</tr>"
+                        for divide, descricao, data_pagamento, movimentacao_valor in movimentacoes_nao_consolidadas
+                    ) +
+                    f"</tbody>"
+                    f"</table><br>"
+                    f"<h4>Resumo da Cobrança:</h4>"
+                    f"<table style='border-collapse: collapse; width: 100%;'>"
+                    f"<tr style='background-color: #f2f2f2;'>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
+                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
+                    f"</tr>"
+                    f"<tr>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_geral_movimentacoes}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_movimentacoes}</td>"
+                    f"</tr>"
+                    f"</table><br>"
+                    f"Por favor, acesse o sistema para mais informações."
+                 }
             background_tasks.add_task(send_email, email_data, parente.email)
 
             return {"message": "Cobrança enviada por email com sucesso."}
