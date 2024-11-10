@@ -128,8 +128,8 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
 
             await session.commit()
             return novo_usuario
-        except IntegrityError:
-            await session.rollback()
+        except Exception as e:
+            await handle_db_exceptions(session, e)
             raise HTTPException(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE, 
                 detail='Já existe um usuário com este email cadastrado'
