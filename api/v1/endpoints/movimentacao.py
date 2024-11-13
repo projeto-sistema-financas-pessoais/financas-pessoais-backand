@@ -28,6 +28,7 @@ from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError
 from calendar import monthrange
+from dateutil.relativedelta import relativedelta
 
 
 router = APIRouter()
@@ -221,15 +222,11 @@ async def create_movimentacao(
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
                         data_pagamento += timedelta(weeks=1)
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
-                        if data_pagamento.month == 12:
-                            data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                        else:
-                            data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                        data_pagamento += relativedelta(months=1)
+
                 else:
-                    if data_pagamento.month == 12:
-                        data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                    else:
-                        data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                    data_pagamento += relativedelta(months=1)
+
                     
                 if movimentacao.forma_pagamento == FormaPagamento.CREDITO:       
                     fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, data_pagamento)
@@ -363,15 +360,11 @@ async def create_movimentacao(
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
                         data_pagamento += timedelta(weeks=1)
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
-                        if data_pagamento.month == 12:
-                            data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                        else:
-                            data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                        data_pagamento += relativedelta(months=1)
+
                 else:
-                    if data_pagamento.month == 12:
-                        data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                    else:
-                        data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                    data_pagamento += relativedelta(months=1)
+
                 
             await db.commit()
             return {"message": "Receita cadastrada com sucesso."}
@@ -937,9 +930,12 @@ async def calcular_orcamento_mensal(
             ParenteModel, DivideModel.id_parente == ParenteModel.id_parente, isouter=True
         ).filter(
             MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
-            MovimentacaoModel.datatime >= primeiro_dia,
-            MovimentacaoModel.datatime <= ultimo_dia,
-            ParenteModel.nome == usuario_logado.nome_completo
+            MovimentacaoModel.data_pagamento >= primeiro_dia,
+            MovimentacaoModel.data_pagamento <= ultimo_dia,
+            ParenteModel.nome == usuario_logado.nome_completo,
+            ParenteModel.id_usuario == usuario_logado.id_usuario
+            
+
         ).group_by(CategoriaModel.id_categoria)
         
         despesas_result = await session.execute(query_despesas_total)
@@ -999,13 +995,17 @@ async def calcular_gastos_receitas_por_categoria(
         ).join(
             ParenteModel, DivideModel.id_parente == ParenteModel.id_parente, isouter=True
         ).filter(
-            MovimentacaoModel.datatime >= primeiro_dia,
-            MovimentacaoModel.datatime <= ultimo_dia,
+            MovimentacaoModel.data_pagamento >= primeiro_dia,
+            MovimentacaoModel.data_pagamento <= ultimo_dia,
             MovimentacaoModel.tipoMovimentacao == ('RECEITA' if tipo_receita else 'DESPESA')
         )
 
         if somente_usuario:
-            query_soma = query_soma.filter(ParenteModel.nome == usuario_logado.nome_completo)
+            query_soma = query_soma.filter(
+                ParenteModel.nome == usuario_logado.nome_completo,
+                ParenteModel.id_usuario == usuario_logado.id_usuario
+
+            )
 
         query_soma = query_soma.group_by(CategoriaModel.id_categoria)
 
@@ -1020,7 +1020,12 @@ async def calcular_gastos_receitas_por_categoria(
 
         for row in soma_despesas_receitas:
             categoria_id = row.id_categoria
+            # Verifica se a chave existe, se não, inicializa com um dicionário vazio
+            if categoria_id not in categoria_despesas_receitas:
+                categoria_despesas_receitas[categoria_id] = {"valor": 0}
+                
             categoria_despesas_receitas[categoria_id]["valor"] = row.valor_categoria
+
 
         valor_total = sum(categoria["valor"] for categoria in categoria_despesas_receitas.values())
 
@@ -1081,7 +1086,11 @@ async def economia_meses_anteriores(
             )
 
             if somente_usuario:
-                query_despesas = query_despesas.filter(ParenteModel.nome == usuario_logado.nome_completo)
+                query_despesas = query_despesas.filter(
+                    ParenteModel.nome == usuario_logado.nome_completo,
+                    ParenteModel.id_usuario == usuario_logado.id_usuario
+
+                )
             else:
                 query_despesas = query_despesas.filter(DivideModel.valor == DivideModel.valor)
 
