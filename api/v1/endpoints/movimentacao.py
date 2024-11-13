@@ -2,7 +2,7 @@
 import api.v1.endpoints
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query, status, HTTPException
-from sqlalchemy import extract, insert
+from sqlalchemy import extract, func, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
@@ -27,6 +27,7 @@ from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, Ti
 from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError
+from calendar import monthrange
 
 
 router = APIRouter()
@@ -188,12 +189,6 @@ async def create_movimentacao(
                             nova_movimentacao.participa_limite_fatura_gastos = True
                     else: 
                         nova_movimentacao.participa_limite_fatura_gastos = False if movimentacao.forma_pagamento == FormaPagamento.CREDITO else None
-
-
-
-                    
-                    
-
 
                 # Criação dos relacionamentos com parentes
                 for divide in movimentacao.divide_parente:
@@ -684,7 +679,6 @@ async def listar_movimentacoes(
 
         return response
     
-
 @router.post("/consolidar")
 async def consolidar_movimentacao(
     movimentacoes: MovimentacaoSchemaConsolida, 
@@ -765,20 +759,17 @@ async def alterar_limite_fatura_gastos(
         raise HTTPException(status_code=404, detail="Cartão de crédito não encontrado")
 
     if participa_limite_fatura_gastos is False:
-        cartao_credito.limite_disponivel -= movimentacao.valor
+        cartao_credito.limite_disponivel += movimentacao.valor
         fatura.fatura_gastos -= movimentacao.valor
         movimentacao.participa_limite_fatura_gastos = False
     elif participa_limite_fatura_gastos is True:
-        cartao_credito.limite_disponivel += movimentacao.valor
+        cartao_credito.limite_disponivel -= movimentacao.valor
         fatura.fatura_gastos += movimentacao.valor
         movimentacao.participa_limite_fatura_gastos = True
 
     await db.commit()
 
     return {"detail": "Limite de fatura e gastos atualizados com sucesso"}
-        
-
-
         
 # @router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
 # async def visualizar_movimentacao(
@@ -813,8 +804,11 @@ async def deletar_movimentacao(
 
         if not movimentacao:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada.")
-        
 
+        # Verificar se a movimentação tem id_fatura e está consolidada
+        if movimentacao.id_fatura is not None and movimentacao.consolidado:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Movimentação consolidada em fatura não pode ser deletada.")
+        
         if movimentacao.id_repeticao is not None:
             repetidas_query = select(MovimentacaoModel).where(
                 MovimentacaoModel.id_repeticao == movimentacao.id_repeticao,
@@ -856,7 +850,6 @@ async def deletar_movimentacao(
         return {"message": "Deletado com sucesso."}
 
 async def processar_delecao_movimentacao(movimentacao: MovimentacaoModel, session: AsyncSession, usuario_logado: UsuarioModel):
-
     if movimentacao.consolidado and movimentacao.id_conta is not None:
         conta_query = select(ContaModel).where(
             ContaModel.id_conta == movimentacao.id_conta,
@@ -878,31 +871,253 @@ async def processar_delecao_movimentacao(movimentacao: MovimentacaoModel, sessio
                     conta_destino.saldo -= Decimal(movimentacao.valor)
                     session.add(conta_destino)
 
-            session.add(conta)
+            session.add(conta)     
+                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+    if movimentacao.participa_limite_fatura_gastos:
 
-    if movimentacao.id_fatura is not None:
         fatura_query = select(FaturaModel).where(
-            FaturaModel.id_fatura == movimentacao.id_fatura,
-
+            FaturaModel.id_fatura == movimentacao.id_fatura
         )
         fatura_result = await session.execute(fatura_query)
-        fatura = fatura_result.scalars().one_or_none()  
+        fatura = fatura_result.scalars().one_or_none()
 
-        if fatura and movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
-            if movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
-                fatura.fatura_gastos -= Decimal(movimentacao.valor)
-                session.add(fatura)
+        if fatura:
+            fatura.fatura_gastos -= Decimal(movimentacao.valor)
 
-            if movimentacao.id_fatura is not None:
-                cartao_query = select(CartaoCreditoModel).join(FaturaModel).where(
-                    FaturaModel.id_fatura == movimentacao.id_fatura,
-                    CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
-                )
-                cartao_result = await session.execute(cartao_query)
-                cartao = cartao_result.scalars().one_or_none()  
+        cartao_query = select(CartaoCreditoModel).where(
+            CartaoCreditoModel.id_cartao_credito == fatura.id_cartao_credito,
+        )
+        cartao_result = await session.execute(cartao_query)
+        cartao = cartao_result.scalars().one_or_none()
 
-                if cartao:
-                    cartao.limite_disponivel += Decimal(movimentacao.valor)
-                    session.add(cartao)
-    
+        if cartao:
+            cartao.limite_disponivel += Decimal(movimentacao.valor)
+
     await session.delete(movimentacao)
+
+
+
+@router.get("/orcamento-mensal", status_code=status.HTTP_200_OK)
+async def calcular_orcamento_mensal(
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    hoje = datetime.now()
+    primeiro_dia = hoje.replace(day=1)
+    ultimo_dia = hoje.replace(day=monthrange(hoje.year, hoje.month)[1])
+    
+    async with db as session:
+        query_orcamento = select(func.sum(CategoriaModel.valor_categoria).label("orcamento_total")).filter(
+            CategoriaModel.modelo_categoria == TipoMovimentacao.DESPESA,
+            CategoriaModel.id_usuario == usuario_logado.id_usuario
+        )
+        orcamento_total_result = await session.execute(query_orcamento)
+        orcamento_total = orcamento_total_result.scalar() or Decimal(0)
+        
+        query_categorias = select(
+            CategoriaModel.id_categoria,
+            CategoriaModel.valor_categoria,
+            CategoriaModel.nome,
+            CategoriaModel.nome_icone
+        ).filter(
+            CategoriaModel.modelo_categoria == TipoMovimentacao.DESPESA,
+            CategoriaModel.id_usuario == usuario_logado.id_usuario
+        )
+        categorias_result = await session.execute(query_categorias)
+        categorias = categorias_result.fetchall()
+        
+        query_despesas_total = select(
+            CategoriaModel.id_categoria,
+            func.coalesce(func.sum(DivideModel.valor), Decimal(0)).label("valor_despesa")
+        ).join(
+            MovimentacaoModel, MovimentacaoModel.id_categoria == CategoriaModel.id_categoria, isouter=True
+        ).join(
+            DivideModel, MovimentacaoModel.id_movimentacao == DivideModel.id_movimentacao, isouter=True
+        ).join(
+            ParenteModel, DivideModel.id_parente == ParenteModel.id_parente, isouter=True
+        ).filter(
+            MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
+            MovimentacaoModel.datatime >= primeiro_dia,
+            MovimentacaoModel.datatime <= ultimo_dia,
+            ParenteModel.nome == usuario_logado.nome_completo
+        ).group_by(CategoriaModel.id_categoria)
+        
+        despesas_result = await session.execute(query_despesas_total)
+        despesas = {row.id_categoria: row.valor_despesa for row in despesas_result.fetchall()}
+        
+        resultado = []
+        soma_despesas_totais = Decimal(0)
+        
+        for categoria in categorias:
+            valor_despesa = despesas.get(categoria.id_categoria, Decimal(0))
+            soma_despesas_totais += valor_despesa
+            resultado.append({
+                "nome_categoria": categoria.nome,
+                "nome_icone_categoria": categoria.nome_icone,
+                "valor_categoria": categoria.valor_categoria,
+                "valor_despesa": valor_despesa
+            })
+        
+        return {
+            "orcamento_total": str(orcamento_total),
+            "despesas_totais": str(soma_despesas_totais),
+            "detalhes_categorias": resultado
+        }
+
+
+@router.get("/gastos-receitas-por-categoria", status_code=status.HTTP_200_OK)
+async def calcular_gastos_receitas_por_categoria(
+    tipo_receita: bool,  
+    somente_usuario: bool,  
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    hoje = datetime.now()
+    primeiro_dia = hoje.replace(day=1)
+    ultimo_dia = hoje.replace(day=monthrange(hoje.year, hoje.month)[1])
+
+    async with db as session:
+        categorias_query = select(
+            CategoriaModel.id_categoria,
+            CategoriaModel.nome.label("nome_categoria"),
+            CategoriaModel.nome_icone.label("nome_icone_categoria")
+        ).filter(
+            CategoriaModel.modelo_categoria == ('DESPESA' if not tipo_receita else 'RECEITA'),
+            CategoriaModel.id_usuario == usuario_logado.id_usuario
+        )
+
+        categorias_result = await session.execute(categorias_query)
+        categorias = categorias_result.fetchall()
+
+        query_soma = select(
+            CategoriaModel.id_categoria,
+            func.coalesce(func.sum(DivideModel.valor), Decimal(0)).label("valor_categoria")
+        ).join(
+            MovimentacaoModel, MovimentacaoModel.id_categoria == CategoriaModel.id_categoria, isouter=True
+        ).join(
+            DivideModel, MovimentacaoModel.id_movimentacao == DivideModel.id_movimentacao, isouter=True
+        ).join(
+            ParenteModel, DivideModel.id_parente == ParenteModel.id_parente, isouter=True
+        ).filter(
+            MovimentacaoModel.datatime >= primeiro_dia,
+            MovimentacaoModel.datatime <= ultimo_dia,
+            MovimentacaoModel.tipoMovimentacao == ('RECEITA' if tipo_receita else 'DESPESA')
+        )
+
+        if somente_usuario:
+            query_soma = query_soma.filter(ParenteModel.nome == usuario_logado.nome_completo)
+
+        query_soma = query_soma.group_by(CategoriaModel.id_categoria)
+
+        soma_result = await session.execute(query_soma)
+        soma_despesas_receitas = soma_result.fetchall()
+
+        categoria_despesas_receitas = {categoria.id_categoria: {
+            "valor": Decimal(0),  
+            "nome_categoria": categoria.nome_categoria,
+            "nome_icone_categoria": categoria.nome_icone_categoria
+        } for categoria in categorias}
+
+        for row in soma_despesas_receitas:
+            categoria_id = row.id_categoria
+            categoria_despesas_receitas[categoria_id]["valor"] = row.valor_categoria
+
+        valor_total = sum(categoria["valor"] for categoria in categoria_despesas_receitas.values())
+
+        categorias_resposta = [
+            {
+                "valor": categoria["valor"],
+                "nome_categoria": categoria["nome_categoria"],
+                "nome_icone_categoria": categoria["nome_icone_categoria"]
+            }
+            for categoria in categoria_despesas_receitas.values()
+        ]
+
+    return {
+        "valor_total": valor_total,
+        "valor_categoria": categorias_resposta
+    }
+
+@router.get("/economia-meses-anteriores", status_code=status.HTTP_200_OK)
+async def economia_meses_anteriores(
+    somente_usuario: bool,  
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    hoje = datetime.now()
+    ano_atual = hoje.year
+    mes_atual = hoje.month
+
+    print(f"[DEBUG] Ano atual: {ano_atual}, Mês atual: {mes_atual}")
+
+    async with db as session:
+        despesas_por_mes = []
+
+        for mes_offset in range(0, 12):
+            mes = mes_atual - mes_offset
+            ano = ano_atual
+
+            
+            if mes <= 0:
+                mes = 12 + mes
+                ano -= 1
+
+            primeiro_dia_mes = datetime(ano, mes, 1)
+            ultimo_dia_mes = datetime(ano, mes, monthrange(ano, mes)[1])  
+
+           
+            query_despesas = select(
+                func.coalesce(func.sum(DivideModel.valor), Decimal(0)).label("valor_despesa"),
+                func.extract('month', MovimentacaoModel.data_pagamento).label("mes"),
+                func.extract('year', MovimentacaoModel.data_pagamento).label("ano")
+            ).join(
+                MovimentacaoModel, MovimentacaoModel.id_movimentacao == DivideModel.id_movimentacao
+            ).join(
+                ParenteModel, DivideModel.id_parente == ParenteModel.id_parente, isouter=True
+            ).filter(
+                MovimentacaoModel.tipoMovimentacao == 'DESPESA',
+                MovimentacaoModel.data_pagamento >= primeiro_dia_mes,
+                MovimentacaoModel.data_pagamento <= ultimo_dia_mes
+            )
+
+            if somente_usuario:
+                query_despesas = query_despesas.filter(ParenteModel.nome == usuario_logado.nome_completo)
+            else:
+                query_despesas = query_despesas.filter(DivideModel.valor == DivideModel.valor)
+
+            query_despesas = query_despesas.group_by(func.extract('month', MovimentacaoModel.data_pagamento), 
+                                                     func.extract('year', MovimentacaoModel.data_pagamento))
+
+            resultado_despesas = await session.execute(query_despesas)
+            despesas_mes = resultado_despesas.fetchall()
+
+            if not despesas_mes:
+                despesas_por_mes.append({
+                    "mes": mes,
+                    "ano": ano,
+                    "valor_despesa": "0"  
+                })
+            else:
+                for resultado in despesas_mes:
+                    despesas_por_mes.append({
+                        "mes": int(resultado.mes),  
+                        "ano": int(resultado.ano), 
+                        "valor_despesa": str(resultado.valor_despesa)
+                    })
+
+    if len(despesas_por_mes) < 12:
+        for i in range(len(despesas_por_mes), 12):
+            mes_faltando = mes_atual - (i - len(despesas_por_mes))
+            ano_faltando = ano_atual
+
+            if mes_faltando <= 0:
+                mes_faltando = 12 + mes_faltando
+                ano_faltando -= 1
+
+            despesas_por_mes.append({
+                "mes": mes_faltando,
+                "ano": ano_faltando,
+                "valor_despesa": "0" 
+            })
+
+    return despesas_por_mes
