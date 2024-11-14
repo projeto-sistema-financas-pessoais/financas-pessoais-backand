@@ -100,6 +100,7 @@ class MovimentacaoRequestFilterSchema(BaseModel):
     # id_fatura: Optional[int] = None
     id_cartao_credito: Optional[int] = None
     id_parente: Optional[int] = None
+    dia_fechamento: Optional[int] = None
     
 
 

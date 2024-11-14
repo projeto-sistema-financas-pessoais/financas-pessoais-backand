@@ -2,11 +2,11 @@
 import api.v1.endpoints
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query, status, HTTPException
-from sqlalchemy import extract, func, insert
+from sqlalchemy import and_, extract, func, insert, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from api.v1.endpoints.fatura import create_fatura_ano
+from api.v1.endpoints.fatura import adjust_to_valid_date, create_fatura_ano
 from core.utils import handle_db_exceptions
 from models.cartao_credito_model import CartaoCreditoModel
 from models.divide_model import DivideModel
@@ -34,27 +34,62 @@ from dateutil.relativedelta import relativedelta
 router = APIRouter()
 
 
-async def find_fatura(id_cartao_credito: int, data_pagamento: date,   db: AsyncSession):
+
+async def find_fatura(id_cartao_credito: int, data_pagamento: date, db: AsyncSession):
     
-    query = select(FaturaModel).filter(
+
+    # Consulta para pegar a fatura no mês atual
+    query_mes_atual = select(FaturaModel).filter(
         FaturaModel.id_cartao_credito == id_cartao_credito,
         extract('month', FaturaModel.data_fechamento) == data_pagamento.month,
         extract('year', FaturaModel.data_fechamento) == data_pagamento.year
     )
+
+    # Consulta para pegar a fatura do mês seguinte
+    query_mes_seguinte = select(FaturaModel).filter(
+        FaturaModel.id_cartao_credito == id_cartao_credito,
+        extract('month', FaturaModel.data_fechamento) == (data_pagamento.month % 12) + 1,  # Incrementa o mês
+        extract('year', FaturaModel.data_fechamento) == (data_pagamento.year if data_pagamento.month < 12 else data_pagamento.year + 1)  # Ajusta o ano se for Dezembro
+    )
     
-    result = await db.execute(query)
-    fatura = result.scalars().first()
-    return fatura
+    # Executa as consultas
+    result_mes_atual = await db.execute(query_mes_atual)
+    fatura_mes_atual = result_mes_atual.scalars().first()
+
+    result_mes_seguinte = await db.execute(query_mes_seguinte)
+    fatura_mes_seguinte = result_mes_seguinte.scalars().first()
+    
+
+    # Verifica qual fatura escolher
+    if fatura_mes_atual:
+        # Se tiver uma fatura no mês atual, verifica se ela já é a fatura seguinte
+
+        if fatura_mes_atual.data_fechamento > data_pagamento:
+            return fatura_mes_atual
+    
+    if fatura_mes_seguinte:
+        if fatura_mes_seguinte.data_fechamento > data_pagamento:
+            return fatura_mes_seguinte
+
+
+    return None
+
 
 async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_pagamento):
     fatura = await find_fatura(id_financeiro, data_pagamento, session)
     cartao_credito = None 
 
     if not fatura:
-        cartao_credito = await create_fatura_ano(session, usuario_logado, id_financeiro, data_pagamento.year, None, None)
+
+        if data_pagamento.month == 12:  
+            cartao_credito = await create_fatura_ano(session, usuario_logado, id_financeiro, data_pagamento.year +1, None, None)
+        else:
+            cartao_credito = await create_fatura_ano(session, usuario_logado, id_financeiro, data_pagamento.year, None, None)
+        
         fatura = await find_fatura(id_financeiro, data_pagamento, session)
         
         if not fatura:
+
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
     
     return fatura, cartao_credito
@@ -129,7 +164,7 @@ async def create_movimentacao(
                     if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
                         movimentacao.quantidade_parcelas = 4
                     else: 
-                        movimentacao.quantidade_parcelas = 48
+                        movimentacao.quantidade_parcelas = 12
 
                 nova_repeticao = RepeticaoModel(
                     quantidade_parcelas=movimentacao.quantidade_parcelas,
@@ -184,7 +219,7 @@ async def create_movimentacao(
                         nova_movimentacao.participa_limite_fatura_gastos = True
 
                     elif parcela_atual > 1: 
-                        if(data_pagamento.month == today.month and data_pagamento.year == today.year):
+                        if(data_pagamento.month <= today.month and data_pagamento.year <= today.year):
                             cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado 
                             fatura.fatura_gastos +=valor_por_parcela_ajustado
                             nova_movimentacao.participa_limite_fatura_gastos = True
@@ -563,12 +598,33 @@ async def listar_movimentacoes(
 ):
     async with db: 
         
+        mes_anterior = requestFilter.mes - 1 if requestFilter.mes > 1 else 12
+        ano_anterior = requestFilter.ano if requestFilter.mes > 1 else requestFilter.ano - 1
+
         
-        condicoes = [
-            MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
-            extract('month', MovimentacaoModel.data_pagamento) == requestFilter.mes,
-            extract('year', MovimentacaoModel.data_pagamento) == requestFilter.ano
-        ] 
+        if requestFilter.id_cartao_credito is None:
+        
+            condicoes = [
+                MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+                extract('month', MovimentacaoModel.data_pagamento) == requestFilter.mes,
+                extract('year', MovimentacaoModel.data_pagamento) == requestFilter.ano
+            ] 
+        else:
+            condicoes = [
+                MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+                  or_(
+                    # Condição para o mês atual
+                    and_(
+                        extract('month', MovimentacaoModel.data_pagamento) == requestFilter.mes,
+                        extract('year', MovimentacaoModel.data_pagamento) == requestFilter.ano
+                    ),
+                    # Condição para o mês anterior
+                    and_(
+                        extract('month', MovimentacaoModel.data_pagamento) == mes_anterior,
+                        extract('year', MovimentacaoModel.data_pagamento) == ano_anterior
+                    )
+                )
+            ]
   
         if requestFilter.forma_pagamento is not None: 
             condicoes.append(MovimentacaoModel.forma_pagamento == requestFilter.forma_pagamento)
@@ -613,12 +669,22 @@ async def listar_movimentacoes(
             query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
             
         if requestFilter.id_cartao_credito is not None:
-            query = query.join(FaturaModel, MovimentacaoModel.fatura).join(CartaoCreditoModel, FaturaModel.cartao_credito).where(CartaoCreditoModel.id_cartao_credito == requestFilter.id_cartao_credito)
+            
+            data =  date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
+            query = query.join(
+                FaturaModel, MovimentacaoModel.fatura
+            ).join(
+                CartaoCreditoModel, FaturaModel.cartao_credito
+            ).where(
+                CartaoCreditoModel.id_cartao_credito == requestFilter.id_cartao_credito,
+                FaturaModel.data_fechamento <= data
+            )
+        
 
         
         result = await db.execute(query)
         movimentacoes = result.scalars().all()
-
+ 
         if not movimentacoes:
             response = []
         else:

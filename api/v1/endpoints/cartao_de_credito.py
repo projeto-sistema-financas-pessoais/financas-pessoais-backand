@@ -141,11 +141,13 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
             for cartao in cartoes_credito:
 
                 proximas_faturas = sorted(
-                    [f for f in cartao.faturas if f.data_vencimento >= datetime.now().date()],
-                    key=lambda f: f.data_vencimento
+                    [f for f in cartao.faturas if f.data_fechamento >= datetime.now().date()],
+                    key=lambda f: f.data_fechamento
                 )
 
                 proxima_fatura = proximas_faturas[0] if proximas_faturas else None
+                
+                print("proxima fatura", proxima_fatura.data_fechamento)
 
                 cartao_data = {
                     "id_cartao_credito": cartao.id_cartao_credito,
@@ -199,6 +201,7 @@ async def listar_cartao_credito(
             "nome": cartao_credito.nome,
             "limite_disponivel": cartao_credito.limite_disponivel,
             "dia_fechamento": proxima_fatura.data_fechamento.day if proxima_fatura else None,
+            "data_fechamento": proxima_fatura.data_fechamento if proxima_fatura else None,
             "dia_vencimento": proxima_fatura.data_vencimento.day if proxima_fatura else None,
             "nome_icone": cartao_credito.nome_icone,
             "ativo": cartao_credito.ativo,
