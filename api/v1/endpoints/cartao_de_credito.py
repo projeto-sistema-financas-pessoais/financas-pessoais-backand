@@ -153,6 +153,7 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                     "id_cartao_credito": cartao.id_cartao_credito,
                     "nome": cartao.nome,
                     "limite_disponivel": cartao.limite_disponivel,
+                    "data_fechamento": proxima_fatura.data_fechamento if proxima_fatura else None,
                     "dia_fechamento": proxima_fatura.data_fechamento.day if proxima_fatura else None,
                     "dia_vencimento": proxima_fatura.data_vencimento.day if proxima_fatura else None,
                     "nome_icone": cartao.nome_icone,

@@ -13,7 +13,7 @@ from models.divide_model import DivideModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
 from schemas.fatura_schema import FaturaSchema, FaturaSchemaId, FaturaSchemaInfo
-from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoRequestFilterSchema,
+from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoFaturaSchemaList, MovimentacaoRequestFilterSchema,
     MovimentacaoSchemaConsolida, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
     MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
 from core.deps import get_session, get_current_user
@@ -644,26 +644,7 @@ async def listar_movimentacoes(
                     (MovimentacaoModel.id_conta_destino == requestFilter.id_conta)
                 )        
             
-        query = (
-            select(MovimentacaoModel)
-            .options(
-                selectinload(MovimentacaoModel.categoria),
-                selectinload(MovimentacaoModel.conta),
-                selectinload(MovimentacaoModel.conta_destino),  
-                selectinload(MovimentacaoModel.repeticao),
-                selectinload(MovimentacaoModel.divisoes),
-                selectinload(MovimentacaoModel.divisoes, DivideModel.parentes),
-                selectinload(MovimentacaoModel.fatura),
-                selectinload(MovimentacaoModel.fatura, FaturaModel.cartao_credito),
-                selectinload(MovimentacaoModel.fatura, FaturaModel.conta)
-
-            )
-            .where(*condicoes)  
-            .order_by(
-                    MovimentacaoModel.data_pagamento,
-                    MovimentacaoModel.datatime 
-                )
-        )
+        query = construir_query_movimentacao(condicoes)
 
         if requestFilter.id_parente is not None:
             query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
@@ -688,56 +669,149 @@ async def listar_movimentacoes(
         if not movimentacoes:
             response = []
         else:
-
-            response = [
-                MovimentacaoSchemaList(
-                    id_movimentacao=mov.id_movimentacao,
-                    valor=mov.valor,
-                    descricao=mov.descricao,
-                    tipoMovimentacao=mov.tipoMovimentacao,
-                    forma_pagamento=mov.forma_pagamento,
-                    condicao_pagamento=mov.condicao_pagamento,
-                    datatime=mov.datatime,
-                    quantidade_parcelas= mov.repeticao.quantidade_parcelas if mov.repeticao else None , 
-                    consolidado=mov.consolidado,
-                    tipo_recorrencia= mov.repeticao.tipo_recorrencia if mov.repeticao else None , 
-                    parcela_atual=mov.parcela_atual,
-                    data_pagamento=mov.data_pagamento,
-                    id_conta=mov.id_conta,
-                    id_conta_destino= mov.id_conta_destino,
-                    nome_conta_destino= mov.conta_destino.nome if mov.conta_destino else None,
-                    id_categoria=mov.id_categoria if mov.categoria else None,
-                    nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
-                    nome_conta = mov.conta.nome if mov.conta else None,
-                    nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
-                    id_fatura=mov.id_fatura,
-                    id_repeticao=mov.id_repeticao,
-                    participa_limite_fatura_gastos = mov.participa_limite_fatura_gastos,
-
-                    divide_parente=[
-                        ParenteResponse(
-                            id_parente=divide.id_parente,
-                            valor_parente=divide.valor, 
-                            nome_parente= divide.parentes.nome
-                        )
-                        for divide in mov.divisoes 
-                    ],
-                    fatura_info = 
-                        FaturaSchemaInfo(
-                            data_vencimento= mov.fatura.data_vencimento,
-                            data_fechamento = mov.fatura.data_fechamento,
-                            data_pagamento = mov.fatura.data_pagamento or None,
-                            id_cartao_credito = mov.fatura.id_cartao_credito,
-                            id_conta = mov.fatura.id_conta,
-                            nome_conta = mov.fatura.conta.nome if mov.fatura.conta else None,
-                            fatura_gastos= mov.fatura.fatura_gastos
-                        ) if requestFilter.id_cartao_credito is not None else None
-                )
-                for mov in movimentacoes
-            ]
+            response = construir_response(movimentacoes, requestFilter)
 
         return response
     
+def construir_query_movimentacao(condicoes):
+    query = (
+            select(MovimentacaoModel)
+            .options(
+                selectinload(MovimentacaoModel.categoria),
+                selectinload(MovimentacaoModel.conta),
+                selectinload(MovimentacaoModel.conta_destino),  
+                selectinload(MovimentacaoModel.repeticao),
+                selectinload(MovimentacaoModel.divisoes),
+                selectinload(MovimentacaoModel.divisoes, DivideModel.parentes),
+                selectinload(MovimentacaoModel.fatura),
+                selectinload(MovimentacaoModel.fatura, FaturaModel.cartao_credito),
+                selectinload(MovimentacaoModel.fatura, FaturaModel.conta)
+
+            )
+            .where(*condicoes)  
+            .order_by(
+                    MovimentacaoModel.data_pagamento,
+                    MovimentacaoModel.datatime 
+                )
+        )
+    return query
+
+def construir_response(movimentacoes: List, requestFilter: MovimentacaoRequestFilterSchema) -> List[MovimentacaoSchemaList]:
+    response = [
+        MovimentacaoSchemaList(
+            id_movimentacao=mov.id_movimentacao,
+            valor=mov.valor,
+            descricao=mov.descricao,
+            tipoMovimentacao=mov.tipoMovimentacao,
+            forma_pagamento=mov.forma_pagamento,
+            condicao_pagamento=mov.condicao_pagamento,
+            datatime=mov.datatime,
+            quantidade_parcelas= mov.repeticao.quantidade_parcelas if mov.repeticao else None , 
+            consolidado=mov.consolidado,
+            tipo_recorrencia= mov.repeticao.tipo_recorrencia if mov.repeticao else None , 
+            parcela_atual=mov.parcela_atual,
+            data_pagamento=mov.data_pagamento,
+            id_conta=mov.id_conta,
+            id_conta_destino= mov.id_conta_destino,
+            nome_conta_destino= mov.conta_destino.nome if mov.conta_destino else None,
+            id_categoria=mov.id_categoria if mov.categoria else None,
+            nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
+            nome_conta = mov.conta.nome if mov.conta else None,
+            nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
+            id_fatura=mov.id_fatura,
+            id_repeticao=mov.id_repeticao,
+            participa_limite_fatura_gastos = mov.participa_limite_fatura_gastos,
+
+            divide_parente=[
+                ParenteResponse(
+                    id_parente=divide.id_parente,
+                    valor_parente=divide.valor, 
+                    nome_parente= divide.parentes.nome
+                )
+                for divide in mov.divisoes 
+            ],
+            fatura_info = 
+                FaturaSchemaInfo(
+                    data_vencimento= mov.fatura.data_vencimento,
+                    data_fechamento = mov.fatura.data_fechamento,
+                    data_pagamento = mov.fatura.data_pagamento or None,
+                    id_cartao_credito = mov.fatura.id_cartao_credito,
+                    id_conta = mov.fatura.id_conta,
+                    nome_conta = mov.fatura.conta.nome if mov.fatura.conta else None,
+                    fatura_gastos= mov.fatura.fatura_gastos
+                ) if requestFilter and  requestFilter.id_cartao_credito is not None else None
+        )
+        for mov in movimentacoes
+    ]
+    return response
+
+    
+    
+@router.get("/movimentacoes_vencidas/{tipo_receita}", response_model=MovimentacaoFaturaSchemaList)
+async def get_movimentacoes_vencidas(
+    tipo_receita: bool,
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    try:
+        dataHoje = datetime.now()
+
+        condicoes = [
+            MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+            MovimentacaoModel.consolidado == False,
+            MovimentacaoModel.data_pagamento <= dataHoje,
+            MovimentacaoModel.id_fatura == None,
+            MovimentacaoModel.forma_pagamento != FormaPagamento.CREDITO
+        ]
+
+        if tipo_receita:
+            condicoes.append(MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.RECEITA)
+            faturas = []
+        else:
+            condicoes.append(MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA)
+
+            query_fatura = (
+                select(FaturaModel)
+                .options(joinedload(FaturaModel.cartao_credito))  # Força o carregamento da relação
+                .where(
+                    FaturaModel.data_fechamento <= dataHoje,
+                    FaturaModel.fatura_gastos > 0
+                )
+            )
+
+            result_fatura = await db.execute(query_fatura)
+            faturas_result = result_fatura.scalars().all()
+
+            faturas = [
+                FaturaSchemaInfo(
+                    data_vencimento=fat.data_vencimento,
+                    data_fechamento=fat.data_fechamento,
+                    data_pagamento=fat.data_pagamento or None,
+                    id_cartao_credito=fat.id_cartao_credito,
+                    id_conta=fat.id_conta,
+                    nome_conta= None,
+                    nome_cartao = fat.cartao_credito.nome,
+                    fatura_gastos = fat.fatura_gastos
+                )
+                for fat in faturas_result
+            ]
+
+        query = construir_query_movimentacao(condicoes)
+        result = await db.execute(query)
+        movimentacoes = result.scalars().all()
+
+        response = MovimentacaoFaturaSchemaList(
+            movimentacoes=construir_response(movimentacoes, None) if movimentacoes else [],
+            faturas=faturas
+        )
+
+        return response
+
+    except Exception as e:
+        await handle_db_exceptions(db, e)
+   
+
+
 @router.post("/consolidar")
 async def consolidar_movimentacao(
     movimentacoes: MovimentacaoSchemaConsolida, 
@@ -830,21 +904,7 @@ async def alterar_limite_fatura_gastos(
 
     return {"detail": "Limite de fatura e gastos atualizados com sucesso"}
         
-# @router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
-# async def visualizar_movimentacao(
-#     id_movimentacao: int,
-#     db: AsyncSession = Depends(get_session),
-#     usuario_logado: UsuarioModel = Depends(get_current_user)
-# ):
-#     async with db as session:
-#         query = select(MovimentacaoModel).join(MovimentacaoModel.conta).filter(MovimentacaoModel.id_movimentacao == id_movimentacao, MovimentacaoModel.conta.id_usuario == usuario_logado.id_usuario)
-#         result = await session.execute(query)
-#         movimentacao = result.scalars().one_or_none()
 
-#         if not movimentacao:
-#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada ou não pertence ao usuário")
-
-#         return movimentacao
 
 @router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_movimentacao(

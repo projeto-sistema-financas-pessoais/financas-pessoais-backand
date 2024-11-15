@@ -118,3 +118,8 @@ class MovimentacaoSchemaList(MovimentacaoSchema):
 class MovimentacaoSchemaConsolida(BaseModel):
     id_movimentacao: int
     consolidado: bool
+    
+    
+class MovimentacaoFaturaSchemaList(BaseModel):
+    movimentacoes: List[MovimentacaoSchemaList]
+    faturas: List[FaturaSchemaInfo]

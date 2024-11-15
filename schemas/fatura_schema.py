@@ -27,4 +27,5 @@ class FaturaSchemaInfo(FaturaSchema):
     id_cartao_credito: int
     fatura_gastos: Decimal
     nome_conta: Optional[str] = None
+    nome_cartao: Optional[str] = None
 
