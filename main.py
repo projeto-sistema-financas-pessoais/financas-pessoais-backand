@@ -4,13 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
-from datetime import datetime
-
 from api.v1.endpoints.rotina import check_and_send_email
 from core.configs import settings
 from api.v1.api import api_router
 
-# Inicialize o agendador
+
 scheduler = BackgroundScheduler()
 
 def executar_funcao_assincrona():
@@ -33,7 +31,7 @@ def agendar_execucao(hora: int, minuto: int):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler.start()
-    agendar_execucao(15, 11)  # Exemplo: agenda para as 14:30
+    agendar_execucao(8, 0)  
     try:
         yield
     finally:
@@ -52,6 +50,6 @@ app.add_middleware(
 )
 
 # Inicie o servidor com Uvicorn
-if __name__ == '_main_':
+if __name__ == '__main__':
     import uvicorn
     uvicorn.run("main:app", host="localhost", port=9000, log_level="info", reload=True)
