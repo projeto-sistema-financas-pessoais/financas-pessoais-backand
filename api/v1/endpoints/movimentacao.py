@@ -481,7 +481,7 @@ async def update_movimentacao(
         if not movimentacao:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada")
 
-        # Verificar se a conta pertence ao usuário logado (se fornecida)
+         # Verificar se a conta pertence ao usuário logado (se fornecida)
         if movimentacao_update.id_conta:
             query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao_update.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
             result_conta = await session.execute(query_conta)
@@ -650,21 +650,27 @@ async def listar_movimentacoes(
             query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
             
         if requestFilter.id_cartao_credito is not None:
+
             
-            data =  date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
+            data = date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
+            data_anterior = data - relativedelta(months=1)
+            
             query = query.join(
                 FaturaModel, MovimentacaoModel.fatura
             ).join(
                 CartaoCreditoModel, FaturaModel.cartao_credito
             ).where(
                 CartaoCreditoModel.id_cartao_credito == requestFilter.id_cartao_credito,
-                FaturaModel.data_fechamento <= data
+                and_(
+                    FaturaModel.data_fechamento > data_anterior,
+                    FaturaModel.data_fechamento <= data
+                )
             )
         
-
         
         result = await db.execute(query)
         movimentacoes = result.scalars().all()
+        
  
         if not movimentacoes:
             response = []
@@ -718,6 +724,7 @@ def construir_response(movimentacoes: List, requestFilter: MovimentacaoRequestFi
             nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
             nome_conta = mov.conta.nome if mov.conta else None,
             nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
+            id_cartao_credito= mov.fatura.id_cartao_credito if mov.fatura else None,
             id_fatura=mov.id_fatura,
             id_repeticao=mov.id_repeticao,
             participa_limite_fatura_gastos = mov.participa_limite_fatura_gastos,
@@ -772,12 +779,13 @@ async def get_movimentacoes_vencidas(
 
             query_fatura = (
                 select(FaturaModel)
-                .options(joinedload(FaturaModel.cartao_credito))  # Força o carregamento da relação
+                .options(joinedload(FaturaModel.cartao_credito)) 
                 .where(
                     FaturaModel.data_fechamento <= dataHoje,
                     FaturaModel.fatura_gastos > 0
                 )
             )
+            
 
             result_fatura = await db.execute(query_fatura)
             faturas_result = result_fatura.scalars().all()
@@ -795,6 +803,8 @@ async def get_movimentacoes_vencidas(
                 )
                 for fat in faturas_result
             ]
+            print('dataaaaaaas', dataHoje, faturas)
+
 
         query = construir_query_movimentacao(condicoes)
         result = await db.execute(query)

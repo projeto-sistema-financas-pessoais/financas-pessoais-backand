@@ -110,6 +110,7 @@ class MovimentacaoSchemaList(MovimentacaoSchema):
     nome_cartao_credito: Optional[str]
     id_movimentacao: int
     id_conta_destino: Optional[int]
+    id_cartao_credito: Optional[int]
     nome_conta_destino : Optional[str]
     divide_parente: List[ParenteResponse]
     fatura_info: Optional[FaturaSchemaInfo] 
