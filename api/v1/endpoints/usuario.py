@@ -15,7 +15,6 @@ from schemas.recoverPasswordRequest import RecoverPasswordRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from core.auth import auth, generate_token_access, decoded_token, send_email_to_reset_password
 import jwt
-from smtplib import SMTPException 
 from sqlalchemy.future import select
 from fastapi import BackgroundTasks 
 from sqlalchemy import text  

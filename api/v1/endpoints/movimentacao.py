@@ -2,18 +2,18 @@
 import api.v1.endpoints
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query, status, HTTPException
-from sqlalchemy import extract, func, insert
+from sqlalchemy import and_, extract, func, insert, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from api.v1.endpoints.fatura import create_fatura_ano
+from api.v1.endpoints.fatura import adjust_to_valid_date, create_fatura_ano
 from core.utils import handle_db_exceptions
 from models.cartao_credito_model import CartaoCreditoModel
 from models.divide_model import DivideModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
 from schemas.fatura_schema import FaturaSchema, FaturaSchemaId, FaturaSchemaInfo
-from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoRequestFilterSchema,
+from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoFaturaSchemaList, MovimentacaoRequestFilterSchema,
     MovimentacaoSchemaConsolida, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
     MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
 from core.deps import get_session, get_current_user
@@ -28,32 +28,68 @@ from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError
 from calendar import monthrange
+from dateutil.relativedelta import relativedelta
 
 
 router = APIRouter()
 
 
-async def find_fatura(id_cartao_credito: int, data_pagamento: date,   db: AsyncSession):
+
+async def find_fatura(id_cartao_credito: int, data_pagamento: date, db: AsyncSession):
     
-    query = select(FaturaModel).filter(
+
+    # Consulta para pegar a fatura no mês atual
+    query_mes_atual = select(FaturaModel).filter(
         FaturaModel.id_cartao_credito == id_cartao_credito,
         extract('month', FaturaModel.data_fechamento) == data_pagamento.month,
         extract('year', FaturaModel.data_fechamento) == data_pagamento.year
     )
+
+    # Consulta para pegar a fatura do mês seguinte
+    query_mes_seguinte = select(FaturaModel).filter(
+        FaturaModel.id_cartao_credito == id_cartao_credito,
+        extract('month', FaturaModel.data_fechamento) == (data_pagamento.month % 12) + 1,  # Incrementa o mês
+        extract('year', FaturaModel.data_fechamento) == (data_pagamento.year if data_pagamento.month < 12 else data_pagamento.year + 1)  # Ajusta o ano se for Dezembro
+    )
     
-    result = await db.execute(query)
-    fatura = result.scalars().first()
-    return fatura
+    # Executa as consultas
+    result_mes_atual = await db.execute(query_mes_atual)
+    fatura_mes_atual = result_mes_atual.scalars().first()
+
+    result_mes_seguinte = await db.execute(query_mes_seguinte)
+    fatura_mes_seguinte = result_mes_seguinte.scalars().first()
+    
+
+    # Verifica qual fatura escolher
+    if fatura_mes_atual:
+        # Se tiver uma fatura no mês atual, verifica se ela já é a fatura seguinte
+
+        if fatura_mes_atual.data_fechamento > data_pagamento:
+            return fatura_mes_atual
+    
+    if fatura_mes_seguinte:
+        if fatura_mes_seguinte.data_fechamento > data_pagamento:
+            return fatura_mes_seguinte
+
+
+    return None
+
 
 async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_pagamento):
     fatura = await find_fatura(id_financeiro, data_pagamento, session)
     cartao_credito = None 
 
     if not fatura:
-        cartao_credito = await create_fatura_ano(session, usuario_logado, id_financeiro, data_pagamento.year, None, None)
+
+        if data_pagamento.month == 12:  
+            cartao_credito = await create_fatura_ano(session, usuario_logado, id_financeiro, data_pagamento.year +1, None, None)
+        else:
+            cartao_credito = await create_fatura_ano(session, usuario_logado, id_financeiro, data_pagamento.year, None, None)
+        
         fatura = await find_fatura(id_financeiro, data_pagamento, session)
         
         if not fatura:
+
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
     
     return fatura, cartao_credito
@@ -128,7 +164,7 @@ async def create_movimentacao(
                     if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
                         movimentacao.quantidade_parcelas = 4
                     else: 
-                        movimentacao.quantidade_parcelas = 48
+                        movimentacao.quantidade_parcelas = 12
 
                 nova_repeticao = RepeticaoModel(
                     quantidade_parcelas=movimentacao.quantidade_parcelas,
@@ -183,7 +219,7 @@ async def create_movimentacao(
                         nova_movimentacao.participa_limite_fatura_gastos = True
 
                     elif parcela_atual > 1: 
-                        if(data_pagamento.month == today.month and data_pagamento.year == today.year):
+                        if(data_pagamento.month <= today.month and data_pagamento.year <= today.year):
                             cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado 
                             fatura.fatura_gastos +=valor_por_parcela_ajustado
                             nova_movimentacao.participa_limite_fatura_gastos = True
@@ -221,15 +257,11 @@ async def create_movimentacao(
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
                         data_pagamento += timedelta(weeks=1)
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
-                        if data_pagamento.month == 12:
-                            data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                        else:
-                            data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                        data_pagamento += relativedelta(months=1)
+
                 else:
-                    if data_pagamento.month == 12:
-                        data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                    else:
-                        data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                    data_pagamento += relativedelta(months=1)
+
                     
                 if movimentacao.forma_pagamento == FormaPagamento.CREDITO:       
                     fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, data_pagamento)
@@ -363,15 +395,11 @@ async def create_movimentacao(
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
                         data_pagamento += timedelta(weeks=1)
                     elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
-                        if data_pagamento.month == 12:
-                            data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                        else:
-                            data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                        data_pagamento += relativedelta(months=1)
+
                 else:
-                    if data_pagamento.month == 12:
-                        data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1, month=1)
-                    else:
-                        data_pagamento = data_pagamento.replace(month=data_pagamento.month + 1)
+                    data_pagamento += relativedelta(months=1)
+
                 
             await db.commit()
             return {"message": "Receita cadastrada com sucesso."}
@@ -453,7 +481,7 @@ async def update_movimentacao(
         if not movimentacao:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada")
 
-        # Verificar se a conta pertence ao usuário logado (se fornecida)
+         # Verificar se a conta pertence ao usuário logado (se fornecida)
         if movimentacao_update.id_conta:
             query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao_update.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
             result_conta = await session.execute(query_conta)
@@ -570,12 +598,33 @@ async def listar_movimentacoes(
 ):
     async with db: 
         
+        mes_anterior = requestFilter.mes - 1 if requestFilter.mes > 1 else 12
+        ano_anterior = requestFilter.ano if requestFilter.mes > 1 else requestFilter.ano - 1
+
         
-        condicoes = [
-            MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
-            extract('month', MovimentacaoModel.data_pagamento) == requestFilter.mes,
-            extract('year', MovimentacaoModel.data_pagamento) == requestFilter.ano
-        ] 
+        if requestFilter.id_cartao_credito is None:
+        
+            condicoes = [
+                MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+                extract('month', MovimentacaoModel.data_pagamento) == requestFilter.mes,
+                extract('year', MovimentacaoModel.data_pagamento) == requestFilter.ano
+            ] 
+        else:
+            condicoes = [
+                MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+                  or_(
+                    # Condição para o mês atual
+                    and_(
+                        extract('month', MovimentacaoModel.data_pagamento) == requestFilter.mes,
+                        extract('year', MovimentacaoModel.data_pagamento) == requestFilter.ano
+                    ),
+                    # Condição para o mês anterior
+                    and_(
+                        extract('month', MovimentacaoModel.data_pagamento) == mes_anterior,
+                        extract('year', MovimentacaoModel.data_pagamento) == ano_anterior
+                    )
+                )
+            ]
   
         if requestFilter.forma_pagamento is not None: 
             condicoes.append(MovimentacaoModel.forma_pagamento == requestFilter.forma_pagamento)
@@ -595,7 +644,43 @@ async def listar_movimentacoes(
                     (MovimentacaoModel.id_conta_destino == requestFilter.id_conta)
                 )        
             
-        query = (
+        query = construir_query_movimentacao(condicoes)
+
+        if requestFilter.id_parente is not None:
+            query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
+            
+        if requestFilter.id_cartao_credito is not None:
+
+            
+            data = date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
+            data_anterior = data - relativedelta(months=1)
+            
+            query = query.join(
+                FaturaModel, MovimentacaoModel.fatura
+            ).join(
+                CartaoCreditoModel, FaturaModel.cartao_credito
+            ).where(
+                CartaoCreditoModel.id_cartao_credito == requestFilter.id_cartao_credito,
+                and_(
+                    FaturaModel.data_fechamento > data_anterior,
+                    FaturaModel.data_fechamento <= data
+                )
+            )
+        
+        
+        result = await db.execute(query)
+        movimentacoes = result.scalars().all()
+        
+ 
+        if not movimentacoes:
+            response = []
+        else:
+            response = construir_response(movimentacoes, requestFilter)
+
+        return response
+    
+def construir_query_movimentacao(condicoes):
+    query = (
             select(MovimentacaoModel)
             .options(
                 selectinload(MovimentacaoModel.categoria),
@@ -615,70 +700,130 @@ async def listar_movimentacoes(
                     MovimentacaoModel.datatime 
                 )
         )
+    return query
 
-        if requestFilter.id_parente is not None:
-            query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
-            
-        if requestFilter.id_cartao_credito is not None:
-            query = query.join(FaturaModel, MovimentacaoModel.fatura).join(CartaoCreditoModel, FaturaModel.cartao_credito).where(CartaoCreditoModel.id_cartao_credito == requestFilter.id_cartao_credito)
+def construir_response(movimentacoes: List, requestFilter: MovimentacaoRequestFilterSchema) -> List[MovimentacaoSchemaList]:
+    response = [
+        MovimentacaoSchemaList(
+            id_movimentacao=mov.id_movimentacao,
+            valor=mov.valor,
+            descricao=mov.descricao,
+            tipoMovimentacao=mov.tipoMovimentacao,
+            forma_pagamento=mov.forma_pagamento,
+            condicao_pagamento=mov.condicao_pagamento,
+            datatime=mov.datatime,
+            quantidade_parcelas= mov.repeticao.quantidade_parcelas if mov.repeticao else None , 
+            consolidado=mov.consolidado,
+            tipo_recorrencia= mov.repeticao.tipo_recorrencia if mov.repeticao else None , 
+            parcela_atual=mov.parcela_atual,
+            data_pagamento=mov.data_pagamento,
+            id_conta=mov.id_conta,
+            id_conta_destino= mov.id_conta_destino,
+            nome_conta_destino= mov.conta_destino.nome if mov.conta_destino else None,
+            id_categoria=mov.id_categoria if mov.categoria else None,
+            nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
+            nome_conta = mov.conta.nome if mov.conta else None,
+            nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
+            id_cartao_credito= mov.fatura.id_cartao_credito if mov.fatura else None,
+            id_fatura=mov.id_fatura,
+            id_repeticao=mov.id_repeticao,
+            participa_limite_fatura_gastos = mov.participa_limite_fatura_gastos,
 
-        
+            divide_parente=[
+                ParenteResponse(
+                    id_parente=divide.id_parente,
+                    valor_parente=divide.valor, 
+                    nome_parente= divide.parentes.nome
+                )
+                for divide in mov.divisoes 
+            ],
+            fatura_info = 
+                FaturaSchemaInfo(
+                    data_vencimento= mov.fatura.data_vencimento,
+                    data_fechamento = mov.fatura.data_fechamento,
+                    data_pagamento = mov.fatura.data_pagamento or None,
+                    id_cartao_credito = mov.fatura.id_cartao_credito,
+                    id_conta = mov.fatura.id_conta,
+                    nome_conta = mov.fatura.conta.nome if mov.fatura.conta else None,
+                    fatura_gastos= mov.fatura.fatura_gastos
+                ) if requestFilter and  requestFilter.id_cartao_credito is not None else None
+        )
+        for mov in movimentacoes
+    ]
+    return response
+
+    
+    
+@router.get("/movimentacoes_vencidas/{tipo_receita}", response_model=MovimentacaoFaturaSchemaList)
+async def get_movimentacoes_vencidas(
+    tipo_receita: bool,
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    try:
+        dataHoje = datetime.now()
+
+        condicoes = [
+            MovimentacaoModel.id_usuario == usuario_logado.id_usuario,
+            MovimentacaoModel.consolidado == False,
+            MovimentacaoModel.data_pagamento <= dataHoje,
+            MovimentacaoModel.id_fatura == None,
+            MovimentacaoModel.forma_pagamento != FormaPagamento.CREDITO
+        ]
+
+        if tipo_receita:
+            condicoes.append(MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.RECEITA)
+            faturas = []
+        else:
+            condicoes.append(MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA)
+
+                        
+            query_fatura = (select(FaturaModel)
+                .options(joinedload(FaturaModel.cartao_credito))
+                .join(FaturaModel.cartao_credito) 
+                .where(
+                    FaturaModel.data_fechamento <= dataHoje,
+                    FaturaModel.fatura_gastos > 0,
+                    CartaoCreditoModel.id_usuario == usuario_logado.id_usuario  
+                )
+            )
+          
+
+            result_fatura = await db.execute(query_fatura)
+            faturas_result = result_fatura.scalars().all()
+
+            faturas = [
+                FaturaSchemaInfo(
+                    data_vencimento=fat.data_vencimento,
+                    data_fechamento=fat.data_fechamento,
+                    data_pagamento=fat.data_pagamento or None,
+                    id_cartao_credito=fat.id_cartao_credito,
+                    id_conta=fat.id_conta,
+                    nome_conta= None,
+                    nome_cartao = fat.cartao_credito.nome,
+                    fatura_gastos = fat.fatura_gastos
+                )
+                for fat in faturas_result
+            ]
+            print('dataaaaaaas', dataHoje, faturas)
+
+
+        query = construir_query_movimentacao(condicoes)
         result = await db.execute(query)
         movimentacoes = result.scalars().all()
 
-        if not movimentacoes:
-            response = []
-        else:
-
-            response = [
-                MovimentacaoSchemaList(
-                    id_movimentacao=mov.id_movimentacao,
-                    valor=mov.valor,
-                    descricao=mov.descricao,
-                    tipoMovimentacao=mov.tipoMovimentacao,
-                    forma_pagamento=mov.forma_pagamento,
-                    condicao_pagamento=mov.condicao_pagamento,
-                    datatime=mov.datatime,
-                    quantidade_parcelas= mov.repeticao.quantidade_parcelas if mov.repeticao else None , 
-                    consolidado=mov.consolidado,
-                    tipo_recorrencia= mov.repeticao.tipo_recorrencia if mov.repeticao else None , 
-                    parcela_atual=mov.parcela_atual,
-                    data_pagamento=mov.data_pagamento,
-                    id_conta=mov.id_conta,
-                    id_conta_destino= mov.id_conta_destino,
-                    nome_conta_destino= mov.conta_destino.nome if mov.conta_destino else None,
-                    id_categoria=mov.id_categoria if mov.categoria else None,
-                    nome_icone_categoria=mov.categoria.nome_icone if mov.categoria else None,
-                    nome_conta = mov.conta.nome if mov.conta else None,
-                    nome_cartao_credito = mov.fatura.cartao_credito.nome if mov.fatura else None,
-                    id_fatura=mov.id_fatura,
-                    id_repeticao=mov.id_repeticao,
-                    participa_limite_fatura_gastos = mov.participa_limite_fatura_gastos,
-
-                    divide_parente=[
-                        ParenteResponse(
-                            id_parente=divide.id_parente,
-                            valor_parente=divide.valor, 
-                            nome_parente= divide.parentes.nome
-                        )
-                        for divide in mov.divisoes 
-                    ],
-                    fatura_info = 
-                        FaturaSchemaInfo(
-                            data_vencimento= mov.fatura.data_vencimento,
-                            data_fechamento = mov.fatura.data_fechamento,
-                            data_pagamento = mov.fatura.data_pagamento or None,
-                            id_cartao_credito = mov.fatura.id_cartao_credito,
-                            id_conta = mov.fatura.id_conta,
-                            nome_conta = mov.fatura.conta.nome if mov.fatura.conta else None,
-                            fatura_gastos= mov.fatura.fatura_gastos
-                        ) if requestFilter.id_cartao_credito is not None else None
-                )
-                for mov in movimentacoes
-            ]
+        response = MovimentacaoFaturaSchemaList(
+            movimentacoes=construir_response(movimentacoes, None) if movimentacoes else [],
+            faturas=faturas
+        )
 
         return response
-    
+
+    except Exception as e:
+        await handle_db_exceptions(db, e)
+   
+
+
 @router.post("/consolidar")
 async def consolidar_movimentacao(
     movimentacoes: MovimentacaoSchemaConsolida, 
@@ -771,21 +916,7 @@ async def alterar_limite_fatura_gastos(
 
     return {"detail": "Limite de fatura e gastos atualizados com sucesso"}
         
-# @router.get('/visualizar/{id_movimentacao}', response_model=MovimentacaoSchemaId)
-# async def visualizar_movimentacao(
-#     id_movimentacao: int,
-#     db: AsyncSession = Depends(get_session),
-#     usuario_logado: UsuarioModel = Depends(get_current_user)
-# ):
-#     async with db as session:
-#         query = select(MovimentacaoModel).join(MovimentacaoModel.conta).filter(MovimentacaoModel.id_movimentacao == id_movimentacao, MovimentacaoModel.conta.id_usuario == usuario_logado.id_usuario)
-#         result = await session.execute(query)
-#         movimentacao = result.scalars().one_or_none()
 
-#         if not movimentacao:
-#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada ou não pertence ao usuário")
-
-#         return movimentacao
 
 @router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_movimentacao(
@@ -937,9 +1068,12 @@ async def calcular_orcamento_mensal(
             ParenteModel, DivideModel.id_parente == ParenteModel.id_parente, isouter=True
         ).filter(
             MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
-            MovimentacaoModel.datatime >= primeiro_dia,
-            MovimentacaoModel.datatime <= ultimo_dia,
-            ParenteModel.nome == usuario_logado.nome_completo
+            MovimentacaoModel.data_pagamento >= primeiro_dia,
+            MovimentacaoModel.data_pagamento <= ultimo_dia,
+            ParenteModel.nome == usuario_logado.nome_completo,
+            ParenteModel.id_usuario == usuario_logado.id_usuario
+            
+
         ).group_by(CategoriaModel.id_categoria)
         
         despesas_result = await session.execute(query_despesas_total)
@@ -999,13 +1133,17 @@ async def calcular_gastos_receitas_por_categoria(
         ).join(
             ParenteModel, DivideModel.id_parente == ParenteModel.id_parente, isouter=True
         ).filter(
-            MovimentacaoModel.datatime >= primeiro_dia,
-            MovimentacaoModel.datatime <= ultimo_dia,
+            MovimentacaoModel.data_pagamento >= primeiro_dia,
+            MovimentacaoModel.data_pagamento <= ultimo_dia,
             MovimentacaoModel.tipoMovimentacao == ('RECEITA' if tipo_receita else 'DESPESA')
         )
 
         if somente_usuario:
-            query_soma = query_soma.filter(ParenteModel.nome == usuario_logado.nome_completo)
+            query_soma = query_soma.filter(
+                ParenteModel.nome == usuario_logado.nome_completo,
+                ParenteModel.id_usuario == usuario_logado.id_usuario
+
+            )
 
         query_soma = query_soma.group_by(CategoriaModel.id_categoria)
 
@@ -1020,7 +1158,12 @@ async def calcular_gastos_receitas_por_categoria(
 
         for row in soma_despesas_receitas:
             categoria_id = row.id_categoria
+            # Verifica se a chave existe, se não, inicializa com um dicionário vazio
+            if categoria_id not in categoria_despesas_receitas:
+                categoria_despesas_receitas[categoria_id] = {"valor": 0}
+                
             categoria_despesas_receitas[categoria_id]["valor"] = row.valor_categoria
+
 
         valor_total = sum(categoria["valor"] for categoria in categoria_despesas_receitas.values())
 
@@ -1081,7 +1224,11 @@ async def economia_meses_anteriores(
             )
 
             if somente_usuario:
-                query_despesas = query_despesas.filter(ParenteModel.nome == usuario_logado.nome_completo)
+                query_despesas = query_despesas.filter(
+                    ParenteModel.nome == usuario_logado.nome_completo,
+                    ParenteModel.id_usuario == usuario_logado.id_usuario
+
+                )
             else:
                 query_despesas = query_despesas.filter(DivideModel.valor == DivideModel.valor)
 
