@@ -1,6 +1,16 @@
-from datetime import datetime  # Corrigido para importar 'datetime' diretamente
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status, Response
+from datetime import datetime
+import email
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formatdate
+import io
+import smtplib
+from decouple import config
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, logger, status, Response
 from fastapi.responses import JSONResponse
+import pdfkit
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from sqlalchemy.future import select
@@ -15,7 +25,6 @@ from schemas.parente_schema import ParenteSchema, ParenteSchemaCobranca, Parente
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
 from sqlalchemy import case, extract, func, select
-
 
 router = APIRouter()
 
@@ -143,7 +152,6 @@ async def delete_parente(id_parente: int, db: AsyncSession = Depends(get_session
         except Exception as e:
             await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao tentar deletar o parente.")
-
 @router.post("/enviar-cobranca", status_code=status.HTTP_202_ACCEPTED)
 async def send_invoice(
     cobranca: ParenteSchemaCobranca,
@@ -201,7 +209,7 @@ async def send_invoice(
                 email_data = {
                     "email_subject": "Lembrete de Movimentações não Consolidadas",
                     "email_body": (
-                        f"Olá, {usuario_logado.nome_completo},<br><br>"
+                        f"Olá, {usuario_logado.nome_completo}!<br><br>"
                         f"Essas são as suas movimentações não consolidadas no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
                         f"<table style='border-collapse: collapse; width: 100%;'>"
                         f"<thead>"
@@ -284,3 +292,47 @@ async def send_invoice(
         except Exception as e:
             await handle_db_exceptions(session, e)
             return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'Erro ao enviar cobrança'})
+
+def send_email(email_data: dict, user_email: str) -> None:
+    try:
+        # Verifique se os dados de e-mail foram lidos corretamente
+        sender_email = config("EMAIL_ADDRESS")
+        sender_password = config("EMAIL_PASSWORD")
+
+        print("Endereço de e-mail do remetente:", sender_email)
+        print("Senha de aplicativo lida:", sender_password)
+
+        # Configura a mensagem
+        msg = MIMEMultipart()
+        msg["Subject"] = email_data["email_subject"]
+        msg["From"] = sender_email
+        msg["To"] = user_email
+        msg["Date"] = formatdate(localtime=True)
+
+        # Adicionar o corpo do e-mail
+        body = MIMEText(email_data["email_body"], "html", "utf-8")
+        msg.attach(body)
+
+        pdf_buffer = io.BytesIO()
+        pdf_data = pdfkit.from_string(email_data["email_body"], False, options={"encoding": "UTF-8"})
+        pdf_buffer.write(pdf_data)
+        pdf_buffer.seek(0)
+
+        # Anexar o PDF
+        attachment = MIMEBase("application", "pdf")
+        attachment.set_payload(pdf_buffer.read())
+        encoders.encode_base64(attachment)
+        attachment.add_header(
+            "Content-Disposition",
+            "attachment; filename=financas.pdf"
+        )
+        msg.attach(attachment)
+
+        # Conectar ao servidor SMTP do Gmail
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)  # Usa as credenciais
+            server.send_message(msg)
+
+    except Exception as e:
+        raise Exception(f"Error occurred while sending email: {e}")
