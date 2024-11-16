@@ -777,15 +777,17 @@ async def get_movimentacoes_vencidas(
         else:
             condicoes.append(MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA)
 
-            query_fatura = (
-                select(FaturaModel)
-                .options(joinedload(FaturaModel.cartao_credito)) 
+                        
+            query_fatura = (select(FaturaModel)
+                .options(joinedload(FaturaModel.cartao_credito))
+                .join(FaturaModel.cartao_credito) 
                 .where(
                     FaturaModel.data_fechamento <= dataHoje,
-                    FaturaModel.fatura_gastos > 0
+                    FaturaModel.fatura_gastos > 0,
+                    CartaoCreditoModel.id_usuario == usuario_logado.id_usuario  
                 )
             )
-            
+          
 
             result_fatura = await db.execute(query_fatura)
             faturas_result = result_fatura.scalars().all()
