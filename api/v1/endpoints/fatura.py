@@ -1,5 +1,7 @@
 from datetime import datetime, date
 from decimal import Decimal
+
+from sqlalchemy import extract
 import api.v1.endpoints
 from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException, status, Response
@@ -32,6 +34,7 @@ async def create_fatura_ano(
     dia_vencimento_usuario: Optional[int],
     dia_fechamento_usuario: Optional[int]
 ):
+    # Consulta para verificar se o cartão de crédito pertence ao usuário
     query_cartao_credito = select(CartaoCreditoModel).where(
         CartaoCreditoModel.id_cartao_credito == id_cartao_credito,
         CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
@@ -46,7 +49,7 @@ async def create_fatura_ano(
         )
     
     if dia_vencimento_usuario is None or dia_fechamento_usuario is None:
-
+        # Buscar a última fatura do cartão de crédito
         fatura_anterior = await db.execute(
             select(FaturaModel)
             .where(FaturaModel.id_cartao_credito == id_cartao_credito)
@@ -66,14 +69,27 @@ async def create_fatura_ano(
                     data_vencimento = adjust_to_valid_date(ano, mes, dia_vencimento)
                     data_fechamento = adjust_to_valid_date(ano, mes, dia_fechamento)
 
-                nova_fatura = FaturaModel(
-                    data_vencimento=data_vencimento,
-                    data_fechamento=data_fechamento,
-                    id_conta=fatura_anterior.id_conta,
-                    id_cartao_credito=id_cartao_credito,
-                    fatura_gastos=0
+                # Verificar se já existe uma fatura para o mesmo mês e ano
+                existing_fatura = await db.execute(
+                    select(FaturaModel).where(
+                        FaturaModel.id_cartao_credito == id_cartao_credito,
+                        extract('month', FaturaModel.data_vencimento) == mes,
+                        extract('year', FaturaModel.data_vencimento) == ano,
+                        extract('month', FaturaModel.data_fechamento) == mes,
+                        extract('year', FaturaModel.data_fechamento) == ano
+                    )
                 )
-                db.add(nova_fatura)
+                existing_fatura = existing_fatura.scalars().first()
+
+                if not existing_fatura:  # Se não houver fatura para esse mês e ano
+                    nova_fatura = FaturaModel(
+                        data_vencimento=data_vencimento,
+                        data_fechamento=data_fechamento,
+                        id_conta=fatura_anterior.id_conta,
+                        id_cartao_credito=id_cartao_credito,
+                        fatura_gastos=0
+                    )
+                    db.add(nova_fatura)
 
     else:
         dia_fechamento = dia_fechamento_usuario
@@ -89,14 +105,27 @@ async def create_fatura_ano(
                 data_vencimento = adjust_to_valid_date(ano, mes, dia_vencimento)
                 data_fechamento = adjust_to_valid_date(ano, mes, dia_fechamento)
 
-            nova_fatura = FaturaModel(
-                data_vencimento=data_vencimento,
-                data_fechamento=data_fechamento,
-                id_conta=None,
-                id_cartao_credito=id_cartao_credito,
-                fatura_gastos=0
+            # Verificar se já existe uma fatura para o mesmo mês e ano
+            existing_fatura = await db.execute(
+                select(FaturaModel).where(
+                    FaturaModel.id_cartao_credito == id_cartao_credito,
+                    extract('month', FaturaModel.data_vencimento) == mes,
+                    extract('year', FaturaModel.data_vencimento) == ano,
+                    extract('month', FaturaModel.data_fechamento) == mes,
+                    extract('year', FaturaModel.data_fechamento) == ano
+                )
             )
-            db.add(nova_fatura)
+            existing_fatura = existing_fatura.scalars().first()
+
+            if not existing_fatura:  # Se não houver fatura para esse mês e ano
+                nova_fatura = FaturaModel(
+                    data_vencimento=data_vencimento,
+                    data_fechamento=data_fechamento,
+                    id_conta=None,
+                    id_cartao_credito=id_cartao_credito,
+                    fatura_gastos=0
+                )
+                db.add(nova_fatura)
 
     try:
         await db.commit()

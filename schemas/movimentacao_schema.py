@@ -100,6 +100,7 @@ class MovimentacaoRequestFilterSchema(BaseModel):
     # id_fatura: Optional[int] = None
     id_cartao_credito: Optional[int] = None
     id_parente: Optional[int] = None
+    dia_fechamento: Optional[int] = None
     
 
 
@@ -109,6 +110,7 @@ class MovimentacaoSchemaList(MovimentacaoSchema):
     nome_cartao_credito: Optional[str]
     id_movimentacao: int
     id_conta_destino: Optional[int]
+    id_cartao_credito: Optional[int]
     nome_conta_destino : Optional[str]
     divide_parente: List[ParenteResponse]
     fatura_info: Optional[FaturaSchemaInfo] 
@@ -117,3 +119,8 @@ class MovimentacaoSchemaList(MovimentacaoSchema):
 class MovimentacaoSchemaConsolida(BaseModel):
     id_movimentacao: int
     consolidado: bool
+    
+    
+class MovimentacaoFaturaSchemaList(BaseModel):
+    movimentacoes: List[MovimentacaoSchemaList]
+    faturas: List[FaturaSchemaInfo]
