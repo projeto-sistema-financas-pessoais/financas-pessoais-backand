@@ -2,11 +2,17 @@ import asyncio
 from collections import defaultdict
 from datetime import datetime
 import email
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from email.utils import formatdate
 import logging
 import smtplib
 from fastapi import logger
+import pdfkit
 from sqlalchemy import select
+from weasyprint import HTML
 from core.auth import send_email
 from core.deps import get_session
 from models.enums import TipoMovimentacao
@@ -15,6 +21,8 @@ from models.usuario_model import UsuarioModel
 from models.fatura_model import FaturaModel
 from models.cartao_credito_model import CartaoCreditoModel
 from decouple import config
+import io
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,19 +37,37 @@ def send_email(email_data: dict, user_email: str) -> None:
         print("Senha de aplicativo lida:", sender_password)
 
         # Configura a mensagem
-        msg = email.message.EmailMessage()
+        msg = MIMEMultipart()
         msg["Subject"] = email_data["email_subject"]
         msg["From"] = sender_email
         msg["To"] = user_email
         msg["Date"] = formatdate(localtime=True)
-        msg.set_content(email_data["email_body"], subtype="html", charset="utf-8")
+
+        # Adicionar o corpo do e-mail
+        body = MIMEText(email_data["email_body"], "html", "utf-8")
+        msg.attach(body)
+
+        pdf_buffer = io.BytesIO()
+        pdf_data = pdfkit.from_string(email_data["email_body"], False, options={"encoding": "UTF-8"})
+        pdf_buffer.write(pdf_data)
+        pdf_buffer.seek(0)
+
+        # Anexar o PDF
+        attachment = MIMEBase("application", "pdf")
+        attachment.set_payload(pdf_buffer.read())
+        encoders.encode_base64(attachment)
+        attachment.add_header(
+            "Content-Disposition",
+            "attachment; filename=financas.pdf"
+        )
+        msg.attach(attachment)
 
         # Conectar ao servidor SMTP do Gmail
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(sender_email, sender_password)  # Usa as credenciais
             server.send_message(msg)
-    
+
     except Exception as e:
         raise Exception(f"Error occurred while sending email: {e}")
 
