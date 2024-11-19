@@ -15,16 +15,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
+from api.v1.endpoints.movimentacao import construir_query_movimentacao, construir_response
 from core.auth import send_email
 from core.utils import handle_db_exceptions
-from models.enums import TipoMovimentacao
+from models.cartao_credito_model import CartaoCreditoModel
+from models.enums import FormaPagamento, TipoMovimentacao
+from models.fatura_model import FaturaModel
 from models.parente_model import ParenteModel
 from models.divide_model import  DivideModel
 from models.movimentacao_model import MovimentacaoModel
+from schemas.fatura_schema import FaturaSchemaInfo
+from schemas.movimentacao_schema import MovimentacaoFaturaSchemaList
 from schemas.parente_schema import ParenteSchema, ParenteSchemaCobranca, ParenteSchemaUpdate, ParenteSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
-from sqlalchemy import case, extract, func, select
+from sqlalchemy import and_, case, extract, func, select
+from sqlalchemy.orm import joinedload
 
 router = APIRouter()
 
@@ -170,121 +176,135 @@ async def send_invoice(
             result = await session.execute(query)
             parente = result.scalars().one_or_none()
 
-            if not parente:
-                return {"message": "Parente não encontrado."}
-            
-            query = select(
-                DivideModel,
-                MovimentacaoModel.descricao,
-                MovimentacaoModel.data_pagamento,
-                MovimentacaoModel.valor, 
-            ).join(MovimentacaoModel).filter(
-                DivideModel.id_parente == cobranca.id_parente,
-                MovimentacaoModel.consolidado == False,
-                MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
-                ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
-                 (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
-            )
-            result = await session.execute(query)
-            movimentacoes_nao_consolidadas = result.all()
-
-            if not movimentacoes_nao_consolidadas:
-                return {"message": "Nenhuma movimentação não consolidada encontrada para este parente."}
-
-
-            total_movimentacoes = sum(divide.valor for divide, _, _, _ in movimentacoes_nao_consolidadas)
-
-            query_total = select(func.sum(MovimentacaoModel.valor)).join(DivideModel).filter(
-                DivideModel.id_parente == cobranca.id_parente, 
-                MovimentacaoModel.consolidado == False,
-                MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
-                ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
-                 (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
-            )
-
-            total_geral_result = await session.execute(query_total)
-            total_geral_movimentacoes = total_geral_result.scalar() or 0  # Caso retorne None
+            # Busca os dados e acessa a chave 'data'
+            response = await send_invoice_pdf(cobranca, db, usuario_logado)
+            movimentacoes_data = response['data']
 
             if parente.nome == usuario_logado.nome_completo:
                 email_data = {
                     "email_subject": "Lembrete de Movimentações não Consolidadas",
                     "email_body": (
                         f"Olá, {usuario_logado.nome_completo}!<br><br>"
-                        f"Essas são as suas movimentações não consolidadas no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+                        f"Seguem as informações referentes ao mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+                        
+                        # Estilo CSS comum para todas as tabelas
+                        f"<style>"
+                        f".table-container {{ margin-bottom: 20px; }}"
+                        f".table-title {{ font-size: 16px; font-weight: bold; margin-bottom: 10px; }}"
+                        f"</style>"
+                        
+                        # Tabela 1: Movimentações Não Consolidadas
+                        f"<div class='table-container'>"
+                        f"<div class='table-title'>Movimentações Não Consolidadas</div>"
                         f"<table style='border-collapse: collapse; width: 100%;'>"
                         f"<thead>"
                         f"<tr style='background-color: #f2f2f2;'>"
                         f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor da Movimentação</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor a pagar</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data Pagamento</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
                         f"</tr>"
                         f"</thead>"
                         f"<tbody>"
                     ) + "".join(
                         f"<tr>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{descricao}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{data_pagamento.strftime('%d/%m/%Y')}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacao_valor}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{divide.valor}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['descricao']}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['data_pagamento']}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: right; padding: 8px;'>{mov['valor']}</td>"
                         f"</tr>"
-                        for divide, descricao, data_pagamento, movimentacao_valor in movimentacoes_nao_consolidadas
-                    ) +
-                    f"</tbody>"
-                    f"</table><br>"
-                    f"<h4>Resumo da Cobrança:</h4>"
-                    f"<table style='border-collapse: collapse; width: 100%;'>"
-                    f"<tr style='background-color: #f2f2f2;'>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
-                    f"</tr>"
-                    f"<tr>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_geral_movimentacoes}</td>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_movimentacoes}</td>"
-                    f"</tr>"
-                    f"</table><br>"
-                    f"Por favor, entre em contato para mais informações."
+                        for mov in movimentacoes_data['movimentacoes_nao_consolidadas']
+                    ) + (
+                        f"</tbody>"
+                        f"</table>"
+                        f"</div>"
+                        
+                        # Tabela 2: Faturas Não Consolidadas
+                        f"<div class='table-container'>"
+                        f"<div class='table-title'>Faturas Não Consolidadas</div>"
+                        f"<table style='border-collapse: collapse; width: 100%;'>"
+                        f"<thead>"
+                        f"<tr style='background-color: #f2f2f2;'>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data Pagamento</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: right; padding: 8px;'>Valor</th>"
+                        f"</tr>"
+                        f"</thead>"
+                        f"<tbody>"
+                    ) + "".join(
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{fatura['descricao']}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{fatura['data_pagamento']}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: right; padding: 8px;'>{fatura['valor']}</td>"
+                        f"</tr>"
+                        for fatura in movimentacoes_data['faturas_nao_consolidadas']
+                    ) + (
+                        f"</tbody>"
+                        f"</table>"
+                        f"</div>"
+                        
+                        # Tabela 3: Resumo Geral
+                        f"<div class='table-container'>"
+                        f"<div class='table-title'>Resumo Geral</div>"
+                        f"<table style='border-collapse: collapse; width: 100%;'>"
+                        f"<tbody>"
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px; font-weight: bold;'>Total de Movimentações:</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: right; padding: 8px;'>{movimentacoes_data['fatura_geral']['total_movimentacoes']}</td>"
+                        f"</tr>"
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px; font-weight: bold;'>Total de Movimentações na Fatura:</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: right; padding: 8px;'>{movimentacoes_data['fatura_geral']['total_movimentacoes_fatura']}</td>"
+                        f"</tr>"
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px; font-weight: bold;'>Total Geral de Movimentações:</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: right; padding: 8px;'>{movimentacoes_data['fatura_geral']['total_geral_movimentacoes']}</td>"
+                        f"</tr>"
+                        f"</tbody>"
+                        f"</table>"
+                        f"</div>"
+                        
+                        f"<br>Por favor, entre em contato para mais informações."
+                    )
                 }
             else:
-                 email_data = { 
+                email_data = {
                     "email_subject": "Cobrança de Movimentações não Consolidadas",
                     "email_body": (
                         f"Olá, {parente.nome},<br><br>"
-                        f"Essas são as suas movimentações não consolidadas com {usuario_logado.nome_completo} no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+                        f"Seguem as informações referentes às suas movimentações não consolidadas com {usuario_logado.nome_completo} no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
                         f"<table style='border-collapse: collapse; width: 100%;'>"
                         f"<thead>"
                         f"<tr style='background-color: #f2f2f2;'>"
                         f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
                         f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor da Movimentação</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor a pagar</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
                         f"</tr>"
                         f"</thead>"
                         f"<tbody>"
                     ) + "".join(
                         f"<tr>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{descricao}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{data_pagamento.strftime('%d/%m/%Y')}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacao_valor}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{divide.valor}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['descricao']}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['data_pagamento']}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['valor']}</td>"
                         f"</tr>"
-                        for divide, descricao, data_pagamento, movimentacao_valor in movimentacoes_nao_consolidadas
-                    ) +
-                    f"</tbody>"
-                    f"</table><br>"
-                    f"<h4>Resumo da Cobrança:</h4>"
-                    f"<table style='border-collapse: collapse; width: 100%;'>"
-                    f"<tr style='background-color: #f2f2f2;'>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
-                    f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
-                    f"</tr>"
-                    f"<tr>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_geral_movimentacoes}</td>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{total_movimentacoes}</td>"
-                    f"</tr>"
-                    f"</table><br>"
-                    f"Por favor, acesse o sistema para mais informações."
-                 }
+                        for mov in movimentacoes_data['movimentacoes_nao_consolidadas']
+                    ) + (
+                        f"</tbody>"
+                        f"</table><br>"
+                        f"<h4>Resumo da Cobrança:</h4>"
+                        f"<table style='border-collapse: collapse; width: 100%;'>"
+                        f"<tr style='background-color: #f2f2f2;'>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
+                        f"</tr>"
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacoes_data['fatura_geral']['total_geral_movimentacoes']}</td>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{movimentacoes_data['fatura_geral']['total_movimentacoes']}</td>"
+                        f"</tr>"
+                        f"</table><br>"
+                        f"Por favor, acesse o sistema para mais informações."
+                    )
+                }
+
             background_tasks.add_task(send_email, email_data, parente.email)
 
             return {"message": "Cobrança enviada por email com sucesso."}
@@ -336,3 +356,124 @@ def send_email(email_data: dict, user_email: str) -> None:
 
     except Exception as e:
         raise Exception(f"Error occurred while sending email: {e}")
+
+
+@router.post("/cobranca", status_code=status.HTTP_202_ACCEPTED)
+async def send_invoice_pdf(
+    cobranca: ParenteSchemaCobranca,
+    db: AsyncSession = Depends(get_session),
+    usuario_logado: UsuarioModel = Depends(get_current_user)
+):
+    
+    async with db as session:
+        try:
+            query = select(ParenteModel).filter(
+                ParenteModel.id_parente == cobranca.id_parente,
+                ParenteModel.id_usuario == usuario_logado.id_usuario
+            )
+            result = await session.execute(query)
+            parente = result.scalars().one_or_none()
+
+            if not parente:
+                return {"message": "Parente não encontrado."}
+            
+            query = select(
+                DivideModel,
+                MovimentacaoModel.descricao,
+                MovimentacaoModel.data_pagamento,
+                MovimentacaoModel.valor, 
+            ).join(MovimentacaoModel).filter(
+                DivideModel.id_parente == cobranca.id_parente,
+                MovimentacaoModel.consolidado == False,
+                MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
+                MovimentacaoModel.forma_pagamento != FormaPagamento.CREDITO,
+                ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
+                 (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
+            )
+            
+            result = await session.execute(query)
+            movimentacoes_nao_consolidadas = result.all()
+
+            query = select(
+                DivideModel,
+                MovimentacaoModel.descricao,
+                MovimentacaoModel.data_pagamento,
+                MovimentacaoModel.valor
+            ).join(
+                MovimentacaoModel
+            ).join(
+                FaturaModel, FaturaModel.id_fatura == MovimentacaoModel.id_fatura
+            ).filter(
+                DivideModel.id_parente == cobranca.id_parente,
+                MovimentacaoModel.consolidado == False,
+                MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
+                MovimentacaoModel.forma_pagamento == FormaPagamento.CREDITO,
+                FaturaModel.data_vencimento < func.current_date(),
+            )
+            result = await session.execute(query)
+            movimentacoes_fatura_nao_consolidadas = result.all()
+
+            total_movimentacoes = sum(divide.valor for divide, _, _, _ in movimentacoes_nao_consolidadas)
+            total_movimentacoes_fatura = sum(divide.valor for divide, _, _, _ in movimentacoes_fatura_nao_consolidadas)
+
+            from sqlalchemy import or_, and_
+
+            query_total = select(
+                func.sum(DivideModel.valor)
+            ).join(
+                MovimentacaoModel
+            ).outerjoin(
+                FaturaModel, FaturaModel.id_fatura == MovimentacaoModel.id_fatura
+            ).filter(
+                DivideModel.id_parente == cobranca.id_parente,
+                MovimentacaoModel.consolidado == False,
+                MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
+                and_(
+                    extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano,
+                    extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes
+                ),
+                or_(
+                    MovimentacaoModel.forma_pagamento != "Crédito",  
+                    and_(
+                        MovimentacaoModel.forma_pagamento == "Crédito",
+                        FaturaModel.data_vencimento < func.current_date()
+                    )
+                )
+            )
+
+            total_geral_result = await session.execute(query_total)
+            total_geral_movimentacoes = total_geral_result.scalar() or 0  
+
+            response = {
+                "movimentacoes_nao_consolidadas": [],
+                "faturas_nao_consolidadas": [],
+                "fatura_geral": {}
+            }
+
+            for divide, descricao, data_pagamento, valor in movimentacoes_nao_consolidadas:
+                response["movimentacoes_nao_consolidadas"].append({
+                    "id_parente": divide.id_parente,
+                    "descricao": descricao,
+                    "data_pagamento": str(data_pagamento), 
+                    "valor": float(divide.valor)  
+                })
+
+            for divide, descricao, data_pagamento, valor in movimentacoes_fatura_nao_consolidadas:
+                response["faturas_nao_consolidadas"].append({
+                    "id_parente": divide.id_parente,
+                    "descricao": descricao,
+                    "data_pagamento": str(data_pagamento),
+                    "valor": float(divide.valor) 
+                })
+
+            response["fatura_geral"] = {
+                "total_movimentacoes": float(total_movimentacoes),
+                "total_movimentacoes_fatura": float(total_movimentacoes_fatura),
+                "total_geral_movimentacoes": float(total_geral_movimentacoes)
+            }
+
+            return {"data": response}
+
+        except Exception as e:
+            await handle_db_exceptions(session, e)
+            return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'Erro ao calcular cobrança'})
