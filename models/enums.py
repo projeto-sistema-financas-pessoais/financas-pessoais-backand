@@ -21,6 +21,7 @@ class CondicaoPagamento(str, Enum):
 class TipoCategoria(str, Enum):
     FIXA = "Fixa"
     VARIAVEL = "Variável"
+    EXTRA = "Extra"
     
 class TipoConta(str, Enum):
     CORRENTE = "Corrente"
