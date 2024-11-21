@@ -29,22 +29,6 @@ class MovimentacaoSchema(BaseModel):
     class Config:
         from_attributes = True
 
-class MovimentacaoSchemaUpdate(BaseModel):
-    valor: Optional[Decimal] = None
-    descricao: Optional[str] = None
-    tipoMovimentacao: Optional[TipoMovimentacao] = None
-    forma_pagamento: Optional[FormaPagamento] = None
-    condicao_pagamento: Optional[CondicaoPagamento] = None
-    datatime: Optional[datetime] = None
-    quantidade_parcelas: Optional[int] = None
-    consolidado: Optional[bool] = None
-    tipo_recorrencia: Optional[str] = None
-    # parcela_atual: Optional[str] = None
-    data_pagamento: Optional[date] = None
-    id_conta: Optional[int] = None
-    id_categoria: Optional[int] = None
-    id_fatura: Optional[int] = None
-    participa_limite_fatura_gastos: Optional[bool] = None
 
 
 class MovimentacaoSchemaId(MovimentacaoSchema):
@@ -70,7 +54,7 @@ class MovimentacaoSchemaReceitaDespesa(BaseModel):
     valor: Decimal
     descricao: Optional[str] = None
     id_categoria: int
-    id_conta: Optional[int] = None
+    id_conta: Optional[int] = None # usar id_financeiro e nao id_conta
     condicao_pagamento : CondicaoPagamento
     tipo_recorrencia: TipoRecorrencia
     datatime: datetime
@@ -124,3 +108,22 @@ class MovimentacaoSchemaConsolida(BaseModel):
 class MovimentacaoFaturaSchemaList(BaseModel):
     movimentacoes: List[MovimentacaoSchemaList]
     faturas: List[FaturaSchemaInfo]
+    
+    
+class MovimentacaoSchemaUpdate(BaseModel):
+    id_conta_atual: Optional[int] = None # transferencia
+    id_conta_transferencia: Optional[int] = None  # transferencia
+    
+    valor: Decimal
+    descricao: Optional[str] = None
+    id_categoria: Optional[int] = None
+    id_conta: Optional[int] = None # usar id_financeiro e nao id_conta
+    condicao_pagamento : Optional[CondicaoPagamento] = None
+    tipo_recorrencia: Optional[TipoRecorrencia] = None 
+    datatime: Optional[datetime] = None
+    data_pagamento: Optional[date] = None
+    consolidado: Optional[bool] = None
+    forma_pagamento:  Optional[FormaPagamento] = None
+    id_financeiro: Optional[int] = None
+    quantidade_parcelas : Optional[int] = None
+    divide_parente: Optional[ List[ParenteResponse]] = None

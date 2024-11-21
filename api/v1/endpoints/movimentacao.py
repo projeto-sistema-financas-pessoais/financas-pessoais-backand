@@ -91,8 +91,22 @@ async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_paga
         if not fatura:
 
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao adicionar fatura")
+    else:
+        query_cartao_credito = select(CartaoCreditoModel).where(
+            CartaoCreditoModel.id_cartao_credito == id_financeiro,
+            CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
+        )
+        result_cartao_credito = await session.execute(query_cartao_credito)
+        cartao_credito = result_cartao_credito.scalars().one_or_none()
+
+        if not cartao_credito:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não tem permissão para acessar esse cartão"
+            )
     
     return fatura, cartao_credito
+
 
 @router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao(
@@ -127,19 +141,6 @@ async def create_movimentacao(
                 fatura, cartao_credito = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, movimentacao.data_pagamento)
                 if cartao_credito:
                     print(f"Cartão de Crédito {cartao_credito}")
-                else:
-                    query_cartao_credito = select(CartaoCreditoModel).where(
-                        CartaoCreditoModel.id_cartao_credito == movimentacao.id_financeiro,
-                        CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
-                    )
-                    result_cartao_credito = await db.execute(query_cartao_credito)
-                    cartao_credito = result_cartao_credito.scalars().one_or_none()
-
-                    if not cartao_credito:
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN, 
-                            detail="Você não tem permissão para acessar esse cartão"
-                        )
 
             if movimentacao.id_conta is not None:
                 query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
@@ -465,7 +466,7 @@ async def create_movimentacao(
         finally:
             await session.close()
 
-@router.post('/editar/{id_movimentacao}', response_model=MovimentacaoSchemaId, status_code=status.HTTP_202_ACCEPTED)
+@router.post('/editar/{id_movimentacao}', status_code=status.HTTP_202_ACCEPTED)
 async def update_movimentacao(
     id_movimentacao: int,
     movimentacao_update: MovimentacaoSchemaUpdate,
@@ -474,7 +475,14 @@ async def update_movimentacao(
 ):
     async with db as session:
         # Verificar se a movimentação existe
-        query_movimentacao = select(MovimentacaoModel).filter(MovimentacaoModel.id_movimentacao == id_movimentacao)
+        query_movimentacao = select(MovimentacaoModel).options(
+            joinedload(MovimentacaoModel.divisoes).joinedload(DivideModel.parentes),
+            joinedload(MovimentacaoModel.fatura, innerjoin=False).joinedload(FaturaModel.cartao_credito)
+
+        ).filter(
+                MovimentacaoModel.id_movimentacao == id_movimentacao,
+                MovimentacaoModel.id_usuario == usuario_logado.id_usuario)
+        
         result = await session.execute(query_movimentacao)
         movimentacao: MovimentacaoModel = result.scalars().unique().one_or_none()
 
@@ -482,68 +490,262 @@ async def update_movimentacao(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movimentação não encontrada")
 
          # Verificar se a conta pertence ao usuário logado (se fornecida)
-        if movimentacao_update.id_conta:
-            query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao_update.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
-            result_conta = await session.execute(query_conta)
-            conta = result_conta.scalars().first()
+        if movimentacao_update.id_financeiro:
+            if(movimentacao_update.forma_pagamento != FormaPagamento.CREDITO):
+                query_conta = select(ContaModel).where(
+                    ContaModel.id_conta == movimentacao_update.id_financeiro,
+                    ContaModel.id_usuario == usuario_logado.id_usuario)
+                result_conta = await session.execute(query_conta)
+                conta = result_conta.scalars().first()
 
-            if not conta:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
+                if not conta:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
+            else:
+                query_credito = select(CartaoCreditoModel).where(
+                    CartaoCreditoModel.id_cartao_credito == movimentacao_update.id_financeiro,
+                    CartaoCreditoModel.id_usuario == usuario_logado.id_usuario)
+                result_credito = await session.execute(query_credito)
+                credito = result_credito.scalars().first()
+
+                if not credito:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de credito não encontrado ou não pertence ao usuário.")
+                
 
         # Verificar se a categoria pertence ao usuário logado (se fornecida)
         if movimentacao_update.id_categoria:
-            query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == movimentacao_update.id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
+            query_categoria = select(CategoriaModel).where(
+                CategoriaModel.id_categoria == movimentacao_update.id_categoria,
+                CategoriaModel.id_usuario == usuario_logado.id_usuario)
+            
             result_categoria = await session.execute(query_categoria)
             categoria = result_categoria.scalars().first()
 
             if not categoria:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
 
-        # Verificar se a fatura pertence ao usuário logado (se fornecida)
-        if movimentacao_update.id_fatura:
-            query_fatura = select(FaturaModel).where(FaturaModel.id_fatura == movimentacao_update.id_fatura)
-            result_fatura = await session.execute(query_fatura)
-            fatura = result_fatura.scalars().first()
+            
+        if(movimentacao.consolidado and movimentacao.id_fatura):
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Não pode editar fatura consolidada")
+        
 
-            if not fatura:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fatura não encontrada.")
-
-        # Atualizar campos fornecidos
-        if movimentacao_update.valor is not None:
-            movimentacao.valor = movimentacao_update.valor
-        if movimentacao_update.descricao:
-            movimentacao.descricao = movimentacao_update.descricao
-        if movimentacao_update.tipoMovimentacao:
-            movimentacao.tipoMovimentacao = movimentacao_update.tipoMovimentacao
-        if movimentacao_update.forma_pagamento:
-            movimentacao.forma_pagamento = movimentacao_update.forma_pagamento
-        if movimentacao_update.condicao_pagamento:
-            movimentacao.condicao_pagamento = movimentacao_update.condicao_pagamento
-        if movimentacao_update.datatime:
-            movimentacao.datatime = movimentacao_update.datatime
-        if movimentacao_update.quantidade_parcelas is not None:
-            movimentacao.quantidade_parcelas = movimentacao_update.quantidade_parcelas
-        if movimentacao_update.consolidado:
-            movimentacao.consolidado = movimentacao_update.consolidado
-        if movimentacao_update.tipo_recorrencia:
-            movimentacao.tipo_recorrencia = movimentacao_update.tipo_recorrencia
-        if movimentacao_update.recorrencia:
-            movimentacao.recorrencia = movimentacao_update.recorrencia
-        if movimentacao_update.data_pagamento:
-            movimentacao.data_pagamento = movimentacao_update.data_pagamento
-        if movimentacao_update.id_conta:
-            movimentacao.id_conta = movimentacao_update.id_conta
-        if movimentacao_update.id_categoria:
+        movimentacao.descricao = movimentacao_update.descricao
+        movimentacao.datatime = movimentacao_update.datatime
+        
+        
+    
+        today = date.today()
+        
+        
+        if(movimentacao.tipoMovimentacao != TipoMovimentacao.TRANSFERENCIA): #movimentacao receita ou despesa
+            if(movimentacao.data_pagamento != movimentacao_update.data_pagamento ):
+                    movimentacao.data_pagamento = movimentacao_update.data_pagamento
             movimentacao.id_categoria = movimentacao_update.id_categoria
-        if movimentacao_update.id_fatura:
-            movimentacao.id_fatura = movimentacao_update.id_fatura
+            
+            query_conta_antiga = select(ContaModel).where(
+                            ContaModel.id_conta == movimentacao.id_conta,
+                            ContaModel.id_usuario == usuario_logado.id_usuario)
+                            
+            result_conta_antiga = await session.execute(query_conta_antiga)
+            conta_antiga = result_conta_antiga.scalars().first()
+
+            
+            if(movimentacao.forma_pagamento != FormaPagamento.CREDITO):#movimentacao dinheiro ou debito
+                
+                if(movimentacao_update.valor != movimentacao.valor
+                   or movimentacao_update.forma_pagamento == FormaPagamento.CREDITO):
+                
+                    if(movimentacao.consolidado):
+                        movimentacao.consolidado = False
+                        
+                        if(movimentacao_update.forma_pagamento == FormaPagamento.CREDITO 
+                            ):
+                            ajustar_saldo_conta(conta_antiga, movimentacao, False)
+                        else:    
+                            ajustar_saldo_conta(conta, movimentacao, False)
+
+                    
+                if(movimentacao_update.forma_pagamento != FormaPagamento.CREDITO):#tipo dinheiro ou conta
+                   
+                    if (movimentacao.id_conta != movimentacao_update.id_financeiro ):
+                        ajustar_saldo_conta(conta_antiga, movimentacao, False)
+
+                    print("teste", movimentacao.id_conta, movimentacao_update.id_financeiro, movimentacao_update.consolidado )
+                    if(movimentacao_update.consolidado 
+                       and ( (movimentacao.consolidado is False or movimentacao_update.valor != movimentacao.valor) 
+                            or (movimentacao.id_conta != movimentacao_update.id_financeiro))):
+                        movimentacao.consolidado = True
+                        movimentacao.valor = movimentacao_update.valor
+                        print("Entrou true")
+                        ajustar_saldo_conta(conta, movimentacao, True)
+                    elif (movimentacao_update.consolidado is False and (movimentacao_update.valor == movimentacao.valor and movimentacao.consolidado is True)):
+                        movimentacao.consolidado = False
+                        movimentacao.valor = movimentacao_update.valor
+                        print("Entrou false", movimentacao_update.consolidado,movimentacao_update.valor, movimentacao.valor)
+                        ajustar_saldo_conta(conta, movimentacao, False)
+                        
+                    movimentacao.id_conta = movimentacao_update.id_financeiro
+
+                else: #tipo credito
+                    movimentacao.id_conta = None
+            
+                    fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao_update.id_financeiro, movimentacao_update.data_pagamento)
+                    
+                    movimentacao.id_fatura = fatura.id_fatura
+                    print(cartao, cartao.limite_disponivel, fatura)
+                    
+                    if(movimentacao.data_pagamento.month <= today.month and movimentacao.data_pagamento.year <= today.year):
+                        ajustar_limite_fatura_gastos(cartao, fatura, movimentacao, True)
+                    else:
+                        movimentacao.participa_limite_fatura_gastos = False
+            else: #movimentacao antiga era do tipo credito
+                
+                if(movimentacao.participa_limite_fatura_gastos == True):
+                        ajustar_limite_fatura_gastos(movimentacao.fatura.cartao_credito, movimentacao.fatura, movimentacao, False)
+
+                        # alterar_limite_fatura_gastos(movimentacao.id_movimentacao, False, db, usuario_logado) # mais barato usar a função do endpoint pois nao precisa consultar o cartao de credito antigo
+                movimentacao.valor = movimentacao_update.valor
+        
+                if(movimentacao_update.forma_pagamento != FormaPagamento.CREDITO): #movimentacao_update é do do tipo conta 
+                    movimentacao.id_conta = movimentacao_update.id_financeiro
+                    movimentacao.data_pagamento = movimentacao_update.data_pagamento
+                    movimentacao.participa_limite_fatura_gastos = None
+                    movimentacao.id_fatura = None
+                    if(movimentacao_update.consolidado):
+                        movimentacao.consolidado = True
+                        ajustar_saldo_conta(conta, movimentacao, True)
+                    else:
+                        movimentacao.consolidado = False # como nao estava na conta (era credito), só colocar como false e nao atualiza o saldo
+                else: #movimentacao_update é do do tipo credito 
+                    
+                    #como eu nao sei se o cartao de credito foi alterado (para isso precisaria pegar o id do cartao),
+                    # vou sempre atualizar a fatura
+                    movimentacao.consolidado = False
+
+                    fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao_update.id_financeiro, movimentacao_update.data_pagamento)
+
+                    movimentacao.id_fatura = fatura.id_fatura
+                    
+                    if(movimentacao.data_pagamento.month <= today.month and movimentacao.data_pagamento.year <= today.year):
+                        ajustar_limite_fatura_gastos(cartao, fatura, movimentacao, True)
+                    else:
+                        movimentacao.participa_limite_fatura_gastos = False
+                    
+            movimentacao.forma_pagamento = movimentacao_update.forma_pagamento
+            movimentacao.valor = movimentacao_update.valor # caso nao tenha passado por nenhum if em !=credito
+            
+            if(movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA):
+                
+                if(len(movimentacao_update.divide_parente) > 0):
+                    soma = sum(divide.valor_parente for divide in movimentacao_update.divide_parente)
+                    if soma != movimentacao_update.valor:
+                        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Valor total de parentes não pode ser diferente do valor.")
+                
+                
+                for divisao in movimentacao.divisoes:
+                    for membro in movimentacao_update.divide_parente:
+                        if(membro.id_parente == divisao.id_parente):
+                            divisao.valor = membro.valor_parente
+        else: #movimentacao tipo transferencia
+            
+            if(movimentacao_update.id_conta_atual == movimentacao_update.id_conta_transferencia):
+                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="As contas devem ter IDs diferentes")
+            
+            if(movimentacao_update.valor != movimentacao.valor or
+               movimentacao_update.id_conta_atual != movimentacao.id_conta or
+               movimentacao_update.id_conta_transferencia != movimentacao.id_conta_destino ):
+                
+                contas_a_verificar = [movimentacao.id_conta, movimentacao.id_conta_destino]
+            
+                contas_encontradas_antigas = await buscar_contas_usuario(
+                    session=session,
+                    id_usuario=usuario_logado.id_usuario,
+                    contas_ids=contas_a_verificar
+                )
+                                
+                if len(contas_encontradas_antigas) < 2:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contas não encontradas ou não pertencem ao usuário.")
+                
+                for conta in contas_encontradas_antigas:
+                    # print("conta antiga primeiro for", conta.saldo, conta.id_conta, movimentacao.valor, movimentacao_update.valor)
+
+                    if conta.id_conta == movimentacao.id_conta:
+                        conta.saldo = conta.saldo + Decimal(movimentacao.valor)
+                    elif conta.id_conta == movimentacao.id_conta_destino:
+                        conta.saldo = conta.saldo - Decimal(movimentacao.valor)
+                        
+                    # print("conta antiga segundo for", conta.saldo, conta.id_conta)
+                        
+                if (
+                    (movimentacao_update.id_conta_atual != movimentacao.id_conta 
+                    or movimentacao_update.id_conta_transferencia != movimentacao.id_conta_destino)
+                    and not (
+                        movimentacao_update.id_conta_atual == movimentacao.id_conta_destino 
+                        and movimentacao_update.id_conta_transferencia == movimentacao.id_conta
+                    )
+                ):
+                    # print("if transferencia")
+
+                    contas_novas = [movimentacao_update.id_conta_atual, movimentacao_update.id_conta_transferencia]
+                    
+                    contas_encontradas_novas = await buscar_contas_usuario(
+                        session=session,
+                        id_usuario=usuario_logado.id_usuario,
+                        contas_ids=contas_novas
+                    )
+                    
+                    if len(contas_encontradas_novas) < 2:
+                        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contas não encontradas ou não pertencem ao usuário.")
+                    
+                    for conta in contas_encontradas_novas:
+                        # print("conta nova primeiro for", conta.saldo, conta.id_conta, movimentacao.valor, movimentacao_update.valor)
+                        if conta.id_conta == movimentacao_update.id_conta_atual:
+                            conta.saldo = conta.saldo - Decimal(movimentacao_update.valor)
+                            movimentacao.id_conta = conta.id_conta
+                        elif conta.id_conta == movimentacao_update.id_conta_transferencia:
+                            conta.saldo = conta.saldo + Decimal(movimentacao_update.valor)
+                            movimentacao.id_conta_destino = conta.id_conta
+                        # print("conta nova segundo for", conta.saldo, conta.id_conta, movimentacao.valor, movimentacao_update.valor)
+
+                else:
+                    # print("else transferencia")
+                    for conta in contas_encontradas_antigas:
+                        if conta.id_conta == movimentacao_update.id_conta_atual:
+                            conta.saldo = conta.saldo - Decimal(movimentacao_update.valor)
+                            movimentacao.id_conta =  conta.id_conta
+                        elif conta.id_conta == movimentacao_update.id_conta_transferencia:
+                            conta.saldo = conta.saldo + Decimal(movimentacao_update.valor)
+                            movimentacao.id_conta_destino = conta.id_conta
+                        # print("conta antiga else", conta.saldo, conta.id_conta)
+
+
+                            
+                movimentacao.valor = movimentacao_update.valor
 
         try:
             await session.commit()
-            return movimentacao
-        except IntegrityError:
-            await session.rollback()
+            #isso deve commitar, conta, fatura e movimentacao
+            return {"message": "Edição feita com sucesso."}
+        except Exception as e:
+            await handle_db_exceptions(session, e)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Erro ao atualizar movimentação")
+
+        finally:
+            await session.close()
+
+        
+        
+async def buscar_contas_usuario(
+    session: AsyncSession,
+    id_usuario: int,
+    contas_ids: List[int]
+) -> List[ContaModel]:
+
+    query = select(ContaModel).where(
+        ContaModel.id_usuario == id_usuario,
+        ContaModel.id_conta.in_(contas_ids)
+    )
+    result = await session.execute(query)
+    return result.scalars().all()
     
 @router.get('/listar', response_model=List[MovimentacaoSchemaId])
 async def listar_movimentacoes(
@@ -805,7 +1007,7 @@ async def get_movimentacoes_vencidas(
                 )
                 for fat in faturas_result
             ]
-            print('dataaaaaaas', dataHoje, faturas)
+            # print('dataaaaaaas', dataHoje, faturas)
 
 
         query = construir_query_movimentacao(condicoes)
@@ -826,7 +1028,7 @@ async def get_movimentacoes_vencidas(
 
 @router.post("/consolidar")
 async def consolidar_movimentacao(
-    movimentacoes: MovimentacaoSchemaConsolida, 
+    movimentacoesConsolida: MovimentacaoSchemaConsolida, 
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)):
 
@@ -834,7 +1036,7 @@ async def consolidar_movimentacao(
         select(MovimentacaoModel)
         .options(joinedload(MovimentacaoModel.conta))
         .where(
-            MovimentacaoModel.id_movimentacao == movimentacoes.id_movimentacao,
+            MovimentacaoModel.id_movimentacao == movimentacoesConsolida.id_movimentacao,
             MovimentacaoModel.id_usuario == usuario_logado.id_usuario
         )
     )
@@ -847,27 +1049,33 @@ async def consolidar_movimentacao(
     if movimentacao.id_fatura is not None:
         raise HTTPException(status_code=400, detail="Não é possível consolidar uma movimentação com fatura relacionada")
 
-    movimentacao.consolidado = movimentacoes.consolidado
+    movimentacao.consolidado = movimentacoesConsolida.consolidado
 
     conta = movimentacao.conta
-    if conta is None:
-        raise HTTPException(status_code=404, detail="Conta não encontrada")
-
-    if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
-        if movimentacoes.consolidado:
-            conta.saldo -= movimentacao.valor
-        else:
-            conta.saldo += movimentacao.valor
-    elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
-        if movimentacoes.consolidado:
-            conta.saldo += movimentacao.valor
-        else:
-            conta.saldo -= movimentacao.valor
+    ajustar_saldo_conta(conta, movimentacao, movimentacoesConsolida.consolidado)
 
     await db.commit()
 
     return {"detail": "Movimentação consolidada com sucesso", "movimentacao": movimentacao}
 
+def ajustar_saldo_conta(
+    conta: ContaModel,
+    movimentacao: MovimentacaoModel,
+    consolidado: bool,
+):
+    if movimentacao.tipoMovimentacao == TipoMovimentacao.DESPESA:
+        if consolidado:
+            conta.saldo -= movimentacao.valor
+        else:
+            conta.saldo += movimentacao.valor
+    elif movimentacao.tipoMovimentacao == TipoMovimentacao.RECEITA:
+        if consolidado:
+            conta.saldo += movimentacao.valor
+        else:
+            conta.saldo -= movimentacao.valor
+            
+
+    
 
 @router.post("/participa_limite_faturas_gastos")
 async def alterar_limite_fatura_gastos(
@@ -903,6 +1111,17 @@ async def alterar_limite_fatura_gastos(
     if not cartao_credito:
         raise HTTPException(status_code=404, detail="Cartão de crédito não encontrado")
 
+    ajustar_limite_fatura_gastos(cartao_credito, fatura, movimentacao, participa_limite_fatura_gastos) 
+    await db.commit()
+
+    return {"detail": "Limite de fatura e gastos atualizados com sucesso"}
+
+def ajustar_limite_fatura_gastos(
+    cartao_credito: CartaoCreditoModel,
+    fatura: FaturaModel,
+    movimentacao: MovimentacaoModel,
+    participa_limite_fatura_gastos: bool
+):
     if participa_limite_fatura_gastos is False:
         cartao_credito.limite_disponivel += movimentacao.valor
         fatura.fatura_gastos -= movimentacao.valor
@@ -910,12 +1129,7 @@ async def alterar_limite_fatura_gastos(
     elif participa_limite_fatura_gastos is True:
         cartao_credito.limite_disponivel -= movimentacao.valor
         fatura.fatura_gastos += movimentacao.valor
-        movimentacao.participa_limite_fatura_gastos = True
-
-    await db.commit()
-
-    return {"detail": "Limite de fatura e gastos atualizados com sucesso"}
-        
+        movimentacao.participa_limite_fatura_gastos = True   
 
 
 @router.delete('/deletar/{id_movimentacao}', status_code=status.HTTP_204_NO_CONTENT)
