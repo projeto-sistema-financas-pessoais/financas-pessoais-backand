@@ -193,8 +193,8 @@ async def listar_cartao_credito(
 
         proxima_fatura = (
             sorted (
-                [f for f in cartao_credito.faturas if f.data_vencimento >= datetime.now().date()], 
-                key=lambda f: f.data_vencimento)[0] if cartao_credito.faturas else None
+                [f for f in cartao_credito.faturas if f.data_fechamento >= datetime.now().date()], 
+                key=lambda f: f.data_fechamento)[0] if cartao_credito.faturas else None
         )
 
         return {

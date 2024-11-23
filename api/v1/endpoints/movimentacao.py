@@ -63,13 +63,22 @@ async def find_fatura(id_cartao_credito: int, data_pagamento: date, db: AsyncSes
     # Verifica qual fatura escolher
     if fatura_mes_atual:
         # Se tiver uma fatura no mês atual, verifica se ela já é a fatura seguinte
-
+        print("mes atual fatura", fatura_mes_atual.data_fechamento, data_pagamento)
         if fatura_mes_atual.data_fechamento > data_pagamento:
             return fatura_mes_atual
     
     if fatura_mes_seguinte:
-        if fatura_mes_seguinte.data_fechamento > data_pagamento:
+        print("mes seguinte fatura", fatura_mes_seguinte.data_fechamento, data_pagamento)
+
+        if fatura_mes_seguinte.data_fechamento > data_pagamento and fatura_mes_atual:
             return fatura_mes_seguinte
+        
+        
+    #2024-10-20
+    #2024-11-21 > 10/20
+        
+    #FaturaModel.data_fechamento > data_anterior,
+                    # FaturaModel.data_fechamento <= data
 
 
     return None
@@ -855,7 +864,19 @@ async def listar_movimentacoes(
 
             
             data = date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
-            data_anterior = data - relativedelta(months=1)
+          
+            query_mes_anterior = select(FaturaModel).filter(
+                FaturaModel.id_cartao_credito == requestFilter.id_cartao_credito,
+                extract('month', FaturaModel.data_fechamento) == mes_anterior,
+                extract('year', FaturaModel.data_fechamento) == ano_anterior
+            )
+            
+            result_mes_anterior = await db.execute(query_mes_anterior)
+            fatura_mes_anterior = result_mes_anterior.scalars().first()
+            
+            data_anterior =  fatura_mes_anterior.data_fechamento if fatura_mes_anterior else  data - relativedelta(months=1)
+            
+            print("datas", data, data_anterior)
             
             query = query.join(
                 FaturaModel, MovimentacaoModel.fatura
@@ -868,11 +889,19 @@ async def listar_movimentacoes(
                     FaturaModel.data_fechamento <= data
                 )
             )
+            
+        
         
         
         result = await db.execute(query)
         movimentacoes = result.scalars().all()
         
+        #20-12 pagamento 
+        #21/01 fechamento
+        
+        # data de fechamento > 21/10
+        # data fechamento <= 19/11
+        #19/12/24
  
         if not movimentacoes:
             response = []
