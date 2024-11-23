@@ -578,18 +578,18 @@ async def update_movimentacao(
                     if (movimentacao.id_conta != movimentacao_update.id_financeiro ):
                         ajustar_saldo_conta(conta_antiga, movimentacao, False)
 
-                    print("teste", movimentacao.id_conta, movimentacao_update.id_financeiro, movimentacao_update.consolidado )
+                    # print("teste", movimentacao.id_conta, movimentacao_update.id_financeiro, movimentacao_update.consolidado )
                     if(movimentacao_update.consolidado 
                        and ( (movimentacao.consolidado is False or movimentacao_update.valor != movimentacao.valor) 
                             or (movimentacao.id_conta != movimentacao_update.id_financeiro))):
                         movimentacao.consolidado = True
                         movimentacao.valor = movimentacao_update.valor
-                        print("Entrou true")
+                        # print("Entrou true")
                         ajustar_saldo_conta(conta, movimentacao, True)
                     elif (movimentacao_update.consolidado is False and (movimentacao_update.valor == movimentacao.valor and movimentacao.consolidado is True)):
                         movimentacao.consolidado = False
                         movimentacao.valor = movimentacao_update.valor
-                        print("Entrou false", movimentacao_update.consolidado,movimentacao_update.valor, movimentacao.valor)
+                        # print("Entrou false", movimentacao_update.consolidado,movimentacao_update.valor, movimentacao.valor)
                         ajustar_saldo_conta(conta, movimentacao, False)
                         
                     movimentacao.id_conta = movimentacao_update.id_financeiro
@@ -948,24 +948,17 @@ async def get_data(
     result_combined = await db.execute(query_combined)
     faturas_combined = result_combined.scalars().all()
 
-    for fatura in faturas_combined:
-        print(f"Data de fechamento da fatura : {fatura.id_fatura, fatura.data_fechamento}")
+    # for fatura in faturas_combined:
+    #     print(f"Data de fechamento da fatura : {fatura.id_fatura, fatura.data_fechamento}")
 
-    # Agora você pode separar as faturas se precisar, caso precise de faturas separadas do mês anterior e do mês atual
-    fatura_mes_anterior = next(
-        (
+    fatura_mes_anterior = next((
             fatura for fatura in faturas_combined
-            if fatura.data_fechamento.month == mes_anterior and fatura.data_fechamento.year == ano_anterior
-        ),
-        None
+            if fatura.data_fechamento.month == mes_anterior and fatura.data_fechamento.year == ano_anterior),None
     )
 
-    fatura_mes_atual = next(
-    (
+    fatura_mes_atual = next((
         fatura for fatura in faturas_combined
-        if fatura.data_fechamento.month == requestFilter.mes and fatura.data_fechamento.year == requestFilter.ano
-    ),
-    None
+        if fatura.data_fechamento.month == requestFilter.mes and fatura.data_fechamento.year == requestFilter.ano),None
     )
   
             
