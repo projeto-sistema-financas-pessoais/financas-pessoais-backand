@@ -1,7 +1,7 @@
 from typing import ClassVar, List
 
 from pydantic_settings import BaseSettings
-from sqlalchemy.ext.declarative import  declarative_base
+from sqlalchemy.orm import declarative_base
 from decouple import config
 
 class Settings(BaseSettings):
