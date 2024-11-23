@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from decimal import Decimal
 
@@ -9,8 +9,8 @@ class CartaoCreditoSchema(BaseModel):
     nome_icone: str
     ativo: Optional[bool] = True
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CartaoCreditoSchemaId(CartaoCreditoSchema):
     id_usuario: int

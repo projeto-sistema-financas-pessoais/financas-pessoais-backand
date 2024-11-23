@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from decimal import Decimal
 import sqlalchemy
 from typing import List, Optional
@@ -26,8 +26,8 @@ class MovimentacaoSchema(BaseModel):
 
 
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 
 
@@ -40,8 +40,8 @@ class MovimentacaoSchemaTransferencia(BaseModel):
     descricao: Optional[str] = None
     id_conta_atual: int
     id_conta_transferencia: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
         
 class ParenteResponse(BaseModel):
@@ -65,8 +65,8 @@ class MovimentacaoSchemaReceitaDespesa(BaseModel):
     quantidade_parcelas : int
     divide_parente: List[ParenteResponse]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 
 class IdMovimentacaoSchema(BaseModel):
