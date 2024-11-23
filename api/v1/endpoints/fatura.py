@@ -26,6 +26,22 @@ router = APIRouter()
 
 from datetime import timedelta
 
+
+async def verificar_fatura_existente(db: AsyncSession, id_cartao_credito: int, mes: int, ano: int) -> Optional[FaturaModel]:
+    # Verificar se já existe uma fatura para o mesmo mês e ano
+
+    result = await db.execute(
+        select(FaturaModel).where(
+            FaturaModel.id_cartao_credito == id_cartao_credito,
+            extract('month', FaturaModel.data_vencimento) == mes,
+            extract('year', FaturaModel.data_vencimento) == ano,
+            extract('month', FaturaModel.data_fechamento) == mes,
+            extract('year', FaturaModel.data_fechamento) == ano
+        )
+    )
+    return result.scalars().first()
+    
+    
 async def create_fatura_ano(
     db: AsyncSession,
     usuario_logado: UsuarioModel,
@@ -69,17 +85,9 @@ async def create_fatura_ano(
                     data_vencimento = adjust_to_valid_date(ano, mes, dia_vencimento)
                     data_fechamento = adjust_to_valid_date(ano, mes, dia_fechamento)
 
-                # Verificar se já existe uma fatura para o mesmo mês e ano
-                existing_fatura = await db.execute(
-                    select(FaturaModel).where(
-                        FaturaModel.id_cartao_credito == id_cartao_credito,
-                        extract('month', FaturaModel.data_vencimento) == mes,
-                        extract('year', FaturaModel.data_vencimento) == ano,
-                        extract('month', FaturaModel.data_fechamento) == mes,
-                        extract('year', FaturaModel.data_fechamento) == ano
-                    )
+                existing_fatura = await verificar_fatura_existente(
+                    db, id_cartao_credito, mes, ano
                 )
-                existing_fatura = existing_fatura.scalars().first()
 
                 if not existing_fatura:  # Se não houver fatura para esse mês e ano
                     nova_fatura = FaturaModel(
@@ -105,17 +113,9 @@ async def create_fatura_ano(
                 data_vencimento = adjust_to_valid_date(ano, mes, dia_vencimento)
                 data_fechamento = adjust_to_valid_date(ano, mes, dia_fechamento)
 
-            # Verificar se já existe uma fatura para o mesmo mês e ano
-            existing_fatura = await db.execute(
-                select(FaturaModel).where(
-                    FaturaModel.id_cartao_credito == id_cartao_credito,
-                    extract('month', FaturaModel.data_vencimento) == mes,
-                    extract('year', FaturaModel.data_vencimento) == ano,
-                    extract('month', FaturaModel.data_fechamento) == mes,
-                    extract('year', FaturaModel.data_fechamento) == ano
-                )
+            existing_fatura = await verificar_fatura_existente(
+                db, id_cartao_credito, mes, ano
             )
-            existing_fatura = existing_fatura.scalars().first()
 
             if not existing_fatura:  # Se não houver fatura para esse mês e ano
                 nova_fatura = FaturaModel(
@@ -133,6 +133,7 @@ async def create_fatura_ano(
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao criar as faturas. Verifique os dados fornecidos.')
+
 
 import calendar
 
@@ -303,38 +304,7 @@ async def put_fatura(
         except IntegrityError:
             await session.rollback()  # Garantir rollback em caso de erro
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Erro ao atualizar a fatura. Verifique os dados fornecidos.')
-        
-# @router.get('/visualizar/{id_fatura}', response_model=FaturaSchema, status_code=status.HTTP_200_OK)
-# async def get_fatura(id_fatura: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
-#     async with db as session:
-#         query = select(FaturaModel).join(CartaoCreditoModel).where(
-#             FaturaModel.id_fatura == id_fatura,
-#             CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
-#         )
-#         result = await session.execute(query)
-#         fatura = result.scalars().unique().one_or_none()
 
-#         if not fatura:
-#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="fatura não encontrada ou não pertence ao usuário logado")
-
-#         return fatura
-
-   
-# @router.get('/cartaoCredito/{id_cartao_credito}/fatura', response_model=List[FaturaSchema], status_code=status.HTTP_200_OK)
-# async def get_faturas_by_cartao(id_cartao_credito: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
-#     async with db as session:
-#         query_cartao_credito = select(CartaoCreditoModel).where(CartaoCreditoModel.id_cartao_credito == id_cartao_credito, CartaoCreditoModel.id_usuario == usuario_logado.id_usuario)
-#         result_cartao_credito = await session.execute(query_cartao_credito)
-#         cartao_credito = result_cartao_credito.scalars().one_or_none()
-
-#         if not cartao_credito:
-#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de crédito não encontrada ou não pertence ao usuário logado")
-        
-#         query_faturas = select(FaturaModel).where(FaturaModel.id_cartao_credito == id_cartao_credito)
-#         result_faturas = await session.execute(query_faturas)
-#         faturas = result_faturas.scalars().all()
-
-#         return faturas
     
 @router.delete('/deletar/{id_fatura}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_fatura(id_fatura: int, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):

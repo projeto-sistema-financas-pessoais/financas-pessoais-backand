@@ -73,7 +73,7 @@ async def find_fatura(id_cartao_credito: int, data_pagamento: date, db: AsyncSes
     return None
 
 
-async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_pagamento):
+async def get_or_create_fatura(session: AsyncSession, usuario_logado: UsuarioModel, id_financeiro:int, data_pagamento):
     fatura = await find_fatura(id_financeiro, data_pagamento, session)
     cartao_credito = None 
 
@@ -105,6 +105,61 @@ async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_paga
     
     return fatura, cartao_credito
 
+async def validar_categoria(session: AsyncSession, usuario_logado: UsuarioModel, id_categoria:int):
+    query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
+    result_categoria = await session.execute(query_categoria)
+    categoria = result_categoria.scalars().first()
+    if not categoria:
+        print(f"Categoria {id_categoria} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
+    return categoria
+
+async def validar_conta(session, usuario_logado, id_conta):
+    query_conta = select(ContaModel).where(ContaModel.id_conta == id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
+    result_conta = await session.execute(query_conta)
+    conta = result_conta.scalars().first()
+    if not conta:
+        print(f"Conta {id_conta} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
+    return conta
+
+async def criar_repeticao(movimentacao: MovimentacaoSchemaReceitaDespesa, usuario_logado: UsuarioModel, db: AsyncSession):
+    if movimentacao.condicao_pagamento in [CondicaoPagamento.PARCELADO, CondicaoPagamento.RECORRENTE]:
+        if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE: 
+            if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
+                movimentacao.quantidade_parcelas = 4
+            else: 
+                movimentacao.quantidade_parcelas = 24
+
+        nova_repeticao = RepeticaoModel(
+            quantidade_parcelas=movimentacao.quantidade_parcelas,
+            tipo_recorrencia=movimentacao.tipo_recorrencia,
+            valor_total=movimentacao.valor,
+            data_inicio=movimentacao.data_pagamento,
+            id_usuario=usuario_logado.id_usuario
+        )
+        
+        db.add(nova_repeticao)
+        await db.flush()
+        await db.refresh(nova_repeticao)
+        
+        return nova_repeticao.id_repeticao
+    return None
+
+def ajustar_data_pagamento(movimentacao: MovimentacaoSchemaReceitaDespesa, data_pagamento: date):
+    if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE:
+        if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
+            data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1)
+        elif movimentacao.tipo_recorrencia == TipoRecorrencia.QUINZENAL:
+            data_pagamento += timedelta(days=15)
+        elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
+            data_pagamento += timedelta(weeks=1)
+        elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
+            data_pagamento += relativedelta(months=1)
+    else:
+        data_pagamento += relativedelta(months=1)
+    
+    return data_pagamento
 
 @router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao_despesa(
@@ -115,14 +170,8 @@ async def create_movimentacao_despesa(
     async with db as session:
         try:
             today = date.today()
-            query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == movimentacao.id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
-            result_categoria = await session.execute(query_categoria)
-            categoria = result_categoria.scalars().first()
+            categoria = await validar_categoria(session, usuario_logado, movimentacao.id_categoria)
 
-            if not categoria:
-                print(f"Categoria {movimentacao.id_categoria} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
-            
             # Validação da soma dos valores de parentes
             soma = sum(divide.valor_parente for divide in movimentacao.divide_parente)
             if soma != movimentacao.valor:
@@ -130,7 +179,6 @@ async def create_movimentacao_despesa(
             
             if movimentacao.condicao_pagamento != CondicaoPagamento.PARCELADO:
                 movimentacao.quantidade_parcelas = 1
-
 
             # Ajuste da conta ou criação de fatura
             if movimentacao.forma_pagamento in [FormaPagamento.DEBITO, FormaPagamento.DINHEIRO]:
@@ -142,14 +190,9 @@ async def create_movimentacao_despesa(
                     print(f"Cartão de Crédito {cartao_credito}")
 
             if movimentacao.id_conta is not None:
-                query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
-                result_conta = await session.execute(query_conta)
-                conta = result_conta.scalars().first()
- 
-                if not conta:
-                    print(f"Conta {movimentacao.id_conta} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
-                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
+                conta = await validar_conta(session, usuario_logado, movimentacao.id_conta)
 
+                
             # Preparação para criar movimentações parceladas
             valor_por_parcela = movimentacao.valor / movimentacao.quantidade_parcelas
             valor_por_parcela_ajustado = round(valor_por_parcela, 2)
@@ -158,26 +201,7 @@ async def create_movimentacao_despesa(
 
             data_pagamento = movimentacao.data_pagamento
 
-            if movimentacao.condicao_pagamento in [CondicaoPagamento.PARCELADO, CondicaoPagamento.RECORRENTE]:
-                
-                if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE: 
-                    if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
-                        movimentacao.quantidade_parcelas = 4
-                    else: 
-                        movimentacao.quantidade_parcelas = 12
-
-                nova_repeticao = RepeticaoModel(
-                    quantidade_parcelas=movimentacao.quantidade_parcelas,
-                    tipo_recorrencia=movimentacao.tipo_recorrencia,
-                    valor_total=movimentacao.valor,
-                    data_inicio=movimentacao.data_pagamento,
-                    id_usuario = usuario_logado.id_usuario
-
-                )
-                db.add(nova_repeticao)
-                await db.flush()
-                await db.refresh(nova_repeticao)
-                id_repeticao = nova_repeticao.id_repeticao
+            id_repeticao = await criar_repeticao(movimentacao, usuario_logado, db)
 
             # Criação das movimentações parceladas
             for parcela_atual in range(1, movimentacao.quantidade_parcelas + 1):
@@ -249,20 +273,8 @@ async def create_movimentacao_despesa(
 
                 movimentacao.consolidado = False
                 
-                if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE:
-                    if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
-                        data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1)
-                    elif movimentacao.tipo_recorrencia == TipoRecorrencia.QUINZENAL:
-                        data_pagamento += timedelta(days=15)
-                    elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
-                        data_pagamento += timedelta(weeks=1)
-                    elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
-                        data_pagamento += relativedelta(months=1)
+                data_pagamento = ajustar_data_pagamento(movimentacao, data_pagamento)
 
-                else:
-                    data_pagamento += relativedelta(months=1)
-
-                    
                 if movimentacao.forma_pagamento == FormaPagamento.CREDITO:       
                     fatura, cartao = await get_or_create_fatura(session, usuario_logado, movimentacao.id_financeiro, data_pagamento)
             await db.commit()
@@ -281,15 +293,8 @@ async def create_movimentacao_receita(
 ):
     async with db as session:
         try:
-            query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == movimentacao.id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
-            result_categoria = await session.execute(query_categoria)
-            categoria = result_categoria.scalars().first()
+            categoria = await validar_categoria(session, usuario_logado, movimentacao.id_categoria)
 
-            if not categoria:
-                print(f"Categoria {movimentacao.id_categoria} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
-            
-            
             if movimentacao.condicao_pagamento != CondicaoPagamento.PARCELADO:
                 movimentacao.quantidade_parcelas = 1
             else:
@@ -313,36 +318,11 @@ async def create_movimentacao_receita(
 
 
             if movimentacao.id_conta is not None:
-                query_conta = select(ContaModel).where(ContaModel.id_conta == movimentacao.id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
-                result_conta = await session.execute(query_conta)
-                conta = result_conta.scalars().first()
- 
-                if not conta:
-                    print(f"Conta {movimentacao.id_conta} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
-                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
+                conta = await validar_conta(session, usuario_logado, movimentacao.id_conta)
 
-           
             data_pagamento = movimentacao.data_pagamento
 
-            if movimentacao.condicao_pagamento in [CondicaoPagamento.PARCELADO, CondicaoPagamento.RECORRENTE]:
-                
-                if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE: 
-                    if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
-                        movimentacao.quantidade_parcelas = 4
-                    else: 
-                        movimentacao.quantidade_parcelas = 48
-
-                nova_repeticao = RepeticaoModel(
-                    quantidade_parcelas=movimentacao.quantidade_parcelas,
-                    tipo_recorrencia=movimentacao.tipo_recorrencia,
-                    valor_total=movimentacao.valor,
-                    data_inicio=movimentacao.data_pagamento,
-                    id_usuario = usuario_logado.id_usuario
-                )
-                db.add(nova_repeticao)
-                await db.flush()
-                await db.refresh(nova_repeticao)
-                id_repeticao = nova_repeticao.id_repeticao
+            id_repeticao = await criar_repeticao(movimentacao, usuario_logado, db)
 
             # Criação das movimentações parceladas
             for parcela_atual in range(1, movimentacao.quantidade_parcelas + 1):
@@ -387,20 +367,8 @@ async def create_movimentacao_receita(
 
                 movimentacao.consolidado = False
                 
-                if movimentacao.condicao_pagamento == CondicaoPagamento.RECORRENTE:
-                    if movimentacao.tipo_recorrencia == TipoRecorrencia.ANUAL:
-                        data_pagamento = data_pagamento.replace(year=data_pagamento.year + 1)
-                    elif movimentacao.tipo_recorrencia == TipoRecorrencia.QUINZENAL:
-                        data_pagamento += timedelta(days=15)
-                    elif movimentacao.tipo_recorrencia == TipoRecorrencia.SEMANAL:
-                        data_pagamento += timedelta(weeks=1)
-                    elif movimentacao.tipo_recorrencia == TipoRecorrencia.MENSAL:
-                        data_pagamento += relativedelta(months=1)
+                data_pagamento = ajustar_data_pagamento(movimentacao, data_pagamento)
 
-                else:
-                    data_pagamento += relativedelta(months=1)
-
-                
             await db.commit()
             return {"message": "Receita cadastrada com sucesso."}
         
@@ -592,7 +560,8 @@ async def update_movimentacao(
                     movimentacao.id_fatura = fatura.id_fatura
                     print(cartao, cartao.limite_disponivel, fatura)
                     
-                    if(movimentacao.data_pagamento.month <= today.month and movimentacao.data_pagamento.year <= today.year):
+                    if(movimentacao.data_pagamento.month <= today.month and movimentacao.data_pagamento.year <= today.year
+                       or movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO):
                         ajustar_limite_fatura_gastos(cartao, fatura, movimentacao, True)
                     else:
                         movimentacao.participa_limite_fatura_gastos = False
@@ -624,7 +593,8 @@ async def update_movimentacao(
 
                     movimentacao.id_fatura = fatura.id_fatura
                     
-                    if(movimentacao.data_pagamento.month <= today.month and movimentacao.data_pagamento.year <= today.year):
+                    if(movimentacao.data_pagamento.month <= today.month and movimentacao.data_pagamento.year <= today.year 
+                       or movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO):
                         ajustar_limite_fatura_gastos(cartao, fatura, movimentacao, True)
                     else:
                         movimentacao.participa_limite_fatura_gastos = False

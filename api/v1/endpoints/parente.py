@@ -1,5 +1,3 @@
-from datetime import datetime
-import email
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -15,22 +13,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from api.v1.endpoints.movimentacao import construir_query_movimentacao, construir_response
 from core.auth import send_email
 from core.utils import handle_db_exceptions
-from models.cartao_credito_model import CartaoCreditoModel
 from models.enums import FormaPagamento, TipoMovimentacao
 from models.fatura_model import FaturaModel
 from models.parente_model import ParenteModel
 from models.divide_model import  DivideModel
 from models.movimentacao_model import MovimentacaoModel
-from schemas.fatura_schema import FaturaSchemaInfo
-from schemas.movimentacao_schema import MovimentacaoFaturaSchemaList
 from schemas.parente_schema import ParenteSchema, ParenteSchemaCobranca, ParenteSchemaUpdate, ParenteSchemaId
 from core.deps import get_session, get_current_user
 from models.usuario_model import UsuarioModel
-from sqlalchemy import and_, case, extract, func, select
-from sqlalchemy.orm import joinedload
+from sqlalchemy import case, extract, func, select
 
 router = APIRouter()
 
