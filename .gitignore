@@ -2,3 +2,4 @@ __pycache__/
 .env
 alembic/versions/*
 venv
+migrations/versions/*
