@@ -2,7 +2,7 @@
 import api.v1.endpoints
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query, status, HTTPException
-from sqlalchemy import and_, extract, func, insert, or_
+from sqlalchemy import and_, extract, func, insert, or_, union
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
@@ -861,22 +861,13 @@ async def listar_movimentacoes(
             query = query.join(DivideModel, MovimentacaoModel.divisoes).where(DivideModel.id_parente == requestFilter.id_parente)
             
         if requestFilter.id_cartao_credito is not None:
-
             
-            data = date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
-          
-            query_mes_anterior = select(FaturaModel).filter(
-                FaturaModel.id_cartao_credito == requestFilter.id_cartao_credito,
-                extract('month', FaturaModel.data_fechamento) == mes_anterior,
-                extract('year', FaturaModel.data_fechamento) == ano_anterior
-            )
-            
-            result_mes_anterior = await db.execute(query_mes_anterior)
-            fatura_mes_anterior = result_mes_anterior.scalars().first()
-            
-            data_anterior =  fatura_mes_anterior.data_fechamento if fatura_mes_anterior else  data - relativedelta(months=1)
-            
-            print("datas", data, data_anterior)
+            data, data_anterior = await get_data(
+                db=db,
+                requestFilter = requestFilter,
+                mes_anterior = mes_anterior,
+                ano_anterior = ano_anterior
+            )            
             
             query = query.join(
                 FaturaModel, MovimentacaoModel.fatura
@@ -890,18 +881,12 @@ async def listar_movimentacoes(
                 )
             )
             
-        
-        
+    
         
         result = await db.execute(query)
         movimentacoes = result.scalars().all()
         
-        #20-12 pagamento 
-        #21/01 fechamento
-        
-        # data de fechamento > 21/10
-        # data fechamento <= 19/11
-        #19/12/24
+
  
         if not movimentacoes:
             response = []
@@ -909,6 +894,87 @@ async def listar_movimentacoes(
             response = construir_response(movimentacoes, requestFilter)
 
         return response
+
+async def get_data(
+    db: AsyncSession,
+    requestFilter: MovimentacaoRequestFilterSchema,
+    mes_anterior: int,
+    ano_anterior: int
+):
+    # query_mes_anterior = select(FaturaModel).filter(
+    #     FaturaModel.id_cartao_credito == requestFilter.id_cartao_credito,
+    #     extract('month', FaturaModel.data_fechamento) == mes_anterior,
+    #     extract('year', FaturaModel.data_fechamento) == ano_anterior
+    # )
+    
+            
+    # query_mes_atual = select(FaturaModel).filter(
+    #     FaturaModel.id_cartao_credito == requestFilter.id_cartao_credito,
+    #     extract('month', FaturaModel.data_fechamento) == requestFilter.mes,
+    #     extract('year', FaturaModel.data_fechamento) == requestFilter.ano
+    # )
+    
+    # result_mes_anterior = await db.execute(query_mes_anterior)
+    # fatura_mes_anterior = result_mes_anterior.scalars().first()
+    
+    # result_mes_atual = await db.execute(query_mes_atual)
+    # fatura_mes_atual = result_mes_atual.scalars().first()     
+    
+    # print(f"Data de fechamento da fatura mes atual: {fatura_mes_atual.id_fatura, fatura_mes_atual.data_fechamento}")
+    # print(f"Data de fechamento da fatura mes anterior: {fatura_mes_anterior.id_fatura, fatura_mes_anterior.data_fechamento}")
+    
+    # data = fatura_mes_atual.data_fechamento if fatura_mes_atual else date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
+
+    # data_anterior = fatura_mes_anterior.data_fechamento if fatura_mes_anterior else  data - relativedelta(months=1)
+    
+    
+    # print(f"Datas 1: {data, data_anterior}")
+
+    
+    query_combined = select(FaturaModel).filter(
+        FaturaModel.id_cartao_credito == requestFilter.id_cartao_credito,
+        or_(
+            and_(
+                extract('month', FaturaModel.data_fechamento) == mes_anterior,
+                extract('year', FaturaModel.data_fechamento) == ano_anterior
+            ),
+            and_(
+                extract('month', FaturaModel.data_fechamento) == requestFilter.mes,
+                extract('year', FaturaModel.data_fechamento) == requestFilter.ano
+            )
+        )
+    )
+
+    result_combined = await db.execute(query_combined)
+    faturas_combined = result_combined.scalars().all()
+
+    for fatura in faturas_combined:
+        print(f"Data de fechamento da fatura : {fatura.id_fatura, fatura.data_fechamento}")
+
+    # Agora você pode separar as faturas se precisar, caso precise de faturas separadas do mês anterior e do mês atual
+    fatura_mes_anterior = next(
+        (
+            fatura for fatura in faturas_combined
+            if fatura.data_fechamento.month == mes_anterior and fatura.data_fechamento.year == ano_anterior
+        ),
+        None
+    )
+
+    fatura_mes_atual = next(
+    (
+        fatura for fatura in faturas_combined
+        if fatura.data_fechamento.month == requestFilter.mes and fatura.data_fechamento.year == requestFilter.ano
+    ),
+    None
+    )
+  
+            
+    data = fatura_mes_atual.data_fechamento if fatura_mes_atual else date(requestFilter.ano, requestFilter.mes, requestFilter.dia_fechamento)
+
+    data_anterior = fatura_mes_anterior.data_fechamento if fatura_mes_anterior else  data - relativedelta(months=1)
+    
+
+    return data, data_anterior
     
 def construir_query_movimentacao(condicoes):
     query = (
