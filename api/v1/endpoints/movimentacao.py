@@ -1,19 +1,17 @@
 
-import api.v1.endpoints
 from decimal import Decimal
-from fastapi import APIRouter, Depends, Query, status, HTTPException
-from sqlalchemy import and_, extract, func, insert, or_, union
+from fastapi import APIRouter, Depends , status, HTTPException
+from sqlalchemy import and_, extract, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
-from api.v1.endpoints.fatura import adjust_to_valid_date, create_fatura_ano
+from api.v1.endpoints.fatura import create_fatura_ano
 from core.utils import handle_db_exceptions
 from models.cartao_credito_model import CartaoCreditoModel
 from models.divide_model import DivideModel
 from models.movimentacao_model import MovimentacaoModel
 from models.parente_model import ParenteModel
-from schemas.fatura_schema import FaturaSchema, FaturaSchemaId, FaturaSchemaInfo
-from schemas.movimentacao_schema import (IdMovimentacaoSchema, MovimentacaoFaturaSchemaList, MovimentacaoRequestFilterSchema,
+from schemas.fatura_schema import FaturaSchemaInfo
+from schemas.movimentacao_schema import (MovimentacaoFaturaSchemaList, MovimentacaoRequestFilterSchema,
     MovimentacaoSchemaConsolida, MovimentacaoSchemaId, MovimentacaoSchemaList, MovimentacaoSchemaReceitaDespesa,
     MovimentacaoSchemaTransferencia, MovimentacaoSchemaUpdate, ParenteResponse)
 from core.deps import get_session, get_current_user
@@ -21,12 +19,11 @@ from models.usuario_model import UsuarioModel
 from models.conta_model import ContaModel
 from models.categoria_model import CategoriaModel
 from models.fatura_model import FaturaModel
-from typing import List, Optional
+from typing import List
 from models.repeticao_model import RepeticaoModel
 from models.enums import CondicaoPagamento, FormaPagamento, TipoMovimentacao, TipoRecorrencia
 from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload, selectinload
-from sqlalchemy.exc import IntegrityError
 from calendar import monthrange
 from dateutil.relativedelta import relativedelta
 
@@ -72,14 +69,6 @@ async def find_fatura(id_cartao_credito: int, data_pagamento: date, db: AsyncSes
 
         if fatura_mes_seguinte.data_fechamento > data_pagamento and fatura_mes_atual:
             return fatura_mes_seguinte
-        
-        
-    #2024-10-20
-    #2024-11-21 > 10/20
-        
-    #FaturaModel.data_fechamento > data_anterior,
-                    # FaturaModel.data_fechamento <= data
-
 
     return None
 
@@ -118,7 +107,7 @@ async def get_or_create_fatura(session, usuario_logado, id_financeiro, data_paga
 
 
 @router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)
-async def create_movimentacao(
+async def create_movimentacao_despesa(
     movimentacao: MovimentacaoSchemaReceitaDespesa,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
@@ -133,6 +122,7 @@ async def create_movimentacao(
             if not categoria:
                 print(f"Categoria {movimentacao.id_categoria} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
+            
             # Validação da soma dos valores de parentes
             soma = sum(divide.valor_parente for divide in movimentacao.divide_parente)
             if soma != movimentacao.valor:
@@ -284,7 +274,7 @@ async def create_movimentacao(
             await session.close()
             
 @router.post('/cadastro/receita', status_code=status.HTTP_201_CREATED)
-async def create_movimentacao(
+async def create_movimentacao_receita(
     movimentacao: MovimentacaoSchemaReceitaDespesa,
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
