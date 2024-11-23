@@ -9,12 +9,12 @@ from sqlalchemy.future import select
 from typing import List
 from core.deps import get_session, get_current_user
 from models.cartao_credito_model import CartaoCreditoModel
+from models.movimentacao_model import MovimentacaoModel
 from schemas.cartao_de_credito_schema import CartaoCreditoSchema, CartaoCreditoSchemaId, CartaoCreditoSchemaUpdate, CartaoCreditoSchemaFatura
 from models.usuario_model import UsuarioModel
 from models.fatura_model import FaturaModel
 from api.v1.endpoints.fatura import create_fatura_ano
 from datetime import date, datetime
-from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 
@@ -76,7 +76,7 @@ async def update_cartao_credito(
             CartaoCreditoModel.id_usuario == usuario_logado.id_usuario
         )
         result = await session.execute(query)
-        cartao_credito: CartaoCreditoModel = result.scalars().unique().one_or_none()
+        cartao_credito = result.scalars().unique().one_or_none()
 
         if not cartao_credito:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão de crédito não encontrado ou você não tem permissão para editá-lo")
@@ -84,7 +84,9 @@ async def update_cartao_credito(
         if cartao_credito_update.nome:
             cartao_credito.nome = cartao_credito_update.nome
         if cartao_credito_update.limite:
+            aux = cartao_credito.limite - cartao_credito.limite_disponivel
             cartao_credito.limite = cartao_credito_update.limite
+            cartao_credito.limite_disponivel = cartao_credito.limite - aux
         if cartao_credito_update.nome_icone:
             cartao_credito.nome_icone = cartao_credito_update.nome_icone
         if cartao_credito_update.ativo is not None:
@@ -92,36 +94,62 @@ async def update_cartao_credito(
 
         if cartao_credito_update.dia_fechamento or cartao_credito_update.dia_vencimento:
             hoje = datetime.now()
-            mes_atual = hoje.month
-            ano_atual = hoje.year
+            dia_fechamento = cartao_credito_update.dia_fechamento or cartao_credito.dia_fechamento
+            dia_vencimento = cartao_credito_update.dia_vencimento or cartao_credito.dia_vencimento
 
             fatura_query = select(FaturaModel).where(
                 FaturaModel.id_cartao_credito == id_cartao_credito,
-                extract('year', FaturaModel.data_fechamento) >= ano_atual,
-                extract('month', FaturaModel.data_fechamento) >= mes_atual
-            )
-
+                FaturaModel.data_fechamento >= hoje
+            ).order_by(FaturaModel.data_fechamento)
             fatura_result = await session.execute(fatura_query)
-            faturas: List[FaturaModel] = fatura_result.scalars().all()
+            faturas = fatura_result.scalars().all()
 
             for fatura in faturas:
-                if cartao_credito_update.dia_fechamento:
-                    fatura.data_fechamento = fatura.data_fechamento.replace(
-                        day=cartao_credito_update.dia_fechamento
+                novo_mes_fechamento = fatura.data_fechamento.month
+                novo_ano_fechamento = fatura.data_fechamento.year
+
+                if dia_fechamento < fatura.data_fechamento.day:
+                    novo_mes_fechamento += 1
+                    if novo_mes_fechamento > 12:
+                        novo_mes_fechamento = 1
+                        novo_ano_fechamento += 1
+
+                fatura.data_fechamento = datetime(
+                    novo_ano_fechamento, novo_mes_fechamento, dia_fechamento
+                )
+
+                novo_mes_vencimento = novo_mes_fechamento
+                novo_ano_vencimento = novo_ano_fechamento
+
+                if dia_vencimento < dia_fechamento:
+                    novo_mes_vencimento += 1
+                    if novo_mes_vencimento > 12:
+                        novo_mes_vencimento = 1
+                        novo_ano_vencimento += 1
+
+                fatura.data_vencimento = datetime(
+                    novo_ano_vencimento, novo_mes_vencimento, dia_vencimento
+                )
+
+                movimentacoes_query = select(MovimentacaoModel).where(
+                    MovimentacaoModel.id_fatura == fatura.id_fatura
+                )
+                movimentacoes_result = await session.execute(movimentacoes_query)
+                movimentacoes = movimentacoes_result.scalars().all()
+
+                for movimentacao in movimentacoes:
+                    data_movimentacao = movimentacao.data_pagamento
+                    nova_fatura = next(
+                        (f for f in faturas if 
+                         f.data_fechamento.year == data_movimentacao.year and 
+                         f.data_fechamento.month == data_movimentacao.month), None
                     )
-                if cartao_credito_update.dia_vencimento:
-                    fatura.data_vencimento = fatura.data_vencimento.replace(
-                        day=cartao_credito_update.dia_vencimento
-            )
+                    if nova_fatura:
+                        movimentacao.id_fatura = nova_fatura.id_fatura
 
-        try:
-            await session.commit()
-            await session.refresh(cartao_credito)  
-            return cartao_credito
-        except IntegrityError:
-            await session.rollback() 
-            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Já existe um cartão com este nome para este usuário")
-
+        await session.commit()
+        await session.refresh(cartao_credito)
+        return cartao_credito
 
 @router.get('/listar/{somente_ativo}', response_model=list[CartaoCreditoSchemaId], status_code=status.HTTP_200_OK)
 async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends(get_session), usuario_logado: UsuarioModel = Depends(get_current_user)):
