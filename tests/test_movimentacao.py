@@ -17,7 +17,9 @@ class TestAjustarSaldoConta:
         ajustar_saldo_conta(conta, movimentacao, consolidado)
 
         # Assert
-        assert conta.saldo == 50.0  # 100 - 50
+        tolerance = 1e-9
+        assert abs(conta.saldo - 50.0) < tolerance, f"Expected saldo to be 50.0, but got {conta.saldo}"
+
 
     def test_despesa_nao_consolidada(self):
         # Arrange
@@ -34,7 +36,8 @@ class TestAjustarSaldoConta:
         ajustar_saldo_conta(conta, movimentacao, consolidado)
 
         # Assert
-        assert conta.saldo == 150.0  # 100 + 50
+        tolerance = 1e-9 
+        assert abs(conta.saldo - 150.0) < tolerance, f"Expected saldo to be 50.0, but got {conta.saldo}"
 
     def test_receita_consolidada(self):
         # Arrange
@@ -51,7 +54,8 @@ class TestAjustarSaldoConta:
         ajustar_saldo_conta(conta, movimentacao, consolidado)
 
         # Assert
-        assert conta.saldo == 150.0  # 100 + 50
+        tolerance = 1e-9 
+        assert abs(conta.saldo - 150.0) < tolerance, f"Expected saldo to be 50.0, but got {conta.saldo}"
 
     def test_receita_nao_consolidada(self):
         # Arrange
@@ -68,4 +72,5 @@ class TestAjustarSaldoConta:
         ajustar_saldo_conta(conta, movimentacao, consolidado)
 
         # Assert
-        assert conta.saldo == 50.0  # 100 - 50
+        tolerance = 1e-9 
+        assert abs(conta.saldo - 50.0) < tolerance, f"Expected saldo to be 50.0, but got {conta.saldo}"

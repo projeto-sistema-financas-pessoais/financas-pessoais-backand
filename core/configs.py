@@ -1,5 +1,6 @@
 from typing import ClassVar, List
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 from sqlalchemy.orm import declarative_base
 from decouple import config
@@ -23,7 +24,7 @@ class Settings(BaseSettings):
     EMAIL_PASSWORD: str = config("EMAIL_PASSWORD")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*8
     
-    class Config:
-        case_sensitive = True
+    model_config = ConfigDict(case_sensitive=True)
+
 
 settings = Settings()
