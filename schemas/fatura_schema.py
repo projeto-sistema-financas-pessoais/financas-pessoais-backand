@@ -1,12 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 from decimal import Decimal
 
 class FaturaSchema(BaseModel):
     id_conta: Optional[int] = None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class FaturaSchemaId(FaturaSchema):
     id_fatura: int
@@ -27,4 +27,5 @@ class FaturaSchemaInfo(FaturaSchema):
     id_cartao_credito: int
     fatura_gastos: Decimal
     nome_conta: Optional[str] = None
+    nome_cartao: Optional[str] = None
 

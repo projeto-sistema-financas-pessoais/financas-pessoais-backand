@@ -15,6 +15,6 @@ from core.configs import settings
 metadata = settings.DBBaseModel.metadata
 
 __all__ = [
-    "CartaoCreditoModel", "CategoriaModel", "ContaModel", "UsuarioModel"
+    "CartaoCreditoModel", "CategoriaModel", "ContaModel", "UsuarioModel",
     "FaturaModel", "MovimentacaoModel", "ParenteModel", "RepeticaoModel", "DivideModel"
 ]

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 class ParenteSchema(BaseModel):
@@ -7,8 +7,8 @@ class ParenteSchema(BaseModel):
     grau_parentesco: str
     ativo : Optional[bool] = True
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class ParenteSchemaId(ParenteSchema):
     id_usuario: int

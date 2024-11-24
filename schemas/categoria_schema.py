@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from models.enums import TipoMovimentacao, TipoCategoria
 from typing import Optional
 from decimal import Decimal
@@ -10,8 +10,8 @@ class CategoriaSchema(BaseModel):
     valor_categoria: Optional[Decimal] = None
     nome_icone: str
     ativo : Optional[bool] = True
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CategoriaSchemaUpdate(BaseModel):
     nome: Optional[str] = None
