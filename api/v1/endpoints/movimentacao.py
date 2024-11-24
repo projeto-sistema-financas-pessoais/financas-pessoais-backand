@@ -51,10 +51,10 @@ async def find_fatura(id_cartao_credito: int, data_pagamento: date, db: AsyncSes
     
     # Executa as consultas
     result_mes_atual = await db.execute(query_mes_atual)
-    fatura_mes_atual = await result_mes_atual.scalars().first()
+    fatura_mes_atual =  result_mes_atual.scalars().first()
 
     result_mes_seguinte = await db.execute(query_mes_seguinte)
-    fatura_mes_seguinte = await result_mes_seguinte.scalars().first()
+    fatura_mes_seguinte =  result_mes_seguinte.scalars().first()
     
 
     # Verifica qual fatura escolher
@@ -108,7 +108,7 @@ async def get_or_create_fatura(session: AsyncSession, usuario_logado: UsuarioMod
 async def validar_categoria(session: AsyncSession, usuario_logado: UsuarioModel, id_categoria:int):
     query_categoria = select(CategoriaModel).where(CategoriaModel.id_categoria == id_categoria, CategoriaModel.id_usuario == usuario_logado.id_usuario)
     result_categoria = await session.execute(query_categoria)
-    categoria = await result_categoria.scalars().first()
+    categoria = result_categoria.scalars().first()
     if not categoria:
         print(f"Categoria {id_categoria} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada ou não pertence ao usuário.")
@@ -117,7 +117,7 @@ async def validar_categoria(session: AsyncSession, usuario_logado: UsuarioModel,
 async def validar_conta(session, usuario_logado, id_conta):
     query_conta = select(ContaModel).where(ContaModel.id_conta == id_conta, ContaModel.id_usuario == usuario_logado.id_usuario)
     result_conta = await session.execute(query_conta)
-    conta = await result_conta.scalars().first()
+    conta =  result_conta.scalars().first()
     if not conta:
         print(f"Conta {id_conta} não encontrada ou não pertence ao usuário {usuario_logado.id_usuario}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conta não encontrada ou não pertence ao usuário.")
@@ -1504,7 +1504,7 @@ async def economia_meses_anteriores(
                                                      func.extract('year', MovimentacaoModel.data_pagamento))
 
             resultado_despesas = await session.execute(query_despesas)
-            despesas_mes = await resultado_despesas.fetchall()
+            despesas_mes = resultado_despesas.fetchall()
 
             if not despesas_mes:
                 despesas_por_mes.append({
