@@ -158,6 +158,8 @@ async def update_cartao_credito(
                         (f for f in faturas if f.data_fechamento > data_movimentacao), None
                     )
                     if nova_fatura:
+                        fatura.fatura_gastos -= movimentacao.valor
+                        nova_fatura.fatura_gastos += movimentacao.valor
                         movimentacao.id_fatura = nova_fatura.id_fatura
 
         await session.commit()
@@ -272,7 +274,8 @@ async def deletar_cartao_credito(
 
     # Verificar se existem faturas associadas ao cartão de crédito
         fatura_query = select(FaturaModel).where(
-            FaturaModel.id_cartao_credito == id_cartao_credito
+            FaturaModel.id_cartao_credito == id_cartao_credito,
+            FaturaModel.fatura_gastos > 0
         )
         Fatura_result = await session.execute(fatura_query)
         faturas = Fatura_result.scalars().unique().all()
