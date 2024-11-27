@@ -224,7 +224,10 @@ async def update_usuario(
         usuario.nome_completo = usuario_update.nome_completo
         usuario.data_nascimento = usuario_update.data_nascimento
         
-        query = await session.execute(select(ParenteModel).filter(ParenteModel.id_usuario == usuario_logado.id_usuario))
+        query = await session.execute(select(ParenteModel).filter(
+            ParenteModel.id_usuario == usuario_logado.id_usuario,
+            ParenteModel.nome == usuario_logado.nome_completo
+        ))
         parente = query.scalars().one_or_none()
         
         if parente:

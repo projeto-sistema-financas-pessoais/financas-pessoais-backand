@@ -230,7 +230,9 @@ async def fechar_fatura(
 
             parente_query = (
                 select(ParenteModel)
-                .where(ParenteModel.nome == usuario_logado.nome_completo)
+                .where(ParenteModel.nome == usuario_logado.nome_completo,
+                       ParenteModel.id_usuario == usuario_logado.id_usuario,
+                       )
             )
             parente_result = await session.execute(parente_query)
             parente = parente_result.scalar_one_or_none()
