@@ -94,7 +94,7 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 ),
                 CategoriaModel(
                     nome="Extra",
-                    tipo_categoria="Variável",
+                    tipo_categoria="Extra",
                     modelo_categoria="Receita",
                     id_usuario=novo_usuario.id_usuario,
                     valor_categoria=None,
@@ -133,6 +133,9 @@ async def post_usuario(usuario: UsuarioSchema, db: AsyncSession = Depends(get_se
                 status_code=status.HTTP_406_NOT_ACCEPTABLE, 
                 detail='Já existe um usuário com este email cadastrado'
             )
+        
+
+
 
 @router.post('/login')
 async def login(login_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_session)):
@@ -221,7 +224,7 @@ async def update_usuario(
         usuario.nome_completo = usuario_update.nome_completo
         usuario.data_nascimento = usuario_update.data_nascimento
         
-        query = await session.execute(select(ParenteModel).filter(ParenteModel.nome == usuario_logado.nome_completo))
+        query = await session.execute(select(ParenteModel).filter(ParenteModel.id_usuario == usuario_logado.id_usuario))
         parente = query.scalars().one_or_none()
         
         if parente:
@@ -265,3 +268,5 @@ async def get_usuario(
             "data_nascimento": usuario_logado.data_nascimento
         }
         return usuario
+
+
