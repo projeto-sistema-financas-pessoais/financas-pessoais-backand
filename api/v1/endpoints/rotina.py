@@ -75,143 +75,128 @@ def send_email(email_data: dict, user_email: str) -> None:
 async def check_and_send_email():
     try:
         async for session in get_session():
-            contas_vencidas, faturas_vencidas = await fetch_vencidas(session)
-            usuarios_contas = process_contas(contas_vencidas)
-            usuarios_faturas = process_faturas(faturas_vencidas)
-
+            query_movimentacoes = (
+                select(MovimentacaoModel, UsuarioModel.email)
+                .join(UsuarioModel, MovimentacaoModel.id_usuario == UsuarioModel.id_usuario)
+                .where(
+                    MovimentacaoModel.data_pagamento < datetime.now(),
+                    MovimentacaoModel.consolidado == False,
+                    MovimentacaoModel.id_fatura == None,
+                    MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA
+                )
+            )
+            
+            query_faturas = (
+                select(FaturaModel, UsuarioModel.email, CartaoCreditoModel)
+                .join(CartaoCreditoModel, FaturaModel.id_cartao_credito == CartaoCreditoModel.id_cartao_credito)
+                .join(UsuarioModel, CartaoCreditoModel.id_usuario == UsuarioModel.id_usuario)
+                .where(
+                    FaturaModel.data_pagamento == None,
+                    FaturaModel.data_vencimento < datetime.now(),
+                    FaturaModel.fatura_gastos > 0
+                )
+            )
+            
+            result_movimentacoes = await session.execute(query_movimentacoes)
+            result_faturas = await session.execute(query_faturas)
+            contas_vencidas = result_movimentacoes.all()
+            faturas_vencidas = result_faturas.all()
+            usuarios_contas = defaultdict(list)
+            usuarios_faturas = defaultdict(list)
+            for conta, user_email in contas_vencidas:
+                if user_email:
+                    usuarios_contas[user_email].append(conta)
+                else:
+                    logger.warning(f"Movimentação '{conta.descricao}' não possui e-mail de usuário.")
+            for fatura, user_email, cartao in faturas_vencidas:
+                if user_email:
+                    usuarios_faturas[user_email].append((fatura, cartao))
+                else:
+                    logger.warning(f"Fatura com ID '{fatura.id_fatura}' não possui e-mail de usuário.")
             if usuarios_contas or usuarios_faturas:
-                await process_and_send_emails(usuarios_contas, usuarios_faturas)
+                all_user_emails = set(usuarios_contas.keys()) | set(usuarios_faturas.keys())
+                
+                for user_email in all_user_emails:
+                    email_body = ""
+                    total_atraso = 0
+                    if user_email in usuarios_contas:
+                        contas = usuarios_contas[user_email]
+                        email_body += (
+                            f"<h4>Contas em atraso:</h4>"
+                            f"<table style='border-collapse: collapse; width: 100%;'>"
+                            f"<thead>"
+                            f"<tr style='background-color: #f2f2f2;'>"
+                            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
+                            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data de Vencimento</th>"
+                            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
+                            f"</tr>"
+                            f"</thead>"
+                            f"<tbody>"
+                        )
+                        for conta in contas:
+                            email_body += (
+                                f"<tr>"
+                                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{conta.descricao}</td>"
+                                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{conta.data_pagamento.strftime('%d/%m/%Y')}</td>"
+                                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {conta.valor:.2f}</td>"
+                                f"</tr>"
+                            )
+                            total_atraso += conta.valor
+                        email_body += "</tbody></table>"
+                    if user_email in usuarios_faturas:
+                        faturas_info = usuarios_faturas[user_email]
+                        if email_body: 
+                            email_body += "<br>"
+                        email_body += (
+                            f"<h4>Faturas em atraso:</h4>"
+                            f"<table style='border-collapse: collapse; width: 100%;'>"
+                            f"<thead>"
+                            f"<tr style='background-color: #f2f2f2;'>"
+                            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Cartão</th>"
+                            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data de Vencimento</th>"
+                            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
+                            f"</tr>"
+                            f"</thead>"
+                            f"<tbody>"
+                        )
+                        for fatura, cartao in faturas_info:
+                            email_body += (
+                                    f"<tr>"
+                                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Fatura - {cartao.nome}</td>"
+                                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{fatura.data_vencimento.strftime('%d/%m/%Y')}</td>"
+                                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {fatura.fatura_gastos:.2f}</td>"
+                                    f"</tr>"
+                                )
+                            total_atraso += fatura.fatura_gastos
+                        email_body += "</tbody></table>"
+                    # Adiciona o resumo
+                    email_body += (
+                        f"<br><h4>Resumo das Pendências:</h4>"
+                        f"<table style='border-collapse: collapse; width: 100%;'>"
+                        f"<tr style='background-color: #f2f2f2;'>"
+                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
+                        f"</tr>"
+                        f"<tr>"
+                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {total_atraso:.2f}</td>"
+                        f"</tr>"
+                        f"</table><br>"
+                        f"Por favor, tome as devidas providências.<br><br>"
+                        f"Atenciosamente,<br>Equipe Finanças Pessoais!"
+                    )
+                    email_data = {
+                        "email_subject": "Alerta: Contas e Faturas em Atraso",
+                        "email_body": email_body
+                    }
+                    try:
+                        logger.info(f"Enviando e-mail para {user_email}...")
+                        send_email(email_data, user_email)
+                        logger.info(f"E-mail enviado com sucesso para {user_email}.")
+                    except Exception as e:
+                        logger.error(f"Erro ao enviar e-mail para {user_email}: {e}")
+                        continue
             else:
                 logger.info("Nenhuma conta ou fatura vencida foi encontrada.")
+            
     except Exception as e:
         logger.error(f"Erro na execução de check_and_send_email: {e}")
         raise
-
-
-async def fetch_vencidas(session):
-    """Busca contas e faturas vencidas do banco de dados."""
-    query_movimentacoes = (
-        select(MovimentacaoModel, UsuarioModel.email)
-        .join(UsuarioModel, MovimentacaoModel.id_usuario == UsuarioModel.id_usuario)
-        .where(
-            MovimentacaoModel.data_pagamento < datetime.now(),
-            MovimentacaoModel.consolidado == False,
-            MovimentacaoModel.id_fatura == None,
-        )
-    )
-    contas_vencidas = await session.execute(query_movimentacoes).all()
-
-    query_faturas = (
-        select(FaturaModel, UsuarioModel.email, CartaoCreditoModel)
-        .join(UsuarioModel, FaturaModel.id_usuario == UsuarioModel.id_usuario)
-        .join(CartaoCreditoModel, FaturaModel.id_cartao == CartaoCreditoModel.id_cartao)
-        .where(
-            FaturaModel.data_vencimento < datetime.now(),
-            FaturaModel.paga == False,
-        )
-    )
-    faturas_vencidas = await session.execute(query_faturas).all()
-
-    return contas_vencidas, faturas_vencidas
-
-
-def process_contas(contas_vencidas):
-    """Agrupa contas vencidas por email do usuário."""
-    usuarios_contas = defaultdict(list)
-    for conta, user_email in contas_vencidas:
-        if user_email:
-            usuarios_contas[user_email].append(conta)
-        else:
-            logger.warning(f"Movimentação '{conta.descricao}' não possui e-mail de usuário.")
-    return usuarios_contas
-
-
-def process_faturas(faturas_vencidas):
-    """Agrupa faturas vencidas por email do usuário."""
-    usuarios_faturas = defaultdict(list)
-    for fatura, user_email, cartao in faturas_vencidas:
-        if user_email:
-            usuarios_faturas[user_email].append((fatura, cartao))
-        else:
-            logger.warning(f"Fatura com ID '{fatura.id_fatura}' não possui e-mail de usuário.")
-    return usuarios_faturas
-
-
-async def process_and_send_emails(usuarios_contas, usuarios_faturas):
-    """Processa e envia emails para os usuários."""
-    all_user_emails = set(usuarios_contas.keys()) | set(usuarios_faturas.keys())
-    for user_email in all_user_emails:
-        try:
-            email_body, total_atraso = build_email_body(user_email, usuarios_contas, usuarios_faturas)
-            if email_body:
-                logger.info(f"Enviando e-mail para {user_email}...")
-                send_email(email_body, user_email)
-                logger.info(f"E-mail enviado com sucesso para {user_email}.")
-        except Exception as e:
-            logger.error(f"Erro ao enviar e-mail para {user_email}: {e}")
-
-
-def build_email_body(user_email, usuarios_contas, usuarios_faturas):
-    """Monta o corpo do e-mail com informações de contas e faturas vencidas."""
-    email_body = ""
-    total_atraso = 0
-
-    if user_email in usuarios_contas:
-        contas = usuarios_contas[user_email]
-        email_body += build_table("Contas em atraso", contas, total_atraso)
-
-    if user_email in usuarios_faturas:
-        faturas_info = usuarios_faturas[user_email]
-        if email_body:
-            email_body += "<br>"
-        email_body += build_table("Faturas em atraso", faturas_info, total_atraso, is_fatura=True)
-
-    return email_body, total_atraso
-
-
-def build_table(title, items, total, is_fatura=False):
-    """Constrói uma tabela HTML para contas ou faturas."""
-    table_html = (
-        f"<h4>{title}:</h4>"
-        f"<table style='border-collapse: collapse; width: 100%;'>"
-        f"<thead>"
-        f"<tr style='background-color: #f2f2f2;'>"
-    )
-
-    if is_fatura:
-        table_html += (
-            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Cartão</th>"
-            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data de Vencimento</th>"
-            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
-        )
-    else:
-        table_html += (
-            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
-            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data de Vencimento</th>"
-            f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
-        )
-
-    table_html += "</tr></thead><tbody>"
-    for item in items:
-        if is_fatura:
-            fatura, cartao = item
-            table_html += (
-                f"<tr>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Fatura - {cartao.nome}</td>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{fatura.data_vencimento.strftime('%d/%m/%Y')}</td>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {fatura.fatura_gastos:.2f}</td>"
-                f"</tr>"
-            )
-            total += fatura.fatura_gastos
-        else:
-            table_html += (
-                f"<tr>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{item.descricao}</td>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{item.data_pagamento.strftime('%d/%m/%Y')}</td>"
-                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {item.valor:.2f}</td>"
-                f"</tr>"
-            )
-            total += item.valor
-
-    table_html += "</tbody></table>"
-    return table_html
