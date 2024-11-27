@@ -199,4 +199,3 @@ async def check_and_send_email():
             
     except Exception as e:
         logger.error(f"Erro na execução de check_and_send_email: {e}")
-        raise
