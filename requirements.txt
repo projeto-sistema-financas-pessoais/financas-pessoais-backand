@@ -63,7 +63,6 @@ uvicorn==0.30.6
 weasyprint==63.0
 webencodings==0.5.1
 zopfli==0.2.3.post1
-alembic==2.13.2
 annotated-types==0.7.0
 anyio==4.4.0
 APScheduler==3.10.1
