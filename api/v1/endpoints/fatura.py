@@ -2,7 +2,6 @@ from datetime import datetime, date
 from decimal import Decimal
 
 from sqlalchemy import extract
-import api.v1.endpoints
 from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession

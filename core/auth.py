@@ -36,7 +36,6 @@ async def auth(email: EmailStr, senha: str, db: AsyncSession) -> Optional[Usuari
 
             return None
         if not check_password(senha, usuario.senha):
-            print("check=>>>", check_password(senha, usuario.senha))
             return None
         
         return usuario

@@ -190,88 +190,10 @@ async def send_invoice(
                 except ValueError:
                     return valor
 
-            if parente.nome == usuario_logado.nome_completo:
-                email_data = {
-                    "email_subject": "Lembrete de Movimentações não Consolidadas",
-                    "email_body": (
-                        f"Olá, {usuario_logado.nome_completo}!<br><br>"
-                        f"Seguem as informações referentes ao mês {cobranca.mes}/{cobranca.ano}:<br><br>"                        
-                        f"<table style='border-collapse: collapse; width: 100%;'>"
-                        f"<thead>"
-                        f"<tr style='background-color: #f2f2f2;'>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
-                        f"</tr>"
-                        f"</thead>"
-                        f"<tbody>"
-                    ) + "".join(
-                        f"<tr>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['descricao']}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_data_brasileira(mov['data_pagamento'])}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(mov['valor'])}</td>"
-                        f"</tr>"
-                        for mov in movimentacoes_data['movimentacoes_nao_consolidadas']
-                    ) + (
-                        f"</tbody>"
-                        f"</table><br>"
-                        f"<h4>Resumo da Cobrança:</h4>"
-                        f"<table style='border-collapse: collapse; width: 100%;'>"
-                        f"<tr style='background-color: #f2f2f2;'>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
-                        f"</tr>"
-                        f"<tr>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_geral_movimentacoes'])}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_movimentacoes'])}</td>"
-                        f"</tr>"
-                        f"</table><br>"
-                        f"Por favor, acesse o sistema para mais informações."
-                    )
-                }
-            
+             # Chama a função auxiliar para criar o email_data
+            email_data = criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data)
 
-            
-            if parente.nome != usuario_logado.nome_completo:
-                email_data = {
-                    "email_subject": "Cobrança de Movimentações não Consolidadas",
-                    "email_body": (
-                        f"Olá, {parente.nome},<br><br>"
-                        f"Seguem as informações referentes às suas movimentações não consolidadas com {usuario_logado.nome_completo} no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
-                        f"<table style='border-collapse: collapse; width: 100%;'>"
-                        f"<thead>"
-                        f"<tr style='background-color: #f2f2f2;'>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
-                        f"</tr>"
-                        f"</thead>"
-                        f"<tbody>"
-                    ) + "".join(
-                        f"<tr>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['descricao']}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_data_brasileira(mov['data_pagamento'])}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(mov['valor'])}</td>"
-                        f"</tr>"
-                        for mov in movimentacoes_data['movimentacoes_nao_consolidadas']
-                    ) + (
-                        f"</tbody>"
-                        f"</table><br>"
-                        f"<h4>Resumo da Cobrança:</h4>"
-                        f"<table style='border-collapse: collapse; width: 100%;'>"
-                        f"<tr style='background-color: #f2f2f2;'>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
-                        f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
-                        f"</tr>"
-                        f"<tr>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_geral_movimentacoes'])}</td>"
-                        f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_movimentacoes'])}</td>"
-                        f"</tr>"
-                        f"</table><br>"
-                        f"Por favor, acesse o sistema para mais informações."
-                    )
-                }
-
+            # Envia o email em segundo plano
             background_tasks.add_task(send_email, email_data, parente.email)
 
             return {"message": "Cobrança enviada por email com sucesso."}
@@ -279,6 +201,102 @@ async def send_invoice(
         except Exception as e:
             await handle_db_exceptions(session, e)
             return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'Erro ao enviar cobrança'})
+
+def criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):
+    """Cria os dados do email com base nas condições de parente e usuário logado."""
+    
+    def formatar_data_brasileira(data_str):
+        """Converte data do formato YYYY-MM-DD para DD/MM/YYYY"""
+        return datetime.strptime(data_str, '%Y-%m-%d').strftime('%d/%m/%Y')
+
+    def formatar_valor_brasileiro(valor):
+        """Formata o valor monetário no padrão brasileiro"""
+        try:
+            valor_float = float(valor)
+            return f'R$ {valor_float:,.2f}'.replace('.', 'X').replace(',', '.').replace('X', ',')
+        except ValueError:
+            return valor
+
+    if parente.nome == usuario_logado.nome_completo:
+        return {
+            "email_subject": "Lembrete de Movimentações não Consolidadas",
+            "email_body": (
+                f"Olá, {usuario_logado.nome_completo}!<br><br>"
+                f"Seguem as informações referentes ao mês {cobranca.mes}/{cobranca.ano}:<br><br>"                        
+                f"<table style='border-collapse: collapse; width: 100%;'>"
+                f"<thead>"
+                f"<tr style='background-color: #f2f2f2;'>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
+                f"</tr>"
+                f"</thead>"
+                f"<tbody>"
+            ) + "".join(
+                f"<tr>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['descricao']}</td>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_data_brasileira(mov['data_pagamento'])}</td>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(mov['valor'])}</td>"
+                f"</tr>"
+                for mov in movimentacoes_data['movimentacoes_nao_consolidadas']
+            ) + (
+                f"</tbody>"
+                f"</table><br>"
+                f"<h4>Resumo da Cobrança:</h4>"
+                f"<table style='border-collapse: collapse; width: 100%;'>"
+                f"<tr style='background-color: #f2f2f2;'>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
+                f"</tr>"
+                f"<tr>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_geral_movimentacoes'])}</td>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_movimentacoes'])}</td>"
+                f"</tr>"
+                f"</table><br>"
+                f"Por favor, acesse o sistema para mais informações."
+            )
+        }
+    else:
+        return {
+            "email_subject": "Cobrança de Movimentações não Consolidadas",
+            "email_body": (
+                f"Olá, {parente.nome},<br><br>"
+                f"Seguem as informações referentes às suas movimentações não consolidadas com {usuario_logado.nome_completo} no mês {cobranca.mes}/{cobranca.ano}:<br><br>"
+                f"<table style='border-collapse: collapse; width: 100%;'>"
+                f"<thead>"
+                f"<tr style='background-color: #f2f2f2;'>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Descrição</th>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Data</th>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Valor</th>"
+                f"</tr>"
+                f"</thead>"
+                f"<tbody>"
+            ) + "".join(
+                f"<tr>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{mov['descricao']}</td>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_data_brasileira(mov['data_pagamento'])}</td>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(mov['valor'])}</td>"
+                f"</tr>"
+                for mov in movimentacoes_data['movimentacoes_nao_consolidadas']
+            ) + (
+                f"</tbody>"
+                f"</table><br>"
+                f"<h4>Resumo da Cobrança:</h4>"
+                f"<table style='border-collapse: collapse; width: 100%;'>"
+                f"<tr style='background-color: #f2f2f2;'>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total das Movimentações</th>"
+                f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
+                f"</tr>"
+                f"<tr>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_geral_movimentacoes'])}</td>"
+                f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(movimentacoes_data['fatura_geral']['total_movimentacoes'])}</td>"
+                f"</tr>"
+                f"</table><br>"
+                f"Por favor, acesse o sistema para mais informações."
+            )
+        }
+
+
 
 def send_email(email_data: dict, user_email: str) -> None:
     try:
