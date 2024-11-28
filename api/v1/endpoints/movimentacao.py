@@ -247,7 +247,6 @@ async def create_movimentacao_despesa(
                         cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado
                         fatura.fatura_gastos +=valor_por_parcela_ajustado
                         nova_movimentacao.participa_limite_fatura_gastos = True
-
                     elif parcela_atual > 1: 
                         if(data_pagamento.month <= today.month and data_pagamento.year <= today.year):
                             cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado 
@@ -393,6 +392,8 @@ async def create_movimentacao(
 ):
     async with db as session:
         try:
+            print(f"Usuário autenticado: {usuario_logado}")
+
             if movimentacao.id_conta_transferencia == movimentacao.id_conta_atual:
                 raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="As contas devem ter IDs diferentes")
             
