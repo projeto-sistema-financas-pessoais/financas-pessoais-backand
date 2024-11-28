@@ -34,7 +34,7 @@ def agendar_execucao(hora: int, minuto: int, loop):
 async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()  # Loop principal do FastAPI
     scheduler.start()
-    agendar_execucao(8, 00,loop)  
+    agendar_execucao(11, 00,loop)  
     try:
         yield
     finally:
