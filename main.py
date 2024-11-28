@@ -11,18 +11,20 @@ from api.v1.api import api_router
 
 scheduler = BackgroundScheduler()
 
-def executar_funcao_assincrona():
-    asyncio.run(check_and_send_email())
+def executar_funcao_assincrona(loop):
+    asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)
+
+
 
 # Função para agendar a execução em uma hora específica
-def agendar_execucao(hora: int, minuto: int):
+def agendar_execucao(hora: int, minuto: int, loop):
     agora = datetime.now()
     hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)
     
     if hora_execucao <= agora:
         hora_execucao += timedelta(days=1)
     
-    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao)
+    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao, args=[loop])
     print(f"Função agendada para: {hora_execucao}")
     current_time = datetime.now().strftime('%H:%M:%S')
     print(f"Horário atual: {current_time}")
@@ -30,8 +32,9 @@ def agendar_execucao(hora: int, minuto: int):
 # Gerenciador de ciclo de vida do FastAPI
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    loop = asyncio.get_running_loop()  # Loop principal do FastAPI
     scheduler.start()
-    agendar_execucao(8, 0)  
+    agendar_execucao(8, 00,loop)  
     try:
         yield
     finally:

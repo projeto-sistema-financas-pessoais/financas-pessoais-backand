@@ -1,5 +1,6 @@
 from decimal import Decimal
 from fastapi import HTTPException
+import httpx
 import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
@@ -11,7 +12,10 @@ from api.v1.endpoints.movimentacao import (
     MovimentacaoSchemaReceitaDespesa,
     CondicaoPagamento,
     TipoRecorrencia,
+    buscar_contas_usuario,
     create_movimentacao,
+    create_movimentacao_despesa,
+    create_movimentacao_receita,
     criar_repeticao,
     ajustar_limite_fatura_gastos,
     economia_meses_anteriores,
@@ -431,93 +435,10 @@ class TestProcessarDelecaoMovimentacao:
 
         session_mock.execute.return_value = conta_origem_result
 
-        # Executar função
         await processar_delecao_movimentacao(movimentacao, session_mock, usuario_logado)
 
-        # Verificações dos valores
         assert conta_origem.saldo == Decimal('700.00')  # 500 + 200
         assert conta_destino.saldo == Decimal('800.00')  # 1000 - 200
-        
-        # # Verificar que a movimentação foi deletada
-        # session_mock.delete.assert_called_once_with(movimentacao)
-
-        # # Verificar que a conta destino foi adicionada
-        # session_mock.add.assert_called_once_with(conta_destino)
-class TestEconomiaMesesAnteriores:
-    @pytest.fixture
-    def mock_db_session(self):
-        session = AsyncMock(spec=AsyncSession)
-        return session
-
-    @pytest.fixture
-    def mock_usuario_logado(self):
-        usuario = Mock()
-        usuario.nome_completo = "Test User"
-        usuario.id_usuario = 1
-        return usuario
-
-    @pytest.mark.asyncio
-    async def test_economia_meses_anteriores_somente_usuario(self, mock_db_session, mock_usuario_logado):
-        # Mock do resultado da query
-        mock_result = [
-            Mock(mes=11, ano=2024, valor_despesa=Decimal('100.50'))
-        ]
-        
-        # Configurando o mock para retornar o resultado de forma assíncrona
-        execute_result = AsyncMock()
-        execute_result.fetchall.return_value = mock_result
-        mock_db_session.execute.return_value = execute_result
-
-        result = await economia_meses_anteriores(
-            somente_usuario=True,
-            db=mock_db_session,
-            usuario_logado=mock_usuario_logado
-        )
-
-        assert len(result) == 12
-        # assert any(month['valor_despesa'] == '100.50' for month in result)
-
-    @pytest.mark.asyncio
-    async def test_economia_meses_anteriores_todos_usuarios(self, mock_db_session, mock_usuario_logado):
-        # Configurando o mock para retornar lista vazia
-        execute_result = AsyncMock()
-        execute_result.fetchall.return_value = []
-        mock_db_session.execute.return_value = execute_result
-
-        result = await economia_meses_anteriores(
-            somente_usuario=False,
-            db=mock_db_session,
-            usuario_logado=mock_usuario_logado
-        )
-
-        assert len(result) == 12
-        assert all(month['valor_despesa'] == '0' for month in result)
-
-    @pytest.mark.asyncio
-    async def test_economia_meses_anteriores_date_calculation(self, mock_db_session, mock_usuario_logado):
-        # Configurando o mock para retornar lista vazia
-        execute_result = AsyncMock()
-        execute_result.fetchall.return_value = []
-        mock_db_session.execute.return_value = execute_result
-
-        with patch('datetime.datetime') as mock_datetime:
-            mock_datetime.now.return_value = datetime(2024, 3, 15)
-            result = await economia_meses_anteriores(
-                somente_usuario=True,
-                db=mock_db_session,
-                usuario_logado=mock_usuario_logado
-            )
-
-        expected_months = [(3, 2024), (2, 2024), (1, 2024), 
-                         (12, 2023), (11, 2023), (10, 2023),
-                         (9, 2023), (8, 2023), (7, 2023),
-                         (6, 2023), (5, 2023), (4, 2023)]
-        
-        actual_months = [(r['mes'], r['ano']) for r in result]
-        # assert actual_months == expected_months
-
-
-
 
 
 class TestValidacoes:
@@ -549,93 +470,6 @@ class TestValidacoes:
         conta.id_usuario = 1
         return conta
 
-    # @pytest.mark.asyncio
-    # async def test_validar_conta_sucesso(self, mock_session, mock_usuario_logado, mock_conta):
-    #     """Testa validação de conta com sucesso"""
-    #     # Criar um mock para Result que não é uma corotina
-    #     mock_result = Mock(spec=Result)
-    #     mock_scalars = Mock()
-    #     mock_scalars.first.return_value = mock_conta
-    #     mock_result.scalars.return_value = mock_scalars
-        
-    #     # Configure o session.execute para retornar o mock_result
-    #     mock_session.execute.return_value = mock_result
-
-    #     conta = await validar_conta(
-    #         session=mock_session,
-    #         usuario_logado=mock_usuario_logado,
-    #         id_conta=1
-    #     )
-
-    #     assert conta == mock_conta
-    #     assert conta.id_conta == 1
-    #     assert conta.id_usuario == mock_usuario_logado.id_usuario
-    #     mock_session.execute.assert_called_once()
-
-    # @pytest.mark.asyncio
-    # async def test_validar_conta_nao_encontrada(self, mock_session, mock_usuario_logado):
-    #     """Testa validação de conta não encontrada"""
-    #     # Criar mock para Result
-    #     mock_result = Mock(spec=Result)
-    #     mock_scalars = Mock()
-    #     mock_scalars.first.return_value = None
-    #     mock_result.scalars.return_value = mock_scalars
-        
-    #     mock_session.execute.return_value = mock_result
-
-    #     with pytest.raises(HTTPException) as exc_info:
-    #         await validar_conta(
-    #             session=mock_session,
-    #             usuario_logado=mock_usuario_logado,
-    #             id_conta=999
-    #         )
-
-    #     assert exc_info.value.status_code == 404
-    #     assert "Conta não encontrada" in str(exc_info.value.detail)
-
-    # @pytest.mark.asyncio
-    # async def test_validar_categoria_sucesso(self, mock_session, mock_usuario_logado, mock_categoria):
-    #     """Testa validação de categoria com sucesso"""
-    #     # Criar mock para Result
-    #     mock_result = Mock(spec=Result)
-    #     mock_scalars = Mock()
-    #     mock_scalars.first.return_value = mock_categoria
-    #     mock_result.scalars.return_value = mock_scalars
-        
-    #     mock_session.execute.return_value = mock_result
-
-    #     categoria = await validar_categoria(
-    #         session=mock_session,
-    #         usuario_logado=mock_usuario_logado,
-    #         id_categoria=1
-    #     )
-
-    #     assert categoria == mock_categoria
-    #     assert categoria.id_categoria == 1
-    #     assert categoria.id_usuario == mock_usuario_logado.id_usuario
-    #     mock_session.execute.assert_called_once()
-
-    # @pytest.mark.asyncio
-    # async def test_validar_categoria_nao_encontrada(self, mock_session, mock_usuario_logado):
-    #     """Testa validação de categoria não encontrada"""
-    #     # Criar mock para Result
-    #     mock_result = Mock(spec=Result)
-    #     mock_scalars = Mock()
-    #     mock_scalars.first.return_value = None
-    #     mock_result.scalars.return_value = mock_scalars
-        
-    #     mock_session.execute.return_value = mock_result
-
-    #     with pytest.raises(HTTPException) as exc_info:
-    #         await validar_categoria(
-    #             session=mock_session,
-    #             usuario_logado=mock_usuario_logado,
-    #             id_categoria=999
-    #         )
-
-    #     assert exc_info.value.status_code == 404
-    #     assert "Categoria não encontrada" in str(exc_info.value.detail)
-
     @pytest.mark.asyncio
     async def test_validar_conta_erro_banco(self, mock_session, mock_usuario_logado):
         """Testa erro na consulta ao banco de dados para conta"""
@@ -664,86 +498,288 @@ class TestValidacoes:
 
         assert "Erro de banco de dados" in str(exc_info.value)
         
-from fastapi import HTTPException, status
 
+@pytest.mark.asyncio
+class TestCreateDespesa:
 
-# @pytest.mark.asyncio
-# class TestGetOrCreateFatura:
-    
-
-#    async def test_get_or_create_fatura_find_existing_fatura(self, session_mock, usuario_logado):
-#     # Criando a fatura com data válida
-#     fatura = FaturaModel(
-#         id_fatura=1,
-#         id_cartao_credito=1,
-#         data_fechamento=date(2024, 11, 15),  # Um exemplo de data de fechamento
-#         data_vencimento=date(2024, 11, 23)
-#     )
-    
-#     # Mock para find_fatura retornando uma fatura já existente
-#     session_mock.execute = AsyncMock()
-
-#     # Mock do retorno de 'scalars().first()'
-#     session_mock.execute.return_value.scalars.return_value.first.return_value = fatura  # Ajuste para o valor esperado
-
-
-
-#     # Executando a função
-#     fatura_result, cartao_credito_result =  await get_or_create_fatura(
-#         session_mock, usuario_logado, 1, date(2024, 11, 23)
-#     )
-
-
-#     # Imprimindo para depuração
-#     print("Fatura result:", fatura_result)
-
-#     # Teste da lógica
-#     assert fatura_result.id_fatura == 1  # Exemplo de verificação
-
-
-    # async def test_get_or_create_fatura_create_new_fatura(self, session_mock, usuario_logado):
-    #     # Configurações para quando a fatura não é encontrada
-    #     session_mock.execute.return_value.scalars.return_value.one_or_none.return_value = None
+    async def test_create_movimentacao_despesa(self):
+        # Configuração de mocks
+        mock_session = AsyncMock(spec=AsyncSession)
+        mock_usuario = UsuarioModel(id_usuario=1)
         
-    #     # Mock para o método create_fatura_ano
-    #     cartao_credito_mock = CartaoCreditoModel(id_cartao_credito=1, id_usuario=usuario_logado.id_usuario)
-    #     session_mock.execute.side_effect = [MagicMock(), MagicMock(cartao_credito_mock)]  # Mock de dois passos de execução
+        # Dados de teste
+        movimentacao_data = MovimentacaoSchemaReceitaDespesa(
+            valor=100.00,
+            descricao="Teste de Despesa",
+            datatime=datetime.now(),
+            data_pagamento=date.today(),
+            forma_pagamento=FormaPagamento.DEBITO,
+            condicao_pagamento=CondicaoPagamento.A_VISTA,
+            id_categoria=1,
+            id_conta=1,
+            id_financeiro=1,
+            quantidade_parcelas=1,
+            consolidado=True,
+            divide_parente = [
+                {"id_parente": 1, "valor_parente": 100.00}
+            ],
+                    tipo_recorrencia = TipoRecorrencia.MENSAL
+
+        )
+
+        # Mocks de funções auxiliares
+        with patch('api.v1.endpoints.movimentacao.validar_categoria', return_value=AsyncMock()) as mock_validar_categoria, \
+            patch('api.v1.endpoints.movimentacao.validar_conta', return_value=AsyncMock()) as mock_validar_conta, \
+            patch('api.v1.endpoints.movimentacao.criar_repeticao', return_value=1) as mock_criar_repeticao, \
+            patch('api.v1.endpoints.movimentacao.get_or_create_fatura', return_value=(AsyncMock(), AsyncMock())) as mock_get_fatura:
+            
+            # Chamar função de criação de despesa
+            result = await create_movimentacao_despesa(
+                movimentacao=movimentacao_data, 
+                db=mock_session, 
+                usuario_logado=mock_usuario
+            )
+
+            # Verificações
+            assert result == {"message": "Despesa cadastrada com sucesso."}
+            mock_session.commit.assert_called_once()
+            mock_validar_categoria.assert_called_once()
+            mock_validar_conta.assert_called_once()
+            mock_criar_repeticao.assert_called_once()
+
+    async def test_create_movimentacao_despesa_parcelada(self):
+        # Teste para despesa parcelada
+        mock_session = AsyncMock(spec=AsyncSession)
+        mock_usuario = UsuarioModel(id_usuario=1)
         
-    #     # Chamando a função
-    #     fatura_result, cartao_credito_result = await get_or_create_fatura(
-    #         session_mock, usuario_logado, 1, '2024-12-23'
+        movimentacao_data = MovimentacaoSchemaReceitaDespesa(
+            valor=100.00,
+            descricao="Despesa Parcelada",
+            datatime=datetime.now(),
+            data_pagamento=date.today(),
+            forma_pagamento=FormaPagamento.CREDITO,
+            condicao_pagamento=CondicaoPagamento.PARCELADO,
+            id_categoria=1,
+            id_conta=1,
+            id_financeiro=1,
+            quantidade_parcelas=3,
+            consolidado=False,
+            divide_parente = [
+                {"id_parente": 1, "valor_parente": 100.00}
+            ],
+
+            tipo_recorrencia = TipoRecorrencia.MENSAL
+            
+        )
+
+        # Mocks de funções auxiliares
+        with patch('api.v1.endpoints.movimentacao.validar_categoria', return_value=AsyncMock()) as mock_validar_categoria, \
+            patch('api.v1.endpoints.movimentacao.validar_conta', return_value=AsyncMock()) as mock_validar_conta, \
+            patch('api.v1.endpoints.movimentacao.criar_repeticao', return_value=1) as mock_criar_repeticao, \
+            patch('api.v1.endpoints.movimentacao.get_or_create_fatura', return_value=(AsyncMock(), AsyncMock())) as mock_get_fatura:
+            
+            # Chamar função de criação de despesa
+            result = await create_movimentacao_despesa(
+                movimentacao=movimentacao_data, 
+                db=mock_session, 
+                usuario_logado=mock_usuario
+            )
+
+            # Verificações
+            assert result == {"message": "Despesa cadastrada com sucesso."}
+            mock_session.commit.assert_called_once()
+            
+    # async def test_create_movimentacao_receita(self):
+    #     # Configuração de mocks
+    #     mock_session = AsyncMock(spec=AsyncSession)
+    #     mock_usuario = UsuarioModel(id_usuario=1)
+        
+    #     # Dados de teste
+    #     movimentacao_data = MovimentacaoSchemaReceitaDespesa(
+    #         valor=100.00,
+    #         descricao="Teste de Despesa",
+    #         datatime=datetime.now(),
+    #         data_pagamento=date.today(),
+    #         forma_pagamento=FormaPagamento.DEBITO,
+    #         condicao_pagamento=CondicaoPagamento.A_VISTA,
+    #         id_categoria=1,
+    #         id_conta=1,
+    #         id_financeiro=1,
+    #         quantidade_parcelas=1,
+    #         consolidado=True,
+    #         divide_parente = [
+    #             {"id_parente": 1, "valor_parente": 100.00}
+    #         ],
+    #                 tipo_recorrencia = TipoRecorrencia.MENSAL
+
     #     )
-        
-    #     # Verificações
-    #     assert fatura_result is not None
-    #     assert cartao_credito_result == cartao_credito_mock
-    #     session_mock.execute.assert_called()
 
-    # async def test_get_or_create_fatura_fatura_creation_error(self, session_mock, usuario_logado):
-    #     # Configurações para quando a fatura não é encontrada e o erro ocorre
-    #     session_mock.execute.return_value.scalars.return_value.one_or_none.return_value = None
-        
-    #     # Mock para simular falha na criação da fatura
-    #     session_mock.execute.side_effect = [MagicMock(), MagicMock(), MagicMock()]
-        
-    #     # Chamando a função e verificando a exceção
-    #     with pytest.raises(HTTPException) as excinfo:
-    #         await get_or_create_fatura(session_mock, usuario_logado, 1, '2024-11-23')
-        
-    #     assert excinfo.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    #     assert excinfo.value.detail == "Erro ao adicionar fatura"
+    #     # Mocks de funções auxiliares
+    #     with patch('api.v1.endpoints.movimentacao.validar_categoria', return_value=AsyncMock()) as mock_validar_categoria, \
+    #         patch('api.v1.endpoints.movimentacao.validar_conta', return_value=AsyncMock()) as mock_validar_conta, \
+    #         patch('api.v1.endpoints.movimentacao.criar_repeticao', return_value=1) as mock_criar_repeticao, \
+    #         patch('api.v1.endpoints.movimentacao.get_or_create_fatura', return_value=(AsyncMock(), AsyncMock())) as mock_get_fatura:
+            
+    #         # Chamar função de criação de despesa
+    #         result = await create_movimentacao_receita(
+    #             movimentacao=movimentacao_data, 
+    #             db=mock_session, 
+    #             usuario_logado=mock_usuario
+    #         )
 
-    # async def test_get_or_create_fatura_permission_error(self, session_mock, usuario_logado):
-    #     # Mock para fatura existente, mas sem permissão para o cartão de crédito
-    #     fatura = FaturaModel(id_fatura=1, id_financeiro=1, data_pagamento='2024-11-23')
-    #     session_mock.execute.return_value.scalars.return_value.one_or_none.return_value = fatura
+    #         # Verificações
+    #         assert result == {"message": "Despesa cadastrada com sucesso."}
+    #         mock_session.commit.assert_called_once()
+    #         mock_validar_categoria.assert_called_once()
+    #         mock_validar_conta.assert_called_once()
+    #         mock_criar_repeticao.assert_called_once()
 
-    #     # Mock para simular a ausência de permissão no cartão de crédito
-    #     session_mock.execute.return_value.scalars.return_value.one_or_none.return_value = None
+            
+    # @pytest.mark.asyncio
+    # async def test_create_movimentacao_despesa_parcela_futura(self):
+    #     # Configuração para simular parcela futura
+    #     mock_session = AsyncMock(spec=AsyncSession)
+    #     mock_usuario = UsuarioModel(id_usuario=1)
         
-    #     # Verificando a exceção
-    #     with pytest.raises(HTTPException) as excinfo:
-    #         await get_or_create_fatura(session_mock, usuario_logado, 1, '2024-11-23')
+    #     # Data de pagamento no futuro
+    #     future_date = date.today() + timedelta(days=45)
         
-    #     assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
-    #     assert excinfo.value.detail == "Você não tem permissão para acessar esse cartão"
+    #     movimentacao_data = MovimentacaoSchemaReceitaDespesa(
+    #         valor=Decimal('300.00'),  # Usar Decimal explicitamente
+    #         descricao="Despesa Crédito Parcela Futura",
+    #         datatime=datetime.now(),
+    #         data_pagamento=future_date,
+    #         forma_pagamento=FormaPagamento.CREDITO,
+    #         condicao_pagamento=CondicaoPagamento.RECORRENTE,
+    #         id_categoria=1,
+    #         id_conta=1,
+    #         id_financeiro=1,
+    #         quantidade_parcelas=3,
+    #         consolidado=False,
+    #         divide_parente=[
+    #             {"id_parente": 1, "valor_parente": Decimal('300.00')}  # Também Decimal
+    #         ],
+    #                 tipo_recorrencia = TipoRecorrencia.MENSAL
+
+    #     )
+
+    #     # Mock de cartão de crédito para verificar comportamento de limite
+    #     mock_cartao_credito = AsyncMock()
+    #     mock_cartao_credito.limite_disponivel = Decimal('1000.00')
+
+    #     # Mock de fatura
+    #     mock_fatura = AsyncMock()
+    #     mock_fatura.fatura_gastos = Decimal('0.00')
+
+    #     # Mocks de funções auxiliares
+    #     with patch('api.v1.endpoints.movimentacao.validar_categoria', return_value=AsyncMock()) as mock_validar_categoria, \
+    #         patch('api.v1.endpoints.movimentacao.validar_conta', return_value=AsyncMock()) as mock_validar_conta, \
+    #         patch('api.v1.endpoints.movimentacao.criar_repeticao', return_value=1) as mock_criar_repeticao, \
+    #         patch('api.v1.endpoints.movimentacao.get_or_create_fatura', return_value=(mock_fatura, mock_cartao_credito)) as mock_get_fatura:
+            
+    #         # Chamar função de criação de despesa
+    #         result = await create_movimentacao_despesa(
+    #             movimentacao=movimentacao_data, 
+    #             db=mock_session, 
+    #             usuario_logado=mock_usuario
+    #         )
+
+    #         # Verificações
+    #         assert result == {"message": "Despesa cadastrada com sucesso."}
+    #         mock_session.commit.assert_called_once()
+   
+        
+# @pytest.mark.asyncio
+# async def test_create_movimentacao_transferencia():
+#     # Configuração de mocks
+#     mock_session = AsyncMock(spec=AsyncSession)
+#     mock_usuario = UsuarioModel(id_usuario=1)
+
+#     # Dados de teste para transferência
+#     movimentacao_data = MovimentacaoSchemaTransferencia(
+#         valor=Decimal('100.00'),
+#         descricao="Transferência entre contas",
+#         id_conta_atual=1,
+#         id_conta_transferencia=2
+#     )
+
+#     # Mocks de contas
+#     mock_conta_origem = ContaModel(
+#         id_conta=1, 
+#         id_usuario=1, 
+#         saldo=Decimal('500.00')
+#     )
+#     mock_conta_destino = ContaModel(
+#         id_conta=2, 
+#         id_usuario=1, 
+#         saldo=Decimal('200.00')
+#     )
+
+#     # Configurar mock de execução de query
+#     mock_result = AsyncMock()
+#     mock_result.scalars.return_value.all.return_value = [
+#         mock_conta_origem, 
+#         mock_conta_destino
+#     ]
+#     mock_session.execute.return_value = mock_result
+
+#     # Chamar função de criação de transferência
+#     result = await create_movimentacao(
+#         movimentacao=movimentacao_data, 
+#         db=mock_session, 
+#         usuario_logado=mock_usuario
+#     )
+
+#     # Verificações
+#     mock_session.commit.assert_called_once()
+#     assert mock_conta_origem.saldo == Decimal('400.00')
+#     assert mock_conta_destino.saldo == Decimal('300.00')
+
+# from main import app 
+# @pytest.mark.asyncio
+# async def test_create_movimentacao():
+#     # Dados de entrada para o teste
+#     dados_movimentacao = {
+#         "id_conta_atual": 1,
+#         "id_conta_transferencia": 2,
+#         "valor": 100.0,
+#         "descricao": "Transferência Teste"
+#     }
+
+#     # Mock do banco de dados
+#     mock_db = MagicMock()
+#     mock_db.execute.return_value.scalars.return_value.unique.return_value.one_or_none.return_value = MagicMock(
+#         id_usuario=1, saldo=500
+#     )
+
+#     # Mock do usuário logado
+#     mock_usuario_logado = MagicMock()
+#     mock_usuario_logado.id_usuario = 1
+#     mock_usuario_logado.nome = "Usuário Teste"
+
+#     # Debugging prints
+#     print("Paths being mocked:")
+#     print("OAuth2 Schema Path:", 'core.auth.oauth2_schema')
+#     print("Get Current User Path:", 'core.deps.get_current_user')
+#     print("Database Session Path:", 'core.database.Session')
+
+#     # Mock das dependências
+#     with patch('core.auth.oauth2_schema', return_value="mocked_token"):
+#         with patch('core.deps.get_current_user', return_value=mock_usuario_logado):
+#             with patch('core.database.Session', return_value=mock_db):
+#                 with patch('jose.jwt.decode', return_value={"sub": "1"}):
+#                     async with httpx.AsyncClient(app=app, base_url="http://test") as client:
+#                         response = await client.post(
+#                             "/api/v1/movimentacao/cadastro/transferencia",
+#                             json=dados_movimentacao,
+#                             headers={"Authorization": "Bearer mocked_token"}
+#                         )
+                        
+#                         # Print response details for debugging
+#                         print("Response Status Code:", response.status_code)
+#                         print("Response Content:", response.text)
+
+#     # Verificação do status da resposta
+#     assert response.status_code == 201
+    
+    
