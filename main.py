@@ -1,4 +1,6 @@
 import asyncio
+import fcntl
+import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
@@ -11,9 +13,35 @@ from api.v1.api import api_router
 
 scheduler = BackgroundScheduler()
 
-def executar_funcao_assincrona(loop):
-    asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)
+def acquire_file_lock(file_path):
+    try:
+        lock_file = open(file_path, 'w')
+        # Tenta obter um bloqueio exclusivo (não bloqueante)
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        print("Lock adquirido com sucesso.")
+        
+        return lock_file
+    except IOError:
+        print("Outro processo já está executando a tarefa.")
+        return None
 
+# Função para liberar o lock do arquivo
+def release_file_lock(lock_file):
+    
+    if lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock
+        lock_file.close()
+        print("Lock liberado.")
+
+# Função que será chamada pelo agendador
+def executar_funcao_assincrona(loop):
+    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock
+    if lock_file:
+        try:
+            # Executa a função assíncrona de forma segura
+            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)
+        finally:
+            release_file_lock(lock_file)
 
 
 # Função para agendar a execução em uma hora específica
@@ -29,21 +57,18 @@ def agendar_execucao(hora: int, minuto: int, loop):
     current_time = datetime.now().strftime('%H:%M:%S')
     print(f"Horário atual: {current_time}")
 
-# Gerenciador de ciclo de vida do FastAPI
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()  # Loop principal do FastAPI
     scheduler.start()
-    agendar_execucao(8, 00,loop)  
+    agendar_execucao(10, 5,loop)  
     try:
         yield
     finally:
         scheduler.shutdown()
 
-# Crie a aplicação FastAPI com o ciclo de vida configurado
 app = FastAPI(title='Finanças Pessoais', lifespan=lifespan)
 
-# Inclua rotas e middlewares
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.add_middleware(
     CORSMiddleware,
@@ -52,7 +77,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inicie o servidor com Uvicorn
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run("main:app", host="localhost", port=9000, log_level="info", reload=True)

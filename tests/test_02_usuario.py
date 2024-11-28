@@ -8,20 +8,37 @@ from unittest.mock import AsyncMock, patch
 
 from main import app
 from models.usuario_model import UsuarioModel
+from tests.config import getValidToken
 
 class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
 
+
+    @classmethod
+    def setUpClass(cls):
+        # Configura o patch do get_session compartilhado para todos os testes
+        cls.mock_get_session = AsyncMock()
+        cls.session_patch = patch(
+            "api.v1.endpoints.usuario.get_session", new=AsyncMock(return_value=cls.mock_get_session)
+        )
+        cls.session_patch.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.session_patch.stop()
+            
     async def asyncSetUp(self):
         # Configuração antes de cada teste
         self.transport = ASGITransport(app=app)
         self.client = AsyncClient(transport=self.transport, base_url="http://testserver")
+        self.token = getValidToken()
+
 
     async def asyncTearDown(self):
         # Limpeza após cada teste
         await self.client.aclose()
 
     # @pytest.mark.asyncio
-    # @patch("api.v1.endpoints.usuario.get_session")
+    # @patch("api.v1.endpoints.usuario.get_session", new_callable=AsyncMock)
     # @patch("api.v1.endpoints.usuario.handle_db_exceptions")
     # async def test_post_usuario_success(self, mock_handle_exceptions, mock_get_session):
     #     # Configurar mock da sessão
@@ -53,12 +70,11 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
     #     mock_handle_exceptions.assert_not_called()
 
     @pytest.mark.asyncio
-    @patch("api.v1.endpoints.usuario.get_session")
     @patch("api.v1.endpoints.usuario.handle_db_exceptions")
-    async def test_post_usuario_duplicado(self, mock_handle_exceptions, mock_get_session):
+    async def test_post_usuario_duplicado(self, mock_handle_exceptions):
         # Configurar mock da sessão
         mock_session = AsyncMock()
-        mock_get_session.return_value.__aenter__.return_value = mock_session
+        self.mock_get_session.return_value.__aenter__.return_value = mock_session
         
         # Simular IntegrityError para email duplicado
         mock_session.commit.side_effect = IntegrityError(
@@ -90,13 +106,12 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
 
 
     @pytest.mark.asyncio
-    @patch("api.v1.endpoints.usuario.get_session")
     @patch("api.v1.endpoints.usuario.handle_db_exceptions")
-    async def test_post_usuario_erro_generico(self, mock_handle_exceptions, mock_get_session):
+    async def test_post_usuario_erro_generico(self, mock_handle_exceptions):
 
         # Configurar mock da sessão
         mock_session = AsyncMock()
-        mock_get_session.return_value.__aenter__.return_value = mock_session
+        self.mock_get_session.return_value.__aenter__.return_value = mock_session
         
         # Simular erro genérico do SQLAlchemy
         mock_session.commit.side_effect = SQLAlchemyError("Erro genérico de banco de dados")
@@ -122,12 +137,11 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @pytest.mark.asyncio
-    @patch("api.v1.endpoints.usuario.get_session")
     @patch("api.v1.endpoints.usuario.auth")
-    async def test_post_usuario_login(self, mock_auth, mock_get_session):
+    async def test_post_usuario_login(self, mock_auth):
 
         mock_session = AsyncMock()
-        mock_get_session.return_value.__aenter__.return_value = mock_session
+        self.mock_get_session.return_value.__aenter__.return_value = mock_session
         
         # Simula o sucesso da autenticação
         mock_auth.return_value = AsyncMock(id_usuario=1, nome_completo="Usuário Teste")
@@ -151,15 +165,29 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
         print("Access Token:", access_token)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
+    
+    
 
 class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
+    
+    @classmethod
+    def setUpClass(cls):
+        # Configura o patch do get_session compartilhado para todos os testes
+        cls.mock_get_session = AsyncMock()
+        cls.session_patch = patch(
+            "api.v1.endpoints.usuario.get_session", new=AsyncMock(return_value=cls.mock_get_session)
+        )
+        cls.session_patch.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.session_patch.stop()
 
     async def asyncSetUp(self):
         # Configuração antes de cada teste
         self.transport = ASGITransport(app=app)
         self.client = AsyncClient(transport=self.transport, base_url="http://testserver")
-        self.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzMyNzEwMDQyLCJpYXQiOjE3MzI2ODEyNDIsInN1YiI6IjEzNiJ9.UtjXrPTjunQ2ZmvJIReFFhvpc_kQSDUP31v2L-d3CZ8"
+        self.token = getValidToken()
 
 
     async def asyncTearDown(self):
@@ -168,12 +196,11 @@ class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
 
     @pytest.mark.asyncio
     @pytest.mark.order(1)
-    @patch("api.v1.endpoints.usuario.get_session")
-    @patch("api.v1.endpoints.usuario.get_current_user")
-    async def test_get_usuario_success(self, mock_get_current_user, mock_get_session):
+    @patch("api.v1.endpoints.usuario.get_current_user", new_callable=AsyncMock)
+    async def test_get_usuario_success(self, mock_get_current_user):
         # Configurar mock da sessão
         mock_session = AsyncMock()
-        mock_get_session.return_value.__aenter__.return_value = mock_session
+        self.mock_get_session.return_value.__aenter__.return_value = mock_session
         
         # Simula um usuário logado com dados específicos
         mock_usuario = AsyncMock(
@@ -191,12 +218,10 @@ class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     # @pytest.mark.asyncio
-    # @patch("api.v1.endpoints.usuario.get_session")
-    # @patch("api.v1.endpoints.usuario.get_current_user")
-    # async def test_update_usuario_success(self, mock_get_current_user, mock_get_session):
+    # async def test_update_usuario_success(self):
     #     # Configuração do mock de sessão
     #     mock_session = AsyncMock()
-    #     mock_get_session.return_value.__aenter__.return_value = mock_session
+    #     self.mock_get_session.return_value.__aenter__.return_value = mock_session
 
     #     # Simula um usuário autenticado
     #     mock_usuario = AsyncMock(
@@ -204,7 +229,7 @@ class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
     #         nome_completo="Usuário Atualizado",
     #         data_nascimento="1990-01-01"
     #     )
-    #     mock_get_current_user.return_value = mock_usuario
+    #     # mock_get_current_user.return_value = mock_usuario
 
     #     headers = {"Authorization": f"Bearer { self.token}"}
 
@@ -221,12 +246,15 @@ class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
     #     self.assertEqual(response.json()["data_nascimento"], "1991-02-02")
         
     #     # Verificar chamadas de mock
-    #     mock_get_current_user.assert_called_once()
-    #     mock_get_session.return_value.__aenter__.assert_called_once()
+    #     # mock_get_current_user.assert_called_once()
+    #     self.mock_get_session.return_value.__aenter__.assert_called_once()
     #     mock_session.commit.assert_called_once()
+
+        
+    
         
     # @pytest.mark.asyncio
-    # @patch("api.v1.endpoints.usuario.get_session")
+    # @patch("api.v1.endpoints.usuario.get_session", new_callable=AsyncMock)
     # async def test_reset_password_error(self, mock_get_session):
     #     # Configuração do mock de sessão
     #     mock_session = AsyncMock()
@@ -243,12 +271,11 @@ class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
 
 
     @pytest.mark.asyncio
-    @patch("api.v1.endpoints.usuario.get_session")
-    @patch("api.v1.endpoints.usuario.send_email_to_reset_password")
-    async def test_recover_password_error(self, mock_send_email_to_reset_password, mock_get_session):
+    @patch("api.v1.endpoints.usuario.send_email_to_reset_password", new_callable=AsyncMock)
+    async def test_recover_password_error(self, mock_send_email_to_reset_password):
         # Configurar mock da sessão
         mock_session = AsyncMock()
-        mock_get_session.return_value.__aenter__.return_value = mock_session
+        self.mock_get_session.return_value.__aenter__.return_value = mock_session
 
         # Simular a resposta do banco de dados
         mock_usuario = UsuarioModel(id_usuario=1, email="test@example.com")
@@ -263,6 +290,4 @@ class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
             "/api/v1/usuarios/recover-password",
             json={"email": "test@example.com"}
         )
-
-
 
