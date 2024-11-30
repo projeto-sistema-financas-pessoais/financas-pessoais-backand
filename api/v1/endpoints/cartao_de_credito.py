@@ -1,3 +1,4 @@
+import calendar
 from sqlalchemy import extract
 import api.v1.endpoints
 import datetime
@@ -110,20 +111,15 @@ async def update_cartao_credito(
                 novo_mes_fechamento = fatura.data_fechamento.month
                 novo_ano_fechamento = fatura.data_fechamento.year
                 
-                # dia 21/11/24
-                # dia 21/12/2024  - 19/12/2024
-                
-                
-                # if dia_fechamento < fatura.data_fechamento.day:
-                #     novo_mes_fechamento += 1
-                #     if novo_mes_fechamento > 12:
-                #         novo_mes_fechamento = 1
-                #         novo_ano_fechamento += 1
-                        
+                ultimo_dia_mes_fechamento = calendar.monthrange(novo_ano_fechamento, novo_mes_fechamento)[1]
+
                 print("novo mes ano fechamento", novo_mes_fechamento, novo_ano_fechamento,  "dia  ", dia_fechamento, "", fatura.data_fechamento.day)
+                
+                dia_fechamento_ajustado = min(dia_fechamento, ultimo_dia_mes_fechamento)            
+
 
                 fatura.data_fechamento = date(
-                    novo_ano_fechamento, novo_mes_fechamento, dia_fechamento
+                    novo_ano_fechamento, novo_mes_fechamento, dia_fechamento_ajustado
                 )
 
                 novo_mes_vencimento = novo_mes_fechamento
@@ -134,13 +130,16 @@ async def update_cartao_credito(
                     if novo_mes_vencimento > 12:
                         novo_mes_vencimento = 1
                         novo_ano_vencimento += 1
+                        
+    
+                ultimo_dia_mes_vencimento = calendar.monthrange(novo_ano_vencimento, novo_mes_vencimento)[1]
 
-                # print("novo mes ano VENCIMENTO",novo_mes_fechamento, novo_ano_vencimento,  "dia ", dia_vencimento, "fechamento", dia_fechamento)
+                dia_vencimento_ajustado = min(dia_vencimento, ultimo_dia_mes_vencimento)            
+
                 fatura.data_vencimento = date(
-                    novo_ano_vencimento, novo_mes_vencimento, dia_vencimento
+                    novo_ano_vencimento, novo_mes_vencimento, dia_vencimento_ajustado
                 )
 
-                #procura a movimentao com id da fatura que esta sendo alterado as datas
                 movimentacoes_query = select(MovimentacaoModel).where(
                     MovimentacaoModel.id_fatura == fatura.id_fatura
                 )
@@ -150,10 +149,7 @@ async def update_cartao_credito(
 
                 for movimentacao in movimentacoes:
                     data_movimentacao = movimentacao.data_pagamento
-                    # for f in faturas:
-                    #     print(f"data_fechamento type: {type(f.data_fechamento)}, value: {f.data_fechamento}")
-                    #     print(f"data_movimentacao type: {type(data_movimentacao)}, value: {data_movimentacao}")
-
+   
                     nova_fatura = next(
                         (f for f in faturas if f.data_fechamento > data_movimentacao), None
                     )

@@ -1,5 +1,5 @@
 
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends , status, HTTPException
 from sqlalchemy import and_, extract, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -167,6 +167,16 @@ def ajustar_data_pagamento(movimentacao: MovimentacaoSchemaReceitaDespesa, data_
     
     return data_pagamento
 
+def calcular_parcelas_precisas(valor_total, quantidade_parcelas):
+    valor_total = Decimal(str(valor_total))
+    quantidade_parcelas = Decimal(str(quantidade_parcelas))
+    
+    valor_parcela = (valor_total / quantidade_parcelas).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    
+    valor_primeira_parcela = valor_total - (valor_parcela * (quantidade_parcelas - 1))
+    
+    return valor_primeira_parcela, valor_parcela
+
 @router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)
 async def create_movimentacao_despesa(
     movimentacao: MovimentacaoSchemaReceitaDespesa,
@@ -200,10 +210,10 @@ async def create_movimentacao_despesa(
 
                 
             # Preparação para criar movimentações parceladas
-            valor_por_parcela = movimentacao.valor / movimentacao.quantidade_parcelas
-            valor_por_parcela_ajustado = round(valor_por_parcela, 2)
-            valor_restante = round(movimentacao.valor - (valor_por_parcela_ajustado * movimentacao.quantidade_parcelas), 2)
-            print(valor_por_parcela, valor_restante, valor_por_parcela_ajustado )
+            valor_primeira_parcela, valor_parcela = calcular_parcelas_precisas(
+                movimentacao.valor, 
+                movimentacao.quantidade_parcelas
+            )
 
             data_pagamento = movimentacao.data_pagamento
 
@@ -212,7 +222,7 @@ async def create_movimentacao_despesa(
             # Criação das movimentações parceladas
             for parcela_atual in range(1, movimentacao.quantidade_parcelas + 1):
                 nova_movimentacao = MovimentacaoModel(
-                    valor= valor_por_parcela_ajustado + valor_restante if  parcela_atual == 1 else valor_por_parcela_ajustado,
+                    valor=valor_primeira_parcela if parcela_atual == 1 else valor_parcela,
                     descricao=movimentacao.descricao,
                     tipoMovimentacao=TipoMovimentacao.DESPESA,
                     forma_pagamento=movimentacao.forma_pagamento,
@@ -234,23 +244,25 @@ async def create_movimentacao_despesa(
                 db.add(nova_movimentacao)
                 
                 if movimentacao.consolidado and parcela_atual == 1:
-                    conta.saldo = conta.saldo - Decimal(valor_por_parcela_ajustado + valor_restante)
+                    conta.saldo = conta.saldo - Decimal(valor_primeira_parcela)
         
                         
                 if movimentacao.forma_pagamento == FormaPagamento.CREDITO:
 
                     if parcela_atual == 1 :
-                        cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado + valor_restante
-                        fatura.fatura_gastos +=valor_por_parcela_ajustado + valor_restante
+                        cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_primeira_parcela
+                        fatura.fatura_gastos += valor_primeira_parcela
                         nova_movimentacao.participa_limite_fatura_gastos = True
+
                     elif movimentacao.condicao_pagamento == CondicaoPagamento.PARCELADO:
-                        cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado
-                        fatura.fatura_gastos +=valor_por_parcela_ajustado
+                        cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_parcela
+                        fatura.fatura_gastos +=valor_parcela
                         nova_movimentacao.participa_limite_fatura_gastos = True
+
                     elif parcela_atual > 1: 
                         if(data_pagamento.month <= today.month and data_pagamento.year <= today.year):
-                            cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_por_parcela_ajustado 
-                            fatura.fatura_gastos +=valor_por_parcela_ajustado
+                            cartao_credito.limite_disponivel = cartao_credito.limite_disponivel - valor_parcela 
+                            fatura.fatura_gastos +=valor_parcela
                             nova_movimentacao.participa_limite_fatura_gastos = True
                     else: 
                         nova_movimentacao.participa_limite_fatura_gastos = False if movimentacao.forma_pagamento == FormaPagamento.CREDITO else None
