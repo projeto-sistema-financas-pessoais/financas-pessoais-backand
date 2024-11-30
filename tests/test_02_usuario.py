@@ -14,7 +14,7 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
 
 
     @classmethod
-    def setUpClassP(cls):
+    def setUpClass(cls):
         # Configura o patch do get_session compartilhado para todos os testes
         cls.mock_get_session = AsyncMock()
         cls.session_patch = patch(
@@ -23,17 +23,17 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
         cls.session_patch.start()
 
     @classmethod
-    def tearDownClassP(cls):
+    def tearDownClass(cls):
         cls.session_patch.stop()
             
-    async def asyncSetUpP(self):
+    async def asyncSetUp(self):
         # Configuração antes de cada teste
         self.transport = ASGITransport(app=app)
         self.client = AsyncClient(transport=self.transport, base_url="http://testserver")
         self.token = getValidToken()
 
 
-    async def asyncTearDownP(self):
+    async def asyncTearDown(self):
         # Limpeza após cada teste
         await self.client.aclose()
 
@@ -62,7 +62,7 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
         usuario_data = {
             "nome_completo": "Usuário Teste",
             "data_nascimento": "1990-01-01",
-            "email": "teste@example.com",
+            "email": "teste5@example.com",
             "senha": "senha123"
         }
         
@@ -135,30 +135,6 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
-    
-
-class TestGetUsuario(unittest.IsolatedAsyncioTestCase):
-    
-    @classmethod
-    def setUpClassU(cls):
-        cls.mock_get_session = AsyncMock()
-        cls.session_patch = patch(
-            "api.v1.endpoints.usuario.get_session", new=AsyncMock(return_value=cls.mock_get_session)
-        )
-        cls.session_patch.start()
-
-    @classmethod
-    def tearDownClassU(cls):
-        cls.session_patch.stop()
-
-    async def asyncSetUpU(self):
-        self.transport = ASGITransport(app=app)
-        self.client = AsyncClient(transport=self.transport, base_url="http://testserver")
-        self.token = getValidToken()
-
-
-    async def asyncTearDown(self):
-        await self.client.aclose()
 
     @pytest.mark.asyncio
     @pytest.mark.order(1)

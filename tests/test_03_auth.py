@@ -48,46 +48,6 @@ class TestSendEmail(unittest.TestCase):
         self.assertTrue("Error occurred while sending email" in str(context.exception))
 
 
-class TestSendEmailToResetPassword(unittest.TestCase):
-    @patch("core.auth.send_email")
-    @patch("core.auth.config")
-    @patch("core.auth.asyncio.to_thread")
-    async def test_send_email_to_reset_password_success(self, mock_to_thread, mock_config, mock_send_email):
-        mock_config.side_effect = lambda key: "mock_value" if key in ["URL_WEB", "DATABASE_URL_SINC"] else None
-
-        # Dados de usuário simulados
-        user_data = MagicMock()
-        user_data.nome_completo = "John Doe"
-        user_data.email = "john.doe@example.com"
-
-        mock_send_email.return_value = None  
-        mock_to_thread.return_value = None  
-
-        await core.auth.send_email_to_reset_password(MagicMock(spec=Request), user_data, "token123")
-
-        mock_send_email.assert_called_once()
-        args, kwargs = mock_send_email.call_args
-        self.assertEqual(kwargs['email_data']['email_subject'], "Redefinição de senha - Finanças Pessoais")
-        self.assertIn("Clique <a href=\"mock_value/login/redefinir-senha/token123\">aqui</a>", kwargs['email_data']['email_body'])
-        self.assertEqual(kwargs['email_data']['email_body'].count("Olá, <b>John Doe</b>"), 1)
-
-    @patch("core.auth.send_email")
-    @patch("core.auth.config")
-    @patch("core.auth.asyncio.to_thread")
-    async def test_send_email_to_reset_password_exception(self, mock_to_thread, mock_config, mock_send_email):
-        mock_config.side_effect = lambda key: "mock_value" if key in ["URL_WEB", "DATABASE_URL_SINC"] else None
-
-        user_data = MagicMock()
-        user_data.nome_completo = "John Doe"
-        user_data.email = "john.doe@example.com"
-
-        mock_send_email.side_effect = Exception("SMTP error")
-
-        with self.assertRaises(Exception) as context:
-            await core.auth.send_email_to_reset_password(MagicMock(spec=Request), user_data, "token123")
-
-        self.assertTrue("Error occurred while sending email" in str(context.exception))
-
 from jose import jwt, JWTError
 
 

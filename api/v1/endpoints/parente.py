@@ -66,7 +66,7 @@ async def update_parente(id_parente: int, parente_update: ParenteSchemaUpdate, d
         parente: ParenteModel = result.scalars().unique().one_or_none()
 
         if not parente:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parente não encontrado.")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parente não encontrado para edição.")
 
         if parente.id_usuario != usuario_logado.id_usuario:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não tem permissão para editar este parente.")
@@ -131,7 +131,7 @@ async def get_parente(id_parente: int, db: AsyncSession = Depends(get_session), 
         parente = result.scalars().one_or_none()
 
         if not parente:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parente não encontrado.")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parente com esse id não foi encontrado .")
 
         return parente
 
@@ -143,7 +143,7 @@ async def delete_parente(id_parente: int, db: AsyncSession = Depends(get_session
         parente = result.scalars().one_or_none()
 
         if not parente:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parente não encontrado.")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não é possível deletar esse parente.")
 
         try:
             await session.delete(parente)
@@ -398,8 +398,8 @@ async def send_invoice_pdf(
             }
 
             for divide, descricao, data_pagamento, valor in movimentacoes_nao_consolidadas:
-                descricao = descricao or f"Outros"  
-                response["movimentacoes_nao_consolidadas"].append({
+                    descricao = f"{descricao or 'Outros'}"
+                    response["movimentacoes_nao_consolidadas"].append({
                     "id_parente": divide.id_parente,
                     "descricao": descricao,
                     "data_pagamento": str(data_pagamento), 

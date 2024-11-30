@@ -2725,6 +2725,14 @@
         "documentation": {}
     },
     {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
         "label": "handle_db_exceptions",
         "importPath": "core.utils",
         "description": "core.utils",
@@ -4066,6 +4074,14 @@
         "documentation": {}
     },
     {
+        "label": "calcular_parcelas_precisas",
+        "importPath": "api.v1.endpoints.movimentacao",
+        "description": "api.v1.endpoints.movimentacao",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.movimentacao",
+        "documentation": {}
+    },
+    {
         "label": "create_movimentacao_despesa",
         "importPath": "api.v1.endpoints.movimentacao",
         "description": "api.v1.endpoints.movimentacao",
@@ -5074,7 +5090,7 @@
         "kind": 2,
         "importPath": "tests.config",
         "description": "tests.config",
-        "peekOfCode": "def getValidToken():\n    return \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzMyODAxOTI4LCJpYXQiOjE3MzI3NzMxMjgsInN1YiI6IjE3NiJ9.Q8YwlhEcNsv65ND9WYlRnhZ9fAxOyY9Yr87_KQGJx94\"",
+        "peekOfCode": "def getValidToken():\n    return \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzMyOTUxNjM5LCJpYXQiOjE3MzI5MjI4MzksInN1YiI6IjE3OCJ9.4zMG4roB19fjzfsPVZXhgJq9uOiJrHtEQQbyJcX_yUo\"",
         "detail": "tests.config",
         "documentation": {}
     },
@@ -5142,6 +5158,15 @@
         "documentation": {}
     },
     {
+        "label": "TestCalcularParcelasPrecisas",
+        "kind": 6,
+        "importPath": "tests.test_01_movimentacao",
+        "description": "tests.test_01_movimentacao",
+        "peekOfCode": "class TestCalcularParcelasPrecisas(unittest.TestCase):\n    def test_calcular_parcelas_precisas(self):\n        valor_total = 100.00\n        quantidade_parcelas = 3\n        valor_primeira_parcela, valor_parcela = calcular_parcelas_precisas(valor_total, quantidade_parcelas)\n        valor_esperado_primeira_parcela = Decimal('33.34')\n        valor_esperado_parcela = Decimal('33.33')\n        self.assertEqual(valor_primeira_parcela, valor_esperado_primeira_parcela)\n        self.assertEqual(valor_parcela, valor_esperado_parcela)\n    def test_calcular_parcelas_precisas_valores_decimal(self):",
+        "detail": "tests.test_01_movimentacao",
+        "documentation": {}
+    },
+    {
         "label": "criar_movimentacao",
         "kind": 2,
         "importPath": "tests.test_01_movimentacao",
@@ -5191,16 +5216,7 @@
         "kind": 6,
         "importPath": "tests.test_02_usuario",
         "description": "tests.test_02_usuario",
-        "peekOfCode": "class TestPostUsuario(unittest.IsolatedAsyncioTestCase):\n    @classmethod\n    def setUpClassP(cls):\n        # Configura o patch do get_session compartilhado para todos os testes\n        cls.mock_get_session = AsyncMock()\n        cls.session_patch = patch(\n            \"api.v1.endpoints.usuario.get_session\", new=AsyncMock(return_value=cls.mock_get_session)\n        )\n        cls.session_patch.start()\n    @classmethod",
-        "detail": "tests.test_02_usuario",
-        "documentation": {}
-    },
-    {
-        "label": "TestGetUsuario",
-        "kind": 6,
-        "importPath": "tests.test_02_usuario",
-        "description": "tests.test_02_usuario",
-        "peekOfCode": "class TestGetUsuario(unittest.IsolatedAsyncioTestCase):\n    @classmethod\n    def setUpClassU(cls):\n        cls.mock_get_session = AsyncMock()\n        cls.session_patch = patch(\n            \"api.v1.endpoints.usuario.get_session\", new=AsyncMock(return_value=cls.mock_get_session)\n        )\n        cls.session_patch.start()\n    @classmethod\n    def tearDownClassU(cls):",
+        "peekOfCode": "class TestPostUsuario(unittest.IsolatedAsyncioTestCase):\n    @classmethod\n    def setUpClass(cls):\n        # Configura o patch do get_session compartilhado para todos os testes\n        cls.mock_get_session = AsyncMock()\n        cls.session_patch = patch(\n            \"api.v1.endpoints.usuario.get_session\", new=AsyncMock(return_value=cls.mock_get_session)\n        )\n        cls.session_patch.start()\n    @classmethod",
         "detail": "tests.test_02_usuario",
         "documentation": {}
     },
@@ -5210,15 +5226,6 @@
         "importPath": "tests.test_03_auth",
         "description": "tests.test_03_auth",
         "peekOfCode": "class TestSendEmail(unittest.TestCase):\n    @patch(\"core.auth.smtplib.SMTP\")\n    @patch(\"core.auth.config\")\n    def test_send_email_success(self, mock_config, mock_smtp):\n        mock_config.side_effect = lambda key: \"mock_value\" if key in [\"EMAIL_ADDRESS\", \"EMAIL_PASSWORD\"] else None\n        mock_server = MagicMock()\n        mock_smtp.return_value.__enter__.return_value = mock_server\n        email_data = {\n            \"email_subject\": \"Test Subject\",\n            \"email_body\": \"<html><body><h1>Test Body</h1></body></html>\"",
-        "detail": "tests.test_03_auth",
-        "documentation": {}
-    },
-    {
-        "label": "TestSendEmailToResetPassword",
-        "kind": 6,
-        "importPath": "tests.test_03_auth",
-        "description": "tests.test_03_auth",
-        "peekOfCode": "class TestSendEmailToResetPassword(unittest.TestCase):\n    @patch(\"core.auth.send_email\")\n    @patch(\"core.auth.config\")\n    @patch(\"core.auth.asyncio.to_thread\")\n    async def test_send_email_to_reset_password_success(self, mock_to_thread, mock_config, mock_send_email):\n        mock_config.side_effect = lambda key: \"mock_value\" if key in [\"URL_WEB\", \"DATABASE_URL_SINC\"] else None\n        # Dados de usuário simulados\n        user_data = MagicMock()\n        user_data.nome_completo = \"John Doe\"\n        user_data.email = \"john.doe@example.com\"",
         "detail": "tests.test_03_auth",
         "documentation": {}
     },
@@ -5308,7 +5315,7 @@
         "kind": 6,
         "importPath": "tests.test_06_main",
         "description": "tests.test_06_main",
-        "peekOfCode": "class TestFuncoesAgendamento(unittest.TestCase):\n    def setUp(self):\n        # Criar um loop de evento\n        self.loop = asyncio.new_event_loop()\n        asyncio.set_event_loop(self.loop)\n        # Substituir a função real por um mock\n        patch('api.v1.endpoints.rotina.check_and_send_email', new=mock_check_and_send_email).start()\n        patch('apscheduler.schedulers.background.BackgroundScheduler.add_job').start()\n    @patch('apscheduler.schedulers.background.BackgroundScheduler.add_job')\n    def test_agendar_execucao(self, mock_add_job):",
+        "peekOfCode": "class TestFuncoesAgendamento(unittest.TestCase):\n    def setUp(self):\n        self.loop = asyncio.new_event_loop()\n        asyncio.set_event_loop(self.loop)\n        patch('api.v1.endpoints.rotina.check_and_send_email', new=mock_check_and_send_email).start()\n        patch('apscheduler.schedulers.background.BackgroundScheduler.add_job').start()\n    @patch('apscheduler.schedulers.background.BackgroundScheduler.add_job')\n    def test_agendar_execucao(self, mock_add_job):\n        agendar_execucao(2, 54, self.loop)\n        mock_add_job.assert_called_once()",
         "detail": "tests.test_06_main",
         "documentation": {}
     },
@@ -5317,7 +5324,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        # Tenta obter um bloqueio exclusivo (não bloqueante)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")\n        return None",
+        "peekOfCode": "def acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")\n        return None\ndef release_file_lock(lock_file):",
         "detail": "main",
         "documentation": {}
     },
@@ -5326,7 +5333,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def release_file_lock(lock_file):\n    if lock_file:\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock\n        lock_file.close()\n        print(\"Lock liberado.\")\n# Função que será chamada pelo agendador\ndef executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:",
+        "peekOfCode": "def release_file_lock(lock_file):\n    if lock_file:\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock\n        lock_file.close()\n        print(\"Lock liberado.\")\ndef executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:\n            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)",
         "detail": "main",
         "documentation": {}
     },
@@ -5335,7 +5342,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:\n            # Executa a função assíncrona de forma segura\n            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)\n        finally:\n            release_file_lock(lock_file)\n# Função para agendar a execução em uma hora específica\ndef agendar_execucao(hora: int, minuto: int, loop):",
+        "peekOfCode": "def executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:\n            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)\n        finally:\n            release_file_lock(lock_file)\ndef agendar_execucao(hora: int, minuto: int, loop):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)",
         "detail": "main",
         "documentation": {}
     },
@@ -5353,7 +5360,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "scheduler = BackgroundScheduler()\ndef acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        # Tenta obter um bloqueio exclusivo (não bloqueante)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")",
+        "peekOfCode": "scheduler = BackgroundScheduler()\ndef acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")\n        return None",
         "detail": "main",
         "documentation": {}
     },
