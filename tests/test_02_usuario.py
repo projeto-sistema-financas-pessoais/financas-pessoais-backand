@@ -7,8 +7,9 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from unittest.mock import AsyncMock, patch
 
 from main import app
-from models.usuario_model import UsuarioModel
 from tests.config import getValidToken
+from decouple import config
+
 
 class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
 
@@ -29,7 +30,7 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         # Configuração antes de cada teste
         self.transport = ASGITransport(app=app)
-        self.client = AsyncClient(transport=self.transport, base_url="http://testserver")
+        self.client = AsyncClient(transport=self.transport, base_url="https://testserver")
         self.token = getValidToken()
 
 
@@ -63,7 +64,7 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
             "nome_completo": "Usuário Teste",
             "data_nascimento": "1990-01-01",
             "email": "teste5@example.com",
-            "senha": "senha123"
+            "senha": config("TOKEN_TESTE")
         }
         
         # Fazer a requisição
@@ -96,7 +97,7 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
             "nome_completo": "Usuário Teste",
             "data_nascimento": "1990-01-01",
             "email": "teste@example.com",
-            "senha": "senha123"
+            "senha": config("TOKEN_TESTE")
         }
         
         # Fazer a requisição
@@ -118,7 +119,8 @@ class TestPostUsuario(unittest.IsolatedAsyncioTestCase):
         # Simula os dados de login
         login_data = {
             "username": "teste@example.com",
-            "password": "senha123"
+            "password":  config("TOKEN_TESTE")
+
         }
         
         # Fazer a requisição de login

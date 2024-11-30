@@ -2181,14 +2181,6 @@
         "documentation": {}
     },
     {
-        "label": "UsuarioModel",
-        "importPath": "models.usuario_model",
-        "description": "models.usuario_model",
-        "isExtraImport": true,
-        "detail": "models.usuario_model",
-        "documentation": {}
-    },
-    {
         "label": "FaturaModel",
         "importPath": "models.fatura_model",
         "description": "models.fatura_model",
@@ -3181,6 +3173,22 @@
         "importPath": "smtplib",
         "description": "smtplib",
         "detail": "smtplib",
+        "documentation": {}
+    },
+    {
+        "label": "config",
+        "importPath": "decouple",
+        "description": "decouple",
+        "isExtraImport": true,
+        "detail": "decouple",
+        "documentation": {}
+    },
+    {
+        "label": "config",
+        "importPath": "decouple",
+        "description": "decouple",
+        "isExtraImport": true,
+        "detail": "decouple",
         "documentation": {}
     },
     {
@@ -5090,7 +5098,7 @@
         "kind": 2,
         "importPath": "tests.config",
         "description": "tests.config",
-        "peekOfCode": "def getValidToken():\n    return \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzMyOTUxNjM5LCJpYXQiOjE3MzI5MjI4MzksInN1YiI6IjE3OCJ9.4zMG4roB19fjzfsPVZXhgJq9uOiJrHtEQQbyJcX_yUo\"",
+        "peekOfCode": "def getValidToken():\n    return config(\"TOKEN_TESTE\")",
         "detail": "tests.config",
         "documentation": {}
     },
