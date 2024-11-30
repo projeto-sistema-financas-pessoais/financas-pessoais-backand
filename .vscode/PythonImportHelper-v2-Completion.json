@@ -1,5 +1,22 @@
 [
     {
+        "label": "calendar",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "calendar",
+        "description": "calendar",
+        "detail": "calendar",
+        "documentation": {}
+    },
+    {
+        "label": "monthrange",
+        "importPath": "calendar",
+        "description": "calendar",
+        "isExtraImport": true,
+        "detail": "calendar",
+        "documentation": {}
+    },
+    {
         "label": "sqlalchemy",
         "kind": 6,
         "isExtraImport": true,
@@ -50,6 +67,14 @@
     },
     {
         "label": "or_",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "and_",
         "importPath": "sqlalchemy",
         "description": "sqlalchemy",
         "isExtraImport": true,
@@ -771,6 +796,14 @@
         "documentation": {}
     },
     {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
         "label": "timedelta",
         "importPath": "datetime",
         "description": "datetime",
@@ -820,6 +853,30 @@
     },
     {
         "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -1116,14 +1173,6 @@
         "documentation": {}
     },
     {
-        "label": "logger",
-        "importPath": "fastapi",
-        "description": "fastapi",
-        "isExtraImport": true,
-        "detail": "fastapi",
-        "documentation": {}
-    },
-    {
         "label": "status",
         "importPath": "fastapi",
         "description": "fastapi",
@@ -1285,6 +1334,14 @@
     },
     {
         "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Request",
         "importPath": "fastapi",
         "description": "fastapi",
         "isExtraImport": true,
@@ -1732,6 +1789,30 @@
         "documentation": {}
     },
     {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "get_session",
         "importPath": "core.deps",
         "description": "core.deps",
@@ -2156,14 +2237,6 @@
         "documentation": {}
     },
     {
-        "label": "FaturaModel",
-        "importPath": "models.fatura_model",
-        "description": "models.fatura_model",
-        "isExtraImport": true,
-        "detail": "models.fatura_model",
-        "documentation": {}
-    },
-    {
         "label": "joinedload",
         "importPath": "sqlalchemy.orm",
         "description": "sqlalchemy.orm",
@@ -2380,14 +2453,6 @@
         "documentation": {}
     },
     {
-        "label": "FormaPagamento",
-        "importPath": "models.enums",
-        "description": "models.enums",
-        "isExtraImport": true,
-        "detail": "models.enums",
-        "documentation": {}
-    },
-    {
         "label": "TipoMovimentacao",
         "importPath": "models.enums",
         "description": "models.enums",
@@ -2596,6 +2661,14 @@
         "documentation": {}
     },
     {
+        "label": "ROUND_HALF_UP",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
         "label": "Decimal",
         "importPath": "decimal",
         "description": "decimal",
@@ -2796,23 +2869,6 @@
         "documentation": {}
     },
     {
-        "label": "calendar",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "calendar",
-        "description": "calendar",
-        "detail": "calendar",
-        "documentation": {}
-    },
-    {
-        "label": "monthrange",
-        "importPath": "calendar",
-        "description": "calendar",
-        "isExtraImport": true,
-        "detail": "calendar",
-        "documentation": {}
-    },
-    {
         "label": "MovimentacaoFaturaSchemaList",
         "importPath": "schemas.movimentacao_schema",
         "description": "schemas.movimentacao_schema",
@@ -2966,6 +3022,38 @@
         "documentation": {}
     },
     {
+        "label": "encoders",
+        "importPath": "email",
+        "description": "email",
+        "isExtraImport": true,
+        "detail": "email",
+        "documentation": {}
+    },
+    {
+        "label": "encoders",
+        "importPath": "email",
+        "description": "email",
+        "isExtraImport": true,
+        "detail": "email",
+        "documentation": {}
+    },
+    {
+        "label": "MIMEBase",
+        "importPath": "email.mime.base",
+        "description": "email.mime.base",
+        "isExtraImport": true,
+        "detail": "email.mime.base",
+        "documentation": {}
+    },
+    {
+        "label": "MIMEBase",
+        "importPath": "email.mime.base",
+        "description": "email.mime.base",
+        "isExtraImport": true,
+        "detail": "email.mime.base",
+        "documentation": {}
+    },
+    {
         "label": "MIMEBase",
         "importPath": "email.mime.base",
         "description": "email.mime.base",
@@ -2995,6 +3083,38 @@
         "description": "email.mime.multipart",
         "isExtraImport": true,
         "detail": "email.mime.multipart",
+        "documentation": {}
+    },
+    {
+        "label": "MIMEMultipart",
+        "importPath": "email.mime.multipart",
+        "description": "email.mime.multipart",
+        "isExtraImport": true,
+        "detail": "email.mime.multipart",
+        "documentation": {}
+    },
+    {
+        "label": "MIMEMultipart",
+        "importPath": "email.mime.multipart",
+        "description": "email.mime.multipart",
+        "isExtraImport": true,
+        "detail": "email.mime.multipart",
+        "documentation": {}
+    },
+    {
+        "label": "MIMEText",
+        "importPath": "email.mime.text",
+        "description": "email.mime.text",
+        "isExtraImport": true,
+        "detail": "email.mime.text",
+        "documentation": {}
+    },
+    {
+        "label": "MIMEText",
+        "importPath": "email.mime.text",
+        "description": "email.mime.text",
+        "isExtraImport": true,
+        "detail": "email.mime.text",
         "documentation": {}
     },
     {
@@ -3118,6 +3238,15 @@
         "importPath": "pdfkit",
         "description": "pdfkit",
         "detail": "pdfkit",
+        "documentation": {}
+    },
+    {
+        "label": "core.auth",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "core.auth",
+        "description": "core.auth",
+        "detail": "core.auth",
         "documentation": {}
     },
     {
@@ -3662,6 +3791,22 @@
         "documentation": {}
     },
     {
+        "label": "jwt",
+        "importPath": "jose",
+        "description": "jose",
+        "isExtraImport": true,
+        "detail": "jose",
+        "documentation": {}
+    },
+    {
+        "label": "JWTError",
+        "importPath": "jose",
+        "description": "jose",
+        "isExtraImport": true,
+        "detail": "jose",
+        "documentation": {}
+    },
+    {
         "label": "BaseSettings",
         "importPath": "pydantic_settings",
         "description": "pydantic_settings",
@@ -3825,6 +3970,54 @@
         "documentation": {}
     },
     {
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "MagicMock",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "MagicMock",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "MagicMock",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
         "label": "ajustar_saldo_conta",
         "importPath": "api.v1.endpoints.movimentacao",
         "description": "api.v1.endpoints.movimentacao",
@@ -3873,31 +4066,7 @@
         "documentation": {}
     },
     {
-        "label": "buscar_contas_usuario",
-        "importPath": "api.v1.endpoints.movimentacao",
-        "description": "api.v1.endpoints.movimentacao",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.movimentacao",
-        "documentation": {}
-    },
-    {
-        "label": "create_movimentacao",
-        "importPath": "api.v1.endpoints.movimentacao",
-        "description": "api.v1.endpoints.movimentacao",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.movimentacao",
-        "documentation": {}
-    },
-    {
         "label": "create_movimentacao_despesa",
-        "importPath": "api.v1.endpoints.movimentacao",
-        "description": "api.v1.endpoints.movimentacao",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.movimentacao",
-        "documentation": {}
-    },
-    {
-        "label": "create_movimentacao_receita",
         "importPath": "api.v1.endpoints.movimentacao",
         "description": "api.v1.endpoints.movimentacao",
         "isExtraImport": true,
@@ -3914,22 +4083,6 @@
     },
     {
         "label": "ajustar_limite_fatura_gastos",
-        "importPath": "api.v1.endpoints.movimentacao",
-        "description": "api.v1.endpoints.movimentacao",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.movimentacao",
-        "documentation": {}
-    },
-    {
-        "label": "economia_meses_anteriores",
-        "importPath": "api.v1.endpoints.movimentacao",
-        "description": "api.v1.endpoints.movimentacao",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.movimentacao",
-        "documentation": {}
-    },
-    {
-        "label": "get_or_create_fatura",
         "importPath": "api.v1.endpoints.movimentacao",
         "description": "api.v1.endpoints.movimentacao",
         "isExtraImport": true,
@@ -3970,6 +4123,14 @@
         "documentation": {}
     },
     {
+        "label": "mock",
+        "importPath": "unittest",
+        "description": "unittest",
+        "isExtraImport": true,
+        "detail": "unittest",
+        "documentation": {}
+    },
+    {
         "label": "app",
         "importPath": "main",
         "description": "main",
@@ -3978,11 +4139,84 @@
         "documentation": {}
     },
     {
-        "label": "CORSMiddleware",
-        "importPath": "fastapi.middleware.cors",
-        "description": "fastapi.middleware.cors",
+        "label": "executar_funcao_assincrona",
+        "importPath": "main",
+        "description": "main",
         "isExtraImport": true,
-        "detail": "fastapi.middleware.cors",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "agendar_execucao",
+        "importPath": "main",
+        "description": "main",
+        "isExtraImport": true,
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "scheduler",
+        "importPath": "main",
+        "description": "main",
+        "isExtraImport": true,
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "getValidToken",
+        "importPath": "tests.config",
+        "description": "tests.config",
+        "isExtraImport": true,
+        "detail": "tests.config",
+        "documentation": {}
+    },
+    {
+        "label": "base64",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "base64",
+        "description": "base64",
+        "detail": "base64",
+        "documentation": {}
+    },
+    {
+        "label": "criar_email_data",
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.parente",
+        "documentation": {}
+    },
+    {
+        "label": "send_email",
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.parente",
+        "documentation": {}
+    },
+    {
+        "label": "processar_usuarios_em_atraso",
+        "importPath": "api.v1.endpoints.rotina",
+        "description": "api.v1.endpoints.rotina",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.rotina",
+        "documentation": {}
+    },
+    {
+        "label": "send_email",
+        "importPath": "api.v1.endpoints.rotina",
+        "description": "api.v1.endpoints.rotina",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.rotina",
+        "documentation": {}
+    },
+    {
+        "label": "check_and_send_email",
+        "importPath": "api.v1.endpoints.rotina",
+        "description": "api.v1.endpoints.rotina",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.rotina",
         "documentation": {}
     },
     {
@@ -3994,19 +4228,45 @@
         "documentation": {}
     },
     {
+        "label": "BackgroundScheduler",
+        "importPath": "apscheduler.schedulers.background",
+        "description": "apscheduler.schedulers.background",
+        "isExtraImport": true,
+        "detail": "apscheduler.schedulers.background",
+        "documentation": {}
+    },
+    {
+        "label": "fcntl",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "fcntl",
+        "description": "fcntl",
+        "detail": "fcntl",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "CORSMiddleware",
+        "importPath": "fastapi.middleware.cors",
+        "description": "fastapi.middleware.cors",
+        "isExtraImport": true,
+        "detail": "fastapi.middleware.cors",
+        "documentation": {}
+    },
+    {
         "label": "asynccontextmanager",
         "importPath": "contextlib",
         "description": "contextlib",
         "isExtraImport": true,
         "detail": "contextlib",
-        "documentation": {}
-    },
-    {
-        "label": "check_and_send_email",
-        "importPath": "api.v1.endpoints.rotina",
-        "description": "api.v1.endpoints.rotina",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.rotina",
         "documentation": {}
     },
     {
@@ -4072,6 +4332,15 @@
         "documentation": {}
     },
     {
+        "label": "calcular_parcelas_precisas",
+        "kind": 2,
+        "importPath": "api.v1.endpoints.movimentacao",
+        "description": "api.v1.endpoints.movimentacao",
+        "peekOfCode": "def calcular_parcelas_precisas(valor_total, quantidade_parcelas):\n    valor_total = Decimal(str(valor_total))\n    quantidade_parcelas = Decimal(str(quantidade_parcelas))\n    valor_parcela = (valor_total / quantidade_parcelas).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    valor_primeira_parcela = valor_total - (valor_parcela * (quantidade_parcelas - 1))\n    return valor_primeira_parcela, valor_parcela\n@router.post('/cadastro/despesa', status_code=status.HTTP_201_CREATED)\nasync def create_movimentacao_despesa(\n    movimentacao: MovimentacaoSchemaReceitaDespesa,\n    db: AsyncSession = Depends(get_session),",
+        "detail": "api.v1.endpoints.movimentacao",
+        "documentation": {}
+    },
+    {
         "label": "construir_query_movimentacao",
         "kind": 2,
         "importPath": "api.v1.endpoints.movimentacao",
@@ -4117,11 +4386,20 @@
         "documentation": {}
     },
     {
+        "label": "criar_email_data",
+        "kind": 2,
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
+        "peekOfCode": "def criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):\n    \"\"\"Cria os dados do email com base nas condições de parente e usuário logado.\"\"\"\n    def formatar_data_brasileira(data_str):\n        \"\"\"Converte data do formato YYYY-MM-DD para DD/MM/YYYY\"\"\"\n        return datetime.strptime(data_str, '%Y-%m-%d').strftime('%d/%m/%Y')\n    def formatar_valor_brasileiro(valor):\n        \"\"\"Formata o valor monetário no padrão brasileiro\"\"\"\n        try:\n            valor_float = float(valor)\n            return f'R$ {valor_float:,.2f}'.replace('.', 'X').replace(',', '.').replace('X', ',')",
+        "detail": "api.v1.endpoints.parente",
+        "documentation": {}
+    },
+    {
         "label": "send_email",
         "kind": 2,
         "importPath": "api.v1.endpoints.parente",
         "description": "api.v1.endpoints.parente",
-        "peekOfCode": "def send_email(email_data: dict, user_email: str) -> None:\n    try:\n        # Verifique se os dados de e-mail foram lidos corretamente\n        sender_email = config(\"EMAIL_ADDRESS\")\n        sender_password = config(\"EMAIL_PASSWORD\")\n        print(\"Endereço de e-mail do remetente:\", sender_email)\n        print(\"Senha de aplicativo lida:\", sender_password)\n        # Configura a mensagem\n        msg = MIMEMultipart()\n        msg[\"Subject\"] = email_data[\"email_subject\"]",
+        "peekOfCode": "def send_email(email_data: dict, user_email: str) -> None:\n    try:\n        # Verifique se os dados de e-mail foram lidos corretamente\n        sender_email = config(\"EMAIL_ADDRESS\")\n        sender_password = config(\"EMAIL_PASSWORD\")\n        # Configura a mensagem\n        msg = MIMEMultipart()\n        msg[\"Subject\"] = email_data[\"email_subject\"]\n        msg[\"From\"] = sender_email\n        msg[\"To\"] = user_email",
         "detail": "api.v1.endpoints.parente",
         "documentation": {}
     },
@@ -4144,38 +4422,11 @@
         "documentation": {}
     },
     {
-        "label": "process_contas",
+        "label": "processar_usuarios_em_atraso",
         "kind": 2,
         "importPath": "api.v1.endpoints.rotina",
         "description": "api.v1.endpoints.rotina",
-        "peekOfCode": "def process_contas(contas_vencidas):\n    \"\"\"Agrupa contas vencidas por email do usuário.\"\"\"\n    usuarios_contas = defaultdict(list)\n    for conta, user_email in contas_vencidas:\n        if user_email:\n            usuarios_contas[user_email].append(conta)\n        else:\n            logger.warning(f\"Movimentação '{conta.descricao}' não possui e-mail de usuário.\")\n    return usuarios_contas\ndef process_faturas(faturas_vencidas):",
-        "detail": "api.v1.endpoints.rotina",
-        "documentation": {}
-    },
-    {
-        "label": "process_faturas",
-        "kind": 2,
-        "importPath": "api.v1.endpoints.rotina",
-        "description": "api.v1.endpoints.rotina",
-        "peekOfCode": "def process_faturas(faturas_vencidas):\n    \"\"\"Agrupa faturas vencidas por email do usuário.\"\"\"\n    usuarios_faturas = defaultdict(list)\n    for fatura, user_email, cartao in faturas_vencidas:\n        if user_email:\n            usuarios_faturas[user_email].append((fatura, cartao))\n        else:\n            logger.warning(f\"Fatura com ID '{fatura.id_fatura}' não possui e-mail de usuário.\")\n    return usuarios_faturas\nasync def process_and_send_emails(usuarios_contas, usuarios_faturas):",
-        "detail": "api.v1.endpoints.rotina",
-        "documentation": {}
-    },
-    {
-        "label": "build_email_body",
-        "kind": 2,
-        "importPath": "api.v1.endpoints.rotina",
-        "description": "api.v1.endpoints.rotina",
-        "peekOfCode": "def build_email_body(user_email, usuarios_contas, usuarios_faturas):\n    \"\"\"Monta o corpo do e-mail com informações de contas e faturas vencidas.\"\"\"\n    email_body = \"\"\n    total_atraso = 0\n    if user_email in usuarios_contas:\n        contas = usuarios_contas[user_email]\n        email_body += build_table(\"Contas em atraso\", contas, total_atraso)\n    if user_email in usuarios_faturas:\n        faturas_info = usuarios_faturas[user_email]\n        if email_body:",
-        "detail": "api.v1.endpoints.rotina",
-        "documentation": {}
-    },
-    {
-        "label": "build_table",
-        "kind": 2,
-        "importPath": "api.v1.endpoints.rotina",
-        "description": "api.v1.endpoints.rotina",
-        "peekOfCode": "def build_table(title, items, total, is_fatura=False):\n    \"\"\"Constrói uma tabela HTML para contas ou faturas.\"\"\"\n    table_html = (\n        f\"<h4>{title}:</h4>\"\n        f\"<table style='border-collapse: collapse; width: 100%;'>\"\n        f\"<thead>\"\n        f\"<tr style='background-color: #f2f2f2;'>\"\n    )\n    if is_fatura:\n        table_html += (",
+        "peekOfCode": "def processar_usuarios_em_atraso(usuarios_contas, usuarios_faturas):\n    resultados = []\n    all_user_emails = set(usuarios_contas.keys()) | set(usuarios_faturas.keys())\n    for user_email in all_user_emails:\n        email_body = \"\"\n        total_atraso = 0\n        if user_email in usuarios_contas:\n            contas = usuarios_contas[user_email]\n            email_body += (\n                f\"<h4>Contas em atraso:</h4>\"",
         "detail": "api.v1.endpoints.rotina",
         "documentation": {}
     },
@@ -4819,6 +5070,15 @@
         "documentation": {}
     },
     {
+        "label": "getValidToken",
+        "kind": 2,
+        "importPath": "tests.config",
+        "description": "tests.config",
+        "peekOfCode": "def getValidToken():\n    return \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzMyODAxOTI4LCJpYXQiOjE3MzI3NzMxMjgsInN1YiI6IjE3NiJ9.Q8YwlhEcNsv65ND9WYlRnhZ9fAxOyY9Yr87_KQGJx94\"",
+        "detail": "tests.config",
+        "documentation": {}
+    },
+    {
         "label": "TestAjustarSaldoConta",
         "kind": 6,
         "importPath": "tests.test_01_movimentacao",
@@ -4841,7 +5101,7 @@
         "kind": 6,
         "importPath": "tests.test_01_movimentacao",
         "description": "tests.test_01_movimentacao",
-        "peekOfCode": "class TestCriarRepeticao:\n    async def test_criar_repeticao_recorrente(self, db_mock_repeticao, usuario_logado):\n        # Teste para movimentação RECORRENTE\n        movimentacao = criar_movimentacao(\n            condicao_pagamento=CondicaoPagamento.RECORRENTE,\n            tipo_recorrencia=TipoRecorrencia.ANUAL\n        )\n        # Não precisa redefinir os mocks aqui, pois já estão configurados na fixture\n        resultado = await criar_repeticao(movimentacao, usuario_logado, db_mock_repeticao)\n        # Verificações",
+        "peekOfCode": "class TestCriarRepeticao:\n    async def test_criar_repeticao_recorrente(self, db_mock_repeticao, usuario_logado):\n        movimentacao = criar_movimentacao(\n            condicao_pagamento=CondicaoPagamento.RECORRENTE,\n            tipo_recorrencia=TipoRecorrencia.ANUAL\n        )\n        resultado = await criar_repeticao(movimentacao, usuario_logado, db_mock_repeticao)\n        assert movimentacao.quantidade_parcelas == 4\n        db_mock_repeticao.add.assert_called_once()\n        called_obj = db_mock_repeticao.add.call_args[0][0]",
         "detail": "tests.test_01_movimentacao",
         "documentation": {}
     },
@@ -4850,7 +5110,7 @@
         "kind": 6,
         "importPath": "tests.test_01_movimentacao",
         "description": "tests.test_01_movimentacao",
-        "peekOfCode": "class TestAjustarLimiteFaturaGastos:\n    @pytest.fixture\n    def cartao_credito(self):\n        # Mock para CartaoCreditoModel\n        cartao_credito = MagicMock(spec=CartaoCreditoModel)\n        cartao_credito.limite_disponivel = Decimal('1000.00')\n        return cartao_credito\n    @pytest.fixture\n    def fatura(self):\n        # Mock para FaturaModel",
+        "peekOfCode": "class TestAjustarLimiteFaturaGastos:\n    @pytest.fixture\n    def cartao_credito(self):\n        cartao_credito = MagicMock(spec=CartaoCreditoModel)\n        cartao_credito.limite_disponivel = Decimal('1000.00')\n        return cartao_credito\n    @pytest.fixture\n    def fatura(self):\n        fatura = MagicMock(spec=FaturaModel)\n        fatura.fatura_gastos = Decimal('200.00')",
         "detail": "tests.test_01_movimentacao",
         "documentation": {}
     },
@@ -4859,7 +5119,7 @@
         "kind": 6,
         "importPath": "tests.test_01_movimentacao",
         "description": "tests.test_01_movimentacao",
-        "peekOfCode": "class TestProcessarDelecaoMovimentacao:\n    async def test_delecao_com_fatura_despesa(self, session_mock, usuario_logado):\n        # Configurar movimentação com fatura\n        movimentacao = MovimentacaoModel(\n            id_movimentacao=1,\n            consolidado=True,\n            id_conta=1,\n            tipoMovimentacao=TipoMovimentacao.DESPESA,\n            valor=Decimal('100.00'),\n            participa_limite_fatura_gastos=True,",
+        "peekOfCode": "class TestProcessarDelecaoMovimentacao:\n    async def test_delecao_com_fatura_despesa(self, session_mock, usuario_logado):\n        movimentacao = MovimentacaoModel(\n            id_movimentacao=1,\n            consolidado=True,\n            id_conta=1,\n            tipoMovimentacao=TipoMovimentacao.DESPESA,\n            valor=Decimal('100.00'),\n            participa_limite_fatura_gastos=True,\n            id_fatura=1",
         "detail": "tests.test_01_movimentacao",
         "documentation": {}
     },
@@ -4877,7 +5137,7 @@
         "kind": 6,
         "importPath": "tests.test_01_movimentacao",
         "description": "tests.test_01_movimentacao",
-        "peekOfCode": "class TestCreateDespesa:\n    async def test_create_movimentacao_despesa(self):\n        # Configuração de mocks\n        mock_session = AsyncMock(spec=AsyncSession)\n        mock_usuario = UsuarioModel(id_usuario=1)\n        # Dados de teste\n        movimentacao_data = MovimentacaoSchemaReceitaDespesa(\n            valor=100.00,\n            descricao=\"Teste de Despesa\",\n            datatime=datetime.now(),",
+        "peekOfCode": "class TestCreateDespesa:\n    async def test_create_movimentacao_despesa(self):\n        mock_session = AsyncMock(spec=AsyncSession)\n        mock_usuario = UsuarioModel(id_usuario=1)\n        movimentacao_data = MovimentacaoSchemaReceitaDespesa(\n            valor=100.00,\n            descricao=\"Teste de Despesa\",\n            datatime=datetime.now(),\n            data_pagamento=date.today(),\n            forma_pagamento=FormaPagamento.DEBITO,",
         "detail": "tests.test_01_movimentacao",
         "documentation": {}
     },
@@ -4904,7 +5164,7 @@
         "kind": 2,
         "importPath": "tests.test_01_movimentacao",
         "description": "tests.test_01_movimentacao",
-        "peekOfCode": "def usuario_logado():\n    return UsuarioModel(id_usuario=1)\n@pytest.mark.asyncio\nclass TestCriarRepeticao:\n    async def test_criar_repeticao_recorrente(self, db_mock_repeticao, usuario_logado):\n        # Teste para movimentação RECORRENTE\n        movimentacao = criar_movimentacao(\n            condicao_pagamento=CondicaoPagamento.RECORRENTE,\n            tipo_recorrencia=TipoRecorrencia.ANUAL\n        )",
+        "peekOfCode": "def usuario_logado():\n    return UsuarioModel(id_usuario=1)\n@pytest.mark.asyncio\nclass TestCriarRepeticao:\n    async def test_criar_repeticao_recorrente(self, db_mock_repeticao, usuario_logado):\n        movimentacao = criar_movimentacao(\n            condicao_pagamento=CondicaoPagamento.RECORRENTE,\n            tipo_recorrencia=TipoRecorrencia.ANUAL\n        )\n        resultado = await criar_repeticao(movimentacao, usuario_logado, db_mock_repeticao)",
         "detail": "tests.test_01_movimentacao",
         "documentation": {}
     },
@@ -4913,7 +5173,7 @@
         "kind": 2,
         "importPath": "tests.test_01_movimentacao",
         "description": "tests.test_01_movimentacao",
-        "peekOfCode": "def session_mock():\n    session = MagicMock(AsyncSession)\n    session.execute = AsyncMock()\n    session.delete = AsyncMock()\n    session.get = AsyncMock()\n    session.add = MagicMock()\n    # Configurar o mock_result padrão\n    mock_result = MagicMock()\n    mock_result.scalars.return_value.one_or_none.return_value = None\n    session.execute.return_value = mock_result",
+        "peekOfCode": "def session_mock():\n    session = MagicMock(AsyncSession)\n    session.execute = AsyncMock()\n    session.delete = AsyncMock()\n    session.get = AsyncMock()\n    session.add = MagicMock()\n    mock_result = MagicMock()\n    mock_result.scalars.return_value.one_or_none.return_value = None\n    session.execute.return_value = mock_result\n    return session",
         "detail": "tests.test_01_movimentacao",
         "documentation": {}
     },
@@ -4931,7 +5191,7 @@
         "kind": 6,
         "importPath": "tests.test_02_usuario",
         "description": "tests.test_02_usuario",
-        "peekOfCode": "class TestPostUsuario(unittest.IsolatedAsyncioTestCase):\n    async def asyncSetUp(self):\n        # Configuração antes de cada teste\n        self.transport = ASGITransport(app=app)\n        self.client = AsyncClient(transport=self.transport, base_url=\"http://testserver\")\n    async def asyncTearDown(self):\n        # Limpeza após cada teste\n        await self.client.aclose()\n    # @pytest.mark.asyncio\n    # @patch(\"api.v1.endpoints.usuario.get_session\")",
+        "peekOfCode": "class TestPostUsuario(unittest.IsolatedAsyncioTestCase):\n    @classmethod\n    def setUpClassP(cls):\n        # Configura o patch do get_session compartilhado para todos os testes\n        cls.mock_get_session = AsyncMock()\n        cls.session_patch = patch(\n            \"api.v1.endpoints.usuario.get_session\", new=AsyncMock(return_value=cls.mock_get_session)\n        )\n        cls.session_patch.start()\n    @classmethod",
         "detail": "tests.test_02_usuario",
         "documentation": {}
     },
@@ -4940,8 +5200,134 @@
         "kind": 6,
         "importPath": "tests.test_02_usuario",
         "description": "tests.test_02_usuario",
-        "peekOfCode": "class TestGetUsuario(unittest.IsolatedAsyncioTestCase):\n    async def asyncSetUp(self):\n        # Configuração antes de cada teste\n        self.transport = ASGITransport(app=app)\n        self.client = AsyncClient(transport=self.transport, base_url=\"http://testserver\")\n        self.token = \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzMyNzEwMDQyLCJpYXQiOjE3MzI2ODEyNDIsInN1YiI6IjEzNiJ9.UtjXrPTjunQ2ZmvJIReFFhvpc_kQSDUP31v2L-d3CZ8\"\n    async def asyncTearDown(self):\n        # Limpeza após cada teste\n        await self.client.aclose()\n    @pytest.mark.asyncio",
+        "peekOfCode": "class TestGetUsuario(unittest.IsolatedAsyncioTestCase):\n    @classmethod\n    def setUpClassU(cls):\n        cls.mock_get_session = AsyncMock()\n        cls.session_patch = patch(\n            \"api.v1.endpoints.usuario.get_session\", new=AsyncMock(return_value=cls.mock_get_session)\n        )\n        cls.session_patch.start()\n    @classmethod\n    def tearDownClassU(cls):",
         "detail": "tests.test_02_usuario",
+        "documentation": {}
+    },
+    {
+        "label": "TestSendEmail",
+        "kind": 6,
+        "importPath": "tests.test_03_auth",
+        "description": "tests.test_03_auth",
+        "peekOfCode": "class TestSendEmail(unittest.TestCase):\n    @patch(\"core.auth.smtplib.SMTP\")\n    @patch(\"core.auth.config\")\n    def test_send_email_success(self, mock_config, mock_smtp):\n        mock_config.side_effect = lambda key: \"mock_value\" if key in [\"EMAIL_ADDRESS\", \"EMAIL_PASSWORD\"] else None\n        mock_server = MagicMock()\n        mock_smtp.return_value.__enter__.return_value = mock_server\n        email_data = {\n            \"email_subject\": \"Test Subject\",\n            \"email_body\": \"<html><body><h1>Test Body</h1></body></html>\"",
+        "detail": "tests.test_03_auth",
+        "documentation": {}
+    },
+    {
+        "label": "TestSendEmailToResetPassword",
+        "kind": 6,
+        "importPath": "tests.test_03_auth",
+        "description": "tests.test_03_auth",
+        "peekOfCode": "class TestSendEmailToResetPassword(unittest.TestCase):\n    @patch(\"core.auth.send_email\")\n    @patch(\"core.auth.config\")\n    @patch(\"core.auth.asyncio.to_thread\")\n    async def test_send_email_to_reset_password_success(self, mock_to_thread, mock_config, mock_send_email):\n        mock_config.side_effect = lambda key: \"mock_value\" if key in [\"URL_WEB\", \"DATABASE_URL_SINC\"] else None\n        # Dados de usuário simulados\n        user_data = MagicMock()\n        user_data.nome_completo = \"John Doe\"\n        user_data.email = \"john.doe@example.com\"",
+        "detail": "tests.test_03_auth",
+        "documentation": {}
+    },
+    {
+        "label": "TestDecodedToken",
+        "kind": 6,
+        "importPath": "tests.test_03_auth",
+        "description": "tests.test_03_auth",
+        "peekOfCode": "class TestDecodedToken(unittest.TestCase):\n    @patch(\"core.auth.jwt.decode\")\n    @patch(\"core.auth.settings.JWT_SECRET\", new=\"secret\")\n    @patch(\"core.auth.settings.ALGORITHM\", new=\"HS256\")\n    def test_decoded_token_success(self, mock_decode):\n        mock_decode.return_value = {\"user_id\": 123, \"username\": \"john_doe\"}\n        token = \"valid_token\"\n        result = core.auth.decoded_token(token)\n        mock_decode.assert_called_once_with(token, \"secret\", algorithms=[\"HS256\"])\n        self.assertEqual(result, {\"user_id\": 123, \"username\": \"john_doe\"})",
+        "detail": "tests.test_03_auth",
+        "documentation": {}
+    },
+    {
+        "label": "TestGeneratePassword",
+        "kind": 6,
+        "importPath": "tests.test_03_auth",
+        "description": "tests.test_03_auth",
+        "peekOfCode": "class TestGeneratePassword(unittest.TestCase):\n    @patch(\"core.auth.secrets.choice\")\n    def test_generate_password_default_length(self, mock_choice):\n        mock_choice.side_effect = lambda characters: characters[0]  # Sempre retorna o primeiro caractere\n        password = core.auth.generate_password()\n        self.assertEqual(len(password), 8)\n        self.assertTrue(all(char in string.ascii_letters + string.digits for char in password))\n    @patch(\"core.auth.secrets.choice\")\n    def test_generate_password_custom_length(self, mock_choice):\n        mock_choice.side_effect = lambda characters: characters[0]  # Sempre retorna o primeiro caractere",
+        "detail": "tests.test_03_auth",
+        "documentation": {}
+    },
+    {
+        "label": "TestSendEmail",
+        "kind": 6,
+        "importPath": "tests.test_04_parente",
+        "description": "tests.test_04_parente",
+        "peekOfCode": "class TestSendEmail(unittest.TestCase):\n    @mock.patch('api.v1.endpoints.parente.smtplib.SMTP')\n    @mock.patch('api.v1.endpoints.parente.config')\n    @mock.patch('api.v1.endpoints.parente.pdfkit.from_string')\n    def test_send_email_success(self, mock_pdfkit, mock_config, mock_smtp):\n        # Configuração do mock\n        mock_config.side_effect = lambda x: 'test_value' if x in ['EMAIL_ADDRESS', 'EMAIL_PASSWORD'] else None\n        mock_server = mock.Mock()\n        mock_smtp.return_value.__enter__.return_value = mock_server  # Configura o __enter__ do mock para retornar o mock_server\n        # Simulando a criação de um PDF",
+        "detail": "tests.test_04_parente",
+        "documentation": {}
+    },
+    {
+        "label": "TestCriarEmailData",
+        "kind": 6,
+        "importPath": "tests.test_04_parente",
+        "description": "tests.test_04_parente",
+        "peekOfCode": "class TestCriarEmailData(unittest.TestCase):\n    def setUp(self):\n        # Criando objetos simulados para 'parente', 'usuario_logado', 'cobranca' e 'movimentacoes_data'\n        self.parente = type('Parente', (object,), {'nome': 'Maria'})()\n        self.usuario_logado = type('Usuario', (object,), {'nome_completo': 'Maria'})()\n        self.cobranca = type('Cobranca', (object,), {'mes': 11, 'ano': 2024})()\n        self.movimentacoes_data = {\n            'movimentacoes_nao_consolidadas': [\n                {'descricao': 'Compra de supermercado', 'data_pagamento': '2024-11-10', 'valor': 150.50},\n                {'descricao': 'Pagamento de energia', 'data_pagamento': '2024-11-15', 'valor': 80.75}",
+        "detail": "tests.test_04_parente",
+        "documentation": {}
+    },
+    {
+        "label": "TestSendEmail",
+        "kind": 6,
+        "importPath": "tests.test_05_rotina",
+        "description": "tests.test_05_rotina",
+        "peekOfCode": "class TestSendEmail(unittest.TestCase):\n    @patch(\"api.v1.endpoints.rotina.smtplib.SMTP\")\n    @patch(\"api.v1.endpoints.rotina.config\")\n    @patch(\"api.v1.endpoints.rotina.pdfkit.from_string\")\n    def test_send_email(self, mock_pdfkit, mock_config, mock_smtp):\n        mock_config.side_effect = lambda key: \"dummy_value\" if key in [\"EMAIL_ADDRESS\", \"EMAIL_PASSWORD\"] else None\n        mock_pdfkit.return_value = b\"PDF content\"\n        mock_server = MagicMock()\n        mock_smtp.return_value.__enter__.return_value = mock_server\n        email_data = {",
+        "detail": "tests.test_05_rotina",
+        "documentation": {}
+    },
+    {
+        "label": "Conta",
+        "kind": 6,
+        "importPath": "tests.test_05_rotina",
+        "description": "tests.test_05_rotina",
+        "peekOfCode": "class Conta:\n    def __init__(self, descricao: str, data_pagamento: datetime, valor: float):\n        self.descricao = descricao\n        self.data_pagamento = data_pagamento\n        self.valor = valor\nclass Fatura:\n    def __init__(self, data_vencimento: datetime, fatura_gastos: float):\n        self.data_vencimento = data_vencimento\n        self.fatura_gastos = fatura_gastos\nclass Cartao:",
+        "detail": "tests.test_05_rotina",
+        "documentation": {}
+    },
+    {
+        "label": "Fatura",
+        "kind": 6,
+        "importPath": "tests.test_05_rotina",
+        "description": "tests.test_05_rotina",
+        "peekOfCode": "class Fatura:\n    def __init__(self, data_vencimento: datetime, fatura_gastos: float):\n        self.data_vencimento = data_vencimento\n        self.fatura_gastos = fatura_gastos\nclass Cartao:\n    def __init__(self, nome: str):\n        self.nome = nome\nclass TestProcessarUsuariosEmAtraso(unittest.TestCase):\n    def setUp(self):\n        # Configura dados de teste para usuários_contas e usuarios_faturas",
+        "detail": "tests.test_05_rotina",
+        "documentation": {}
+    },
+    {
+        "label": "Cartao",
+        "kind": 6,
+        "importPath": "tests.test_05_rotina",
+        "description": "tests.test_05_rotina",
+        "peekOfCode": "class Cartao:\n    def __init__(self, nome: str):\n        self.nome = nome\nclass TestProcessarUsuariosEmAtraso(unittest.TestCase):\n    def setUp(self):\n        # Configura dados de teste para usuários_contas e usuarios_faturas\n        self.usuarios_contas = {\n            \"usuario1@example.com\": [\n                Conta(\"Conta de Água\", datetime(2024, 11, 1), 150.00),\n                Conta(\"Conta de Luz\", datetime(2024, 11, 5), 200.00)",
+        "detail": "tests.test_05_rotina",
+        "documentation": {}
+    },
+    {
+        "label": "TestProcessarUsuariosEmAtraso",
+        "kind": 6,
+        "importPath": "tests.test_05_rotina",
+        "description": "tests.test_05_rotina",
+        "peekOfCode": "class TestProcessarUsuariosEmAtraso(unittest.TestCase):\n    def setUp(self):\n        # Configura dados de teste para usuários_contas e usuarios_faturas\n        self.usuarios_contas = {\n            \"usuario1@example.com\": [\n                Conta(\"Conta de Água\", datetime(2024, 11, 1), 150.00),\n                Conta(\"Conta de Luz\", datetime(2024, 11, 5), 200.00)\n            ],\n            \"usuario2@example.com\": [\n                Conta(\"Conta de Internet\", datetime(2024, 11, 10), 100.00)",
+        "detail": "tests.test_05_rotina",
+        "documentation": {}
+    },
+    {
+        "label": "TestFuncoesAgendamento",
+        "kind": 6,
+        "importPath": "tests.test_06_main",
+        "description": "tests.test_06_main",
+        "peekOfCode": "class TestFuncoesAgendamento(unittest.TestCase):\n    def setUp(self):\n        # Criar um loop de evento\n        self.loop = asyncio.new_event_loop()\n        asyncio.set_event_loop(self.loop)\n        # Substituir a função real por um mock\n        patch('api.v1.endpoints.rotina.check_and_send_email', new=mock_check_and_send_email).start()\n        patch('apscheduler.schedulers.background.BackgroundScheduler.add_job').start()\n    @patch('apscheduler.schedulers.background.BackgroundScheduler.add_job')\n    def test_agendar_execucao(self, mock_add_job):",
+        "detail": "tests.test_06_main",
+        "documentation": {}
+    },
+    {
+        "label": "acquire_file_lock",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        # Tenta obter um bloqueio exclusivo (não bloqueante)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")\n        return None",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "release_file_lock",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def release_file_lock(lock_file):\n    if lock_file:\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock\n        lock_file.close()\n        print(\"Lock liberado.\")\n# Função que será chamada pelo agendador\ndef executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:",
+        "detail": "main",
         "documentation": {}
     },
     {
@@ -4949,7 +5335,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def executar_funcao_assincrona():\n    asyncio.run(check_and_send_email())\n# Função para agendar a execução em uma hora específica\ndef agendar_execucao(hora: int, minuto: int):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)\n    if hora_execucao <= agora:\n        hora_execucao += timedelta(days=1)\n    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao)\n    print(f\"Função agendada para: {hora_execucao}\")",
+        "peekOfCode": "def executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:\n            # Executa a função assíncrona de forma segura\n            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)\n        finally:\n            release_file_lock(lock_file)\n# Função para agendar a execução em uma hora específica\ndef agendar_execucao(hora: int, minuto: int, loop):",
         "detail": "main",
         "documentation": {}
     },
@@ -4958,7 +5344,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def agendar_execucao(hora: int, minuto: int):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)\n    if hora_execucao <= agora:\n        hora_execucao += timedelta(days=1)\n    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao)\n    print(f\"Função agendada para: {hora_execucao}\")\n    current_time = datetime.now().strftime('%H:%M:%S')\n    print(f\"Horário atual: {current_time}\")\n# Gerenciador de ciclo de vida do FastAPI",
+        "peekOfCode": "def agendar_execucao(hora: int, minuto: int, loop):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)\n    if hora_execucao <= agora:\n        hora_execucao += timedelta(days=1)\n    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao, args=[loop])\n    print(f\"Função agendada para: {hora_execucao}\")\n    current_time = datetime.now().strftime('%H:%M:%S')\n    print(f\"Horário atual: {current_time}\")\n@asynccontextmanager",
         "detail": "main",
         "documentation": {}
     },
@@ -4967,7 +5353,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "scheduler = BackgroundScheduler()\ndef executar_funcao_assincrona():\n    asyncio.run(check_and_send_email())\n# Função para agendar a execução em uma hora específica\ndef agendar_execucao(hora: int, minuto: int):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)\n    if hora_execucao <= agora:\n        hora_execucao += timedelta(days=1)\n    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao)",
+        "peekOfCode": "scheduler = BackgroundScheduler()\ndef acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        # Tenta obter um bloqueio exclusivo (não bloqueante)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")",
         "detail": "main",
         "documentation": {}
     },
@@ -4976,7 +5362,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "app = FastAPI(title='Finanças Pessoais', lifespan=lifespan)\n# Inclua rotas e middlewares\napp.include_router(api_router, prefix=settings.API_V1_STR)\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_methods=[\"GET\", \"POST\", \"OPTIONS\", \"DELETE\", \"PUT\"],\n    allow_headers=[\"*\"],\n)\n# Inicie o servidor com Uvicorn",
+        "peekOfCode": "app = FastAPI(title='Finanças Pessoais', lifespan=lifespan)\napp.include_router(api_router, prefix=settings.API_V1_STR)\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_methods=[\"GET\", \"POST\", \"OPTIONS\", \"DELETE\", \"PUT\"],\n    allow_headers=[\"*\"],\n)\nif __name__ == '__main__':\n    import uvicorn",
         "detail": "main",
         "documentation": {}
     }

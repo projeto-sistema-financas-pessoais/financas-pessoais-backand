@@ -5,22 +5,19 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
 import io
-import json
-import locale
 import smtplib
 from decouple import config
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, logger, status, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status, Response
 from fastapi.responses import JSONResponse
 import pdfkit
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from sqlalchemy import or_, and_
+from sqlalchemy import and_
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from core.auth import send_email
 from core.utils import handle_db_exceptions
-from models.enums import FormaPagamento, TipoMovimentacao
-from models.fatura_model import FaturaModel
+from models.enums import TipoMovimentacao
 from models.parente_model import ParenteModel
 from models.divide_model import  DivideModel
 from models.movimentacao_model import MovimentacaoModel
@@ -368,7 +365,6 @@ async def send_invoice_pdf(
                 DivideModel.id_parente == cobranca.id_parente,
                 MovimentacaoModel.consolidado == False,
                 MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
-                # MovimentacaoModel.forma_pagamento != FormaPagamento.CREDITO,
                 ((extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano) & 
                  (extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes))
             )
@@ -376,52 +372,8 @@ async def send_invoice_pdf(
             result = await session.execute(query)
             movimentacoes_nao_consolidadas = result.all()
 
-            # query = select(
-            #     DivideModel,
-            #     MovimentacaoModel.descricao,
-            #     MovimentacaoModel.data_pagamento,
-            #     MovimentacaoModel.valor
-            # ).join(
-            #     MovimentacaoModel
-            # ).join(
-            #     FaturaModel, FaturaModel.id_fatura == MovimentacaoModel.id_fatura
-            # ).filter(
-            #     DivideModel.id_parente == cobranca.id_parente,
-            #     MovimentacaoModel.consolidado == False,
-            #     MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
-            #     MovimentacaoModel.forma_pagamento == FormaPagamento.CREDITO,
-            #     FaturaModel.data_vencimento < func.current_date(),
-            # )
-            # result = await session.execute(query)
-            # movimentacoes_fatura_nao_consolidadas = result.all()
-
             total_movimentacoes = sum(divide.valor for divide, _, _, _ in movimentacoes_nao_consolidadas)
-            # total_movimentacoes_fatura = sum(divide.valor for divide, _, _, _ in movimentacoes_fatura_nao_consolidadas)
 
-
-
-            # query_total = select(
-            #     func.sum(DivideModel.valor)
-            # ).join(
-            #     MovimentacaoModel
-            # ).outerjoin(
-            #     FaturaModel, FaturaModel.id_fatura == MovimentacaoModel.id_fatura
-            # ).filter(
-            #     DivideModel.id_parente == cobranca.id_parente,
-            #     MovimentacaoModel.consolidado == False,
-            #     MovimentacaoModel.tipoMovimentacao == TipoMovimentacao.DESPESA,
-            #     and_(
-            #         extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano,
-            #         extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes
-            #     ),
-            #     or_(
-            #         MovimentacaoModel.forma_pagamento != "Crédito",  
-            #         and_(
-            #             MovimentacaoModel.forma_pagamento == "Crédito",
-            #             FaturaModel.data_vencimento < func.current_date()
-            #         )
-            #     )
-            # )
 
             query_total = select(
                 func.sum(DivideModel.valor)
@@ -435,20 +387,13 @@ async def send_invoice_pdf(
                     extract("year", MovimentacaoModel.data_pagamento) == cobranca.ano,
                     extract("month", MovimentacaoModel.data_pagamento) == cobranca.mes
                 ),
-                # or_(
-                #     MovimentacaoModel.forma_pagamento != "Crédito",  
-                #     and_(
-                #         MovimentacaoModel.forma_pagamento == "Crédito",
-                #         FaturaModel.data_vencimento < func.current_date()
-                #     )
-                # )
+
             )
             total_geral_result = await session.execute(query_total)
             total_geral_movimentacoes = total_geral_result.scalar() or 0  
 
             response = {
                 "movimentacoes_nao_consolidadas": [],
-                # "faturas_nao_consolidadas": [],
                 "fatura_geral": {}
             }
 
@@ -461,17 +406,10 @@ async def send_invoice_pdf(
                     "valor": float(divide.valor)  
                 })
 
-            # for divide, descricao, data_pagamento, valor in movimentacoes_fatura_nao_consolidadas:
-            #     response["faturas_nao_consolidadas"].append({
-            #         "id_parente": divide.id_parente,
-            #         "descricao": descricao,
-            #         "data_pagamento": str(data_pagamento),
-            #         "valor": float(divide.valor) 
-            #     })
+    
 
             response["fatura_geral"] = {
                 "total_movimentacoes": float(total_movimentacoes),
-                # "total_movimentacoes_fatura": float(total_movimentacoes_fatura),
                 "total_geral_movimentacoes": float(total_geral_movimentacoes)
             }
 
