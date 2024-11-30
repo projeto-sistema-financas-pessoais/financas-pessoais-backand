@@ -12,6 +12,7 @@ from api.v1.endpoints.movimentacao import (
     MovimentacaoSchemaReceitaDespesa,
     CondicaoPagamento,
     TipoRecorrencia,
+    calcular_parcelas_precisas,
     create_movimentacao_despesa,
     criar_repeticao,
     ajustar_limite_fatura_gastos,
@@ -408,22 +409,6 @@ class TestValidacoes:
         usuario.nome_completo = "Usuário Teste"
         return usuario
 
-    @pytest.fixture
-    def mock_categoria(self):
-        categoria = Mock()
-        categoria.id_categoria = 1
-        categoria.nome = "Categoria Teste"
-        categoria.id_usuario = 1
-        return categoria
-
-    @pytest.fixture
-    def mock_conta(self):
-        conta = Mock()
-        conta.id_conta = 1
-        conta.nome = "Conta Teste"
-        conta.id_usuario = 1
-        return conta
-
     @pytest.mark.asyncio
     async def test_validar_conta_erro_banco(self, mock_session, mock_usuario_logado):
         """Testa erro na consulta ao banco de dados para conta"""
@@ -535,3 +520,43 @@ class TestCreateDespesa:
             mock_session.commit.assert_called_once()
             
     
+import unittest
+from decimal import Decimal
+
+class TestCalcularParcelasPrecisas(unittest.TestCase):
+
+    def test_calcular_parcelas_precisas(self):
+        valor_total = 100.00
+        quantidade_parcelas = 3
+        valor_primeira_parcela, valor_parcela = calcular_parcelas_precisas(valor_total, quantidade_parcelas)
+        
+        valor_esperado_primeira_parcela = Decimal('33.34')
+        valor_esperado_parcela = Decimal('33.33')
+
+        self.assertEqual(valor_primeira_parcela, valor_esperado_primeira_parcela)
+        self.assertEqual(valor_parcela, valor_esperado_parcela)
+
+    def test_calcular_parcelas_precisas_valores_decimal(self):
+        valor_total = Decimal('100.55')
+        quantidade_parcelas = 4
+        valor_primeira_parcela, valor_parcela = calcular_parcelas_precisas(valor_total, quantidade_parcelas)
+        
+        valor_esperado_primeira_parcela = Decimal('25.13')
+        valor_esperado_parcela = Decimal('25.14')
+
+        self.assertEqual(valor_primeira_parcela, valor_esperado_primeira_parcela)
+        self.assertEqual(valor_parcela, valor_esperado_parcela)
+
+    def test_calcular_parcelas_precisas_um_real(self):
+        valor_total = Decimal('1.00')
+        quantidade_parcelas = 2
+        valor_primeira_parcela, valor_parcela = calcular_parcelas_precisas(valor_total, quantidade_parcelas)
+        
+        valor_esperado_primeira_parcela = Decimal('0.50')
+        valor_esperado_parcela = Decimal('0.50')
+
+        self.assertEqual(valor_primeira_parcela, valor_esperado_primeira_parcela)
+        self.assertEqual(valor_parcela, valor_esperado_parcela)
+
+if __name__ == '__main__':
+    unittest.main()
