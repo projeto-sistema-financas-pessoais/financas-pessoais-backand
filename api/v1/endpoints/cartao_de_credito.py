@@ -1,4 +1,5 @@
 import calendar
+import core.utils
 from sqlalchemy import extract
 import api.v1.endpoints
 import datetime
@@ -55,6 +56,16 @@ async def post_cartao_credito(
                 cartao_credito.dia_vencimento, 
                 cartao_credito.dia_fechamento
             )
+            
+            if date.today().month == 12:
+                await create_fatura_ano(
+                    db, 
+                    usuario_logado, 
+                    novo_cartao.id_cartao_credito, 
+                    date.today().year +1, 
+                    cartao_credito.dia_vencimento, 
+                    cartao_credito.dia_fechamento
+                )
 
             return novo_cartao
         except IntegrityError:
@@ -186,7 +197,6 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
 
                 proxima_fatura = proximas_faturas[0] if proximas_faturas else None
                 
-                print("proxima fatura", proxima_fatura.data_fechamento)
 
                 cartao_data = {
                     "id_cartao_credito": cartao.id_cartao_credito,
@@ -199,14 +209,14 @@ async def listar_cartoes_credito(somente_ativo: bool, db: AsyncSession = Depends
                     "ativo": cartao.ativo,
                     "id_usuario": cartao.id_usuario,
                     "limite": cartao.limite,
-                    "fatura_gastos": proxima_fatura.fatura_gastos
+                    "fatura_gastos": proxima_fatura.fatura_gastos if proxima_fatura else None,
                 }
                 cartoes_credito_response.append(cartao_data)
 
             return cartoes_credito_response
 
     except Exception as e:
-        print(f"Error: {str(e)}")
+        await core.utils.handle_db_exceptions(session, e)
         raise HTTPException(status_code=500, detail="Internal server error while fetching credit cards")
     
 @router.get('/visualizar/{id_cartao_credito}', response_model=CartaoCreditoSchemaId, status_code=status.HTTP_200_OK)
