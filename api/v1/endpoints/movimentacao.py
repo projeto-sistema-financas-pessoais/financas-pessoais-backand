@@ -1387,9 +1387,11 @@ async def calcular_gastos_receitas_por_categoria(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    hoje = datetime.now()
+    hoje = date.today()
     primeiro_dia = hoje.replace(day=1)
     ultimo_dia = hoje.replace(day=monthrange(hoje.year, hoje.month)[1])
+    
+    print("primeiro dia", primeiro_dia)
 
     async with db as session:
         categorias_query = select(
@@ -1425,6 +1427,10 @@ async def calcular_gastos_receitas_por_categoria(
                 ParenteModel.id_usuario == usuario_logado.id_usuario
 
             )
+        else:
+            query_soma = query_soma.filter(
+                ParenteModel.id_usuario == usuario_logado.id_usuario
+            )
 
         query_soma = query_soma.group_by(CategoriaModel.id_categoria)
 
@@ -1447,6 +1453,8 @@ async def calcular_gastos_receitas_por_categoria(
 
 
         valor_total = sum(categoria["valor"] for categoria in categoria_despesas_receitas.values())
+        
+        
 
         categorias_resposta = [
             {
@@ -1511,7 +1519,8 @@ async def economia_meses_anteriores(
 
                 )
             else:
-                query_despesas = query_despesas.filter(DivideModel.valor == DivideModel.valor)
+                query_despesas = query_despesas.filter(DivideModel.valor == DivideModel.valor,
+                                                        ParenteModel.id_usuario == usuario_logado.id_usuario)
 
             query_despesas = query_despesas.group_by(func.extract('month', MovimentacaoModel.data_pagamento), 
                                                      func.extract('year', MovimentacaoModel.data_pagamento))
