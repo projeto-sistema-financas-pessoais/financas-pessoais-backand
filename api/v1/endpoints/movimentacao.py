@@ -1476,7 +1476,7 @@ async def economia_meses_anteriores(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    hoje = datetime.now()
+    hoje = date.today()
     ano_atual = hoje.year
     mes_atual = hoje.month
 
