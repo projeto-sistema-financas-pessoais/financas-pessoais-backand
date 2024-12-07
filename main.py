@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 scheduler = BackgroundScheduler()
-LOCK_DIR = "/tmp/my_lock_dir"
+LOCK_DIR = tempfile.gettempdir()
 
 # Garantir que o diretório existe com permissões restritas
 os.makedirs(LOCK_DIR, mode=0o700, exist_ok=True)
@@ -72,7 +72,7 @@ def agendar_execucao(hora: int, minuto: int, loop):
 async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()  # Loop principal do FastAPI
     scheduler.start()
-    agendar_execucao(13, 10,loop)  
+    agendar_execucao(11, 00,loop)  
     try:
         yield
     finally:
