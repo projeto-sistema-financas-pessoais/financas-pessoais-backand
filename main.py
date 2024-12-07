@@ -17,17 +17,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 scheduler = BackgroundScheduler()
-LOCK_DIR = tempfile.gettempdir()
+LOCK_FILE_PATH = os.path.join(tempfile.gettempdir(), 'shared_lock_file.lock')
 
 # Garantir que o diretório existe com permissões restritas
-os.makedirs(LOCK_DIR, mode=0o700, exist_ok=True)
+os.makedirs(tempfile.gettempdir(), mode=0o700, exist_ok=True)
 
 def acquire_file_lock():
     try:
-        # Criar um arquivo temporário no diretório dedicado
-        lock_file = tempfile.NamedTemporaryFile(dir=LOCK_DIR, delete=False)
+        # Criar ou abrir um arquivo de lock compartilhado
+        lock_file = open(LOCK_FILE_PATH, 'w')
         fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        logger.info(f"Lock adquirido com sucesso no arquivo: {lock_file.name}")
+        logger.info(f"Lock adquirido com sucesso no arquivo: {LOCK_FILE_PATH}")
         return lock_file
     except IOError as e:
         logger.info(f"Outro processo já está executando a tarefa {e}")
@@ -38,7 +38,8 @@ def release_file_lock(lock_file):
         fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock
         lock_file.close()  # Fecha o arquivo
         os.unlink(lock_file.name)  # Remove o arquivo
-        logger.info(f"Lock liberado e arquivo removido: {lock_file.name}")
+
+        logger.info(f"Lock liberado e arquivo: {LOCK_FILE_PATH} fechado.")
 
 def executar_funcao_assincrona(loop):
     lock_file = acquire_file_lock()  # Caminho do arquivo de lock
