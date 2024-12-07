@@ -17,6 +17,47 @@
         "documentation": {}
     },
     {
+        "label": "core.utils",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "core.utils",
+        "description": "core.utils",
+        "detail": "core.utils",
+        "documentation": {}
+    },
+    {
+        "label": "handle_db_exceptions",
+        "importPath": "core.utils",
+        "description": "core.utils",
+        "isExtraImport": true,
+        "detail": "core.utils",
+        "documentation": {}
+    },
+    {
+        "label": "handle_db_exceptions",
+        "importPath": "core.utils",
+        "description": "core.utils",
+        "isExtraImport": true,
+        "detail": "core.utils",
+        "documentation": {}
+    },
+    {
+        "label": "handle_db_exceptions",
+        "importPath": "core.utils",
+        "description": "core.utils",
+        "isExtraImport": true,
+        "detail": "core.utils",
+        "documentation": {}
+    },
+    {
+        "label": "handle_db_exceptions",
+        "importPath": "core.utils",
+        "description": "core.utils",
+        "isExtraImport": true,
+        "detail": "core.utils",
+        "documentation": {}
+    },
+    {
         "label": "sqlalchemy",
         "kind": 6,
         "isExtraImport": true,
@@ -2725,38 +2766,6 @@
         "documentation": {}
     },
     {
-        "label": "handle_db_exceptions",
-        "importPath": "core.utils",
-        "description": "core.utils",
-        "isExtraImport": true,
-        "detail": "core.utils",
-        "documentation": {}
-    },
-    {
-        "label": "handle_db_exceptions",
-        "importPath": "core.utils",
-        "description": "core.utils",
-        "isExtraImport": true,
-        "detail": "core.utils",
-        "documentation": {}
-    },
-    {
-        "label": "handle_db_exceptions",
-        "importPath": "core.utils",
-        "description": "core.utils",
-        "isExtraImport": true,
-        "detail": "core.utils",
-        "documentation": {}
-    },
-    {
-        "label": "handle_db_exceptions",
-        "importPath": "core.utils",
-        "description": "core.utils",
-        "isExtraImport": true,
-        "detail": "core.utils",
-        "documentation": {}
-    },
-    {
         "label": "DivideModel",
         "importPath": "models.divide_model",
         "description": "models.divide_model",
@@ -3354,15 +3363,6 @@
         "documentation": {}
     },
     {
-        "label": "asyncio",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "asyncio",
-        "description": "asyncio",
-        "detail": "asyncio",
-        "documentation": {}
-    },
-    {
         "label": "defaultdict",
         "importPath": "collections",
         "description": "collections",
@@ -3380,11 +3380,27 @@
         "documentation": {}
     },
     {
-        "label": "HTML",
-        "importPath": "weasyprint",
-        "description": "weasyprint",
+        "label": "formatar_valor_brasileiro",
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
         "isExtraImport": true,
-        "detail": "weasyprint",
+        "detail": "api.v1.endpoints.parente",
+        "documentation": {}
+    },
+    {
+        "label": "criar_email_data",
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.parente",
+        "documentation": {}
+    },
+    {
+        "label": "send_email",
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
+        "isExtraImport": true,
+        "detail": "api.v1.endpoints.parente",
         "documentation": {}
     },
     {
@@ -3823,6 +3839,15 @@
         "documentation": {}
     },
     {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
         "label": "BaseSettings",
         "importPath": "pydantic_settings",
         "description": "pydantic_settings",
@@ -4204,22 +4229,6 @@
         "documentation": {}
     },
     {
-        "label": "criar_email_data",
-        "importPath": "api.v1.endpoints.parente",
-        "description": "api.v1.endpoints.parente",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.parente",
-        "documentation": {}
-    },
-    {
-        "label": "send_email",
-        "importPath": "api.v1.endpoints.parente",
-        "description": "api.v1.endpoints.parente",
-        "isExtraImport": true,
-        "detail": "api.v1.endpoints.parente",
-        "documentation": {}
-    },
-    {
         "label": "processar_usuarios_em_atraso",
         "importPath": "api.v1.endpoints.rotina",
         "description": "api.v1.endpoints.rotina",
@@ -4269,15 +4278,6 @@
         "documentation": {}
     },
     {
-        "label": "time",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "time",
-        "description": "time",
-        "detail": "time",
-        "documentation": {}
-    },
-    {
         "label": "CORSMiddleware",
         "importPath": "fastapi.middleware.cors",
         "description": "fastapi.middleware.cors",
@@ -4299,6 +4299,24 @@
         "description": "api.v1.api",
         "isExtraImport": true,
         "detail": "api.v1.api",
+        "documentation": {}
+    },
+    {
+        "label": "tempfile",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tempfile",
+        "description": "tempfile",
+        "detail": "tempfile",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
         "documentation": {}
     },
     {
@@ -4410,11 +4428,20 @@
         "documentation": {}
     },
     {
+        "label": "formatar_valor_brasileiro",
+        "kind": 2,
+        "importPath": "api.v1.endpoints.parente",
+        "description": "api.v1.endpoints.parente",
+        "peekOfCode": "def formatar_valor_brasileiro(valor):\n    \"\"\"Formata o valor monetário no padrão brasileiro\"\"\"\n    try:\n        valor_float = float(valor)\n        return f'R$ {valor_float:,.2f}'.replace(',', 'TEMP').replace('.', ',').replace('TEMP', '.')\n    except ValueError:\n        return valor\ndef criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):\n    \"\"\"Cria os dados do email com base nas condições de parente e usuário logado.\"\"\"\n    def formatar_data_brasileira(data_str):",
+        "detail": "api.v1.endpoints.parente",
+        "documentation": {}
+    },
+    {
         "label": "criar_email_data",
         "kind": 2,
         "importPath": "api.v1.endpoints.parente",
         "description": "api.v1.endpoints.parente",
-        "peekOfCode": "def criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):\n    \"\"\"Cria os dados do email com base nas condições de parente e usuário logado.\"\"\"\n    def formatar_data_brasileira(data_str):\n        \"\"\"Converte data do formato YYYY-MM-DD para DD/MM/YYYY\"\"\"\n        return datetime.strptime(data_str, '%Y-%m-%d').strftime('%d/%m/%Y')\n    def formatar_valor_brasileiro(valor):\n        \"\"\"Formata o valor monetário no padrão brasileiro\"\"\"\n        try:\n            valor_float = float(valor)\n            return f'R$ {valor_float:,.2f}'.replace('.', 'X').replace(',', '.').replace('X', ',')",
+        "peekOfCode": "def criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):\n    \"\"\"Cria os dados do email com base nas condições de parente e usuário logado.\"\"\"\n    def formatar_data_brasileira(data_str):\n        \"\"\"Converte data do formato YYYY-MM-DD para DD/MM/YYYY\"\"\"\n        return datetime.strptime(data_str, '%Y-%m-%d').strftime('%d/%m/%Y')\n    if parente.nome == usuario_logado.nome_completo:\n        return {\n            \"email_subject\": \"Lembrete de Movimentações não Consolidadas\",\n            \"email_body\": (\n                f\"Olá, {usuario_logado.nome_completo}!<br><br>\"",
         "detail": "api.v1.endpoints.parente",
         "documentation": {}
     },
@@ -4441,7 +4468,7 @@
         "kind": 2,
         "importPath": "api.v1.endpoints.rotina",
         "description": "api.v1.endpoints.rotina",
-        "peekOfCode": "def send_email(email_data: dict, user_email: str) -> None:\n    try:\n        # Verifique se os dados de e-mail foram lidos corretamente\n        sender_email = config(\"EMAIL_ADDRESS\")\n        sender_password = config(\"EMAIL_PASSWORD\")\n        print(\"Endereço de e-mail do remetente:\", sender_email)\n        print(\"Senha de aplicativo lida:\", sender_password)\n        # Configura a mensagem\n        msg = MIMEMultipart()\n        msg[\"Subject\"] = email_data[\"email_subject\"]",
+        "peekOfCode": "def send_email(email_data: dict, user_email: str) -> None:\n    try:\n        # Verifique se os dados de e-mail foram lidos corretamente\n        sender_email = config(\"EMAIL_ADDRESS\")\n        sender_password = config(\"EMAIL_PASSWORD\")\n        print(\"Endereço de e-mail do remetente será usado\")\n        # Configura a mensagem\n        msg = MIMEMultipart()\n        msg[\"Subject\"] = email_data[\"email_subject\"]\n        msg[\"From\"] = sender_email",
         "detail": "api.v1.endpoints.rotina",
         "documentation": {}
     },
@@ -4459,7 +4486,7 @@
         "kind": 5,
         "importPath": "api.v1.endpoints.rotina",
         "description": "api.v1.endpoints.rotina",
-        "peekOfCode": "logger = logging.getLogger(__name__)\ndef send_email(email_data: dict, user_email: str) -> None:\n    try:\n        # Verifique se os dados de e-mail foram lidos corretamente\n        sender_email = config(\"EMAIL_ADDRESS\")\n        sender_password = config(\"EMAIL_PASSWORD\")\n        print(\"Endereço de e-mail do remetente:\", sender_email)\n        print(\"Senha de aplicativo lida:\", sender_password)\n        # Configura a mensagem\n        msg = MIMEMultipart()",
+        "peekOfCode": "logger = logging.getLogger(__name__)\ndef send_email(email_data: dict, user_email: str) -> None:\n    try:\n        # Verifique se os dados de e-mail foram lidos corretamente\n        sender_email = config(\"EMAIL_ADDRESS\")\n        sender_password = config(\"EMAIL_PASSWORD\")\n        print(\"Endereço de e-mail do remetente será usado\")\n        # Configura a mensagem\n        msg = MIMEMultipart()\n        msg[\"Subject\"] = email_data[\"email_subject\"]",
         "detail": "api.v1.endpoints.rotina",
         "documentation": {}
     },
@@ -4551,6 +4578,15 @@
         "description": "core.configs",
         "peekOfCode": "settings = Settings()",
         "detail": "core.configs",
+        "documentation": {}
+    },
+    {
+        "label": "engine",
+        "kind": 5,
+        "importPath": "core.database",
+        "description": "core.database",
+        "peekOfCode": "engine = create_async_engine(\n    settings.DB_URL,\n    pool_pre_ping=True,        # Verifica se a conexão está ativa antes de usá-la\n    pool_recycle=3600,        # Recicla conexões após 3600 segundos (1 hora)\n)\nSession: AsyncSession = sessionmaker(\n    autocommit= False,\n    autoflush= False,\n    expire_on_commit= False,\n    class_= AsyncSession,",
+        "detail": "core.database",
         "documentation": {}
     },
     {
@@ -5332,7 +5368,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")\n        return None\ndef release_file_lock(lock_file):",
+        "peekOfCode": "def acquire_file_lock():\n    try:\n        # Criar um arquivo temporário no diretório dedicado\n        lock_file = tempfile.NamedTemporaryFile(dir=LOCK_DIR, delete=False)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        logger.info(f\"Lock adquirido com sucesso no arquivo: {lock_file.name}\")\n        return lock_file\n    except IOError as e:\n        logger.info(\"Outro processo já está executando a tarefa.\")\n        return None",
         "detail": "main",
         "documentation": {}
     },
@@ -5341,7 +5377,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def release_file_lock(lock_file):\n    if lock_file:\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock\n        lock_file.close()\n        print(\"Lock liberado.\")\ndef executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:\n            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)",
+        "peekOfCode": "def release_file_lock(lock_file):\n    if lock_file:\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock\n        lock_file.close()  # Fecha o arquivo\n        os.unlink(lock_file.name)  # Remove o arquivo\n        logger.info(f\"Lock liberado e arquivo removido: {lock_file.name}\")\ndef executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock()  # Caminho do arquivo de lock\n    if lock_file:\n        try:",
         "detail": "main",
         "documentation": {}
     },
@@ -5350,7 +5386,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock\n    if lock_file:\n        try:\n            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)\n        finally:\n            release_file_lock(lock_file)\ndef agendar_execucao(hora: int, minuto: int, loop):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)",
+        "peekOfCode": "def executar_funcao_assincrona(loop):\n    lock_file = acquire_file_lock()  # Caminho do arquivo de lock\n    if lock_file:\n        try:\n            asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)\n        finally:\n            release_file_lock(lock_file)\ndef agendar_execucao(hora: int, minuto: int, loop):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)",
         "detail": "main",
         "documentation": {}
     },
@@ -5359,7 +5395,16 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def agendar_execucao(hora: int, minuto: int, loop):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)\n    if hora_execucao <= agora:\n        hora_execucao += timedelta(days=1)\n    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao, args=[loop])\n    print(f\"Função agendada para: {hora_execucao}\")\n    current_time = datetime.now().strftime('%H:%M:%S')\n    print(f\"Horário atual: {current_time}\")\n@asynccontextmanager",
+        "peekOfCode": "def agendar_execucao(hora: int, minuto: int, loop):\n    agora = datetime.now()\n    hora_execucao = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)\n    if hora_execucao <= agora:\n        hora_execucao += timedelta(days=1)\n    scheduler.add_job(\n        executar_funcao_assincrona,\n        'cron',  # Tipo cron para execução recorrente\n        hour=hora,\n        minute=minuto,",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "logger = logging.getLogger(__name__)\nscheduler = BackgroundScheduler()\nLOCK_DIR = \"/tmp/my_lock_dir\"\n# Garantir que o diretório existe com permissões restritas\nos.makedirs(LOCK_DIR, mode=0o700, exist_ok=True)\ndef acquire_file_lock():\n    try:\n        # Criar um arquivo temporário no diretório dedicado\n        lock_file = tempfile.NamedTemporaryFile(dir=LOCK_DIR, delete=False)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)",
         "detail": "main",
         "documentation": {}
     },
@@ -5368,7 +5413,16 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "scheduler = BackgroundScheduler()\ndef acquire_file_lock(file_path):\n    try:\n        lock_file = open(file_path, 'w')\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        print(\"Lock adquirido com sucesso.\")\n        return lock_file\n    except IOError:\n        print(\"Outro processo já está executando a tarefa.\")\n        return None",
+        "peekOfCode": "scheduler = BackgroundScheduler()\nLOCK_DIR = \"/tmp/my_lock_dir\"\n# Garantir que o diretório existe com permissões restritas\nos.makedirs(LOCK_DIR, mode=0o700, exist_ok=True)\ndef acquire_file_lock():\n    try:\n        # Criar um arquivo temporário no diretório dedicado\n        lock_file = tempfile.NamedTemporaryFile(dir=LOCK_DIR, delete=False)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        logger.info(f\"Lock adquirido com sucesso no arquivo: {lock_file.name}\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "LOCK_DIR",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "LOCK_DIR = \"/tmp/my_lock_dir\"\n# Garantir que o diretório existe com permissões restritas\nos.makedirs(LOCK_DIR, mode=0o700, exist_ok=True)\ndef acquire_file_lock():\n    try:\n        # Criar um arquivo temporário no diretório dedicado\n        lock_file = tempfile.NamedTemporaryFile(dir=LOCK_DIR, delete=False)\n        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        logger.info(f\"Lock adquirido com sucesso no arquivo: {lock_file.name}\")\n        return lock_file",
         "detail": "main",
         "documentation": {}
     },

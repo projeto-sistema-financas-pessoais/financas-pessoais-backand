@@ -198,6 +198,15 @@ async def send_invoice(
         except Exception as e:
             await handle_db_exceptions(session, e)
             return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={'message': 'Erro ao enviar cobrança'})
+        
+        
+def formatar_valor_brasileiro(valor):
+    """Formata o valor monetário no padrão brasileiro"""
+    try:
+        valor_float = float(valor)
+        return f'R$ {valor_float:,.2f}'.replace(',', 'TEMP').replace('.', ',').replace('TEMP', '.')
+    except ValueError:
+        return valor
 
 def criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):
     """Cria os dados do email com base nas condições de parente e usuário logado."""
@@ -206,13 +215,7 @@ def criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):
         """Converte data do formato YYYY-MM-DD para DD/MM/YYYY"""
         return datetime.strptime(data_str, '%Y-%m-%d').strftime('%d/%m/%Y')
 
-    def formatar_valor_brasileiro(valor):
-        """Formata o valor monetário no padrão brasileiro"""
-        try:
-            valor_float = float(valor)
-            return f'R$ {valor_float:,.2f}'.replace(',', 'TEMP').replace('.', ',').replace('TEMP', '.')
-        except ValueError:
-            return valor
+ 
 
     if parente.nome == usuario_logado.nome_completo:
         return {
