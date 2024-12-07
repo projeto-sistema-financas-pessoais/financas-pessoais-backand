@@ -210,7 +210,7 @@ def criar_email_data(parente, usuario_logado, cobranca, movimentacoes_data):
         """Formata o valor monetário no padrão brasileiro"""
         try:
             valor_float = float(valor)
-            return f'R$ {valor_float:,.2f}'.replace('.', 'X').replace(',', '.').replace('X', ',')
+            return f'R$ {valor_float:,.2f}'.replace(',', 'TEMP').replace('.', ',').replace('TEMP', '.')
         except ValueError:
             return valor
 

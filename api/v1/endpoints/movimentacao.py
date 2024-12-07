@@ -1314,7 +1314,7 @@ async def calcular_orcamento_mensal(
     db: AsyncSession = Depends(get_session),
     usuario_logado: UsuarioModel = Depends(get_current_user)
 ):
-    hoje = datetime.now()
+    hoje = date.today()
     primeiro_dia = hoje.replace(day=1)
     ultimo_dia = hoje.replace(day=monthrange(hoje.year, hoje.month)[1])
     
@@ -1519,8 +1519,7 @@ async def economia_meses_anteriores(
 
                 )
             else:
-                query_despesas = query_despesas.filter(DivideModel.valor == DivideModel.valor,
-                                                        ParenteModel.id_usuario == usuario_logado.id_usuario)
+                query_despesas = query_despesas.filter(ParenteModel.id_usuario == usuario_logado.id_usuario)
 
             query_despesas = query_despesas.group_by(func.extract('month', MovimentacaoModel.data_pagamento), 
                                                      func.extract('year', MovimentacaoModel.data_pagamento))
