@@ -1,7 +1,6 @@
-import asyncio
+
 from collections import defaultdict
 from datetime import datetime
-import email
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -12,7 +11,6 @@ import smtplib
 from fastapi import logger
 import pdfkit
 from sqlalchemy import select
-from weasyprint import HTML
 from core.auth import send_email
 from core.deps import get_session
 from models.enums import TipoMovimentacao
@@ -22,6 +20,8 @@ from models.fatura_model import FaturaModel
 from models.cartao_credito_model import CartaoCreditoModel
 from decouple import config
 import io
+
+from api.v1.endpoints.parente import formatar_valor_brasileiro
 
 
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +33,7 @@ def send_email(email_data: dict, user_email: str) -> None:
         sender_email = config("EMAIL_ADDRESS")
         sender_password = config("EMAIL_PASSWORD")
 
-        print("Endereço de e-mail do remetente:", sender_email)
-        print("Senha de aplicativo lida:", sender_password)
+        print("Endereço de e-mail do remetente será usado")
 
         # Configura a mensagem
         msg = MIMEMultipart()
@@ -153,11 +152,12 @@ def processar_usuarios_em_atraso(usuarios_contas, usuarios_faturas):
                 f"<tbody>"
             )
             for conta in contas:
+                conta.descricao = f"{conta.descricao or 'Outros'}"
                 email_body += (
                     f"<tr>"
                     f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{conta.descricao}</td>"
                     f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{conta.data_pagamento.strftime('%d/%m/%Y')}</td>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {conta.valor:.2f}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(conta.valor)}</td>"
                     f"</tr>"
                 )
                 total_atraso += conta.valor
@@ -184,7 +184,7 @@ def processar_usuarios_em_atraso(usuarios_contas, usuarios_faturas):
                     f"<tr>"
                     f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Fatura - {cartao.nome}</td>"
                     f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{fatura.data_vencimento.strftime('%d/%m/%Y')}</td>"
-                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {fatura.fatura_gastos:.2f}</td>"
+                    f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(fatura.fatura_gastos)}</td>"
                     f"</tr>"
                 )
                 total_atraso += fatura.fatura_gastos
@@ -198,7 +198,7 @@ def processar_usuarios_em_atraso(usuarios_contas, usuarios_faturas):
             f"<th style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>Total a Pagar</th>"
             f"</tr>"
             f"<tr>"
-            f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>R$ {total_atraso:.2f}</td>"
+            f"<td style='border: 1px solid #dddddd; text-align: left; padding: 8px;'>{formatar_valor_brasileiro(total_atraso)}</td>"
             f"</tr>"
             f"</table><br>"
             f"Por favor, tome as devidas providências.<br><br>"

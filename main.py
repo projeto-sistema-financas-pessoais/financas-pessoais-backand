@@ -1,6 +1,5 @@
 import asyncio
 import fcntl
-import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
@@ -9,30 +8,40 @@ from contextlib import asynccontextmanager
 from api.v1.endpoints.rotina import check_and_send_email
 from core.configs import settings
 from api.v1.api import api_router
+import tempfile
+import os
+import logging
 
+# Configuração do logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 scheduler = BackgroundScheduler()
+LOCK_DIR = "/tmp/my_lock_dir"
 
-def acquire_file_lock(file_path):
+# Garantir que o diretório existe com permissões restritas
+os.makedirs(LOCK_DIR, mode=0o700, exist_ok=True)
+
+def acquire_file_lock():
     try:
-        lock_file = open(file_path, 'w')
+        # Criar um arquivo temporário no diretório dedicado
+        lock_file = tempfile.NamedTemporaryFile(dir=LOCK_DIR, delete=False)
         fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        print("Lock adquirido com sucesso.")
-        
+        logger.info(f"Lock adquirido com sucesso no arquivo: {lock_file.name}")
         return lock_file
-    except IOError:
-        print("Outro processo já está executando a tarefa.")
+    except IOError as e:
+        logger.info("Outro processo já está executando a tarefa.")
         return None
 
 def release_file_lock(lock_file):
-    
     if lock_file:
         fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)  # Libera o lock
-        lock_file.close()
-        print("Lock liberado.")
+        lock_file.close()  # Fecha o arquivo
+        os.unlink(lock_file.name)  # Remove o arquivo
+        logger.info(f"Lock liberado e arquivo removido: {lock_file.name}")
 
 def executar_funcao_assincrona(loop):
-    lock_file = acquire_file_lock('/tmp/check_and_send_email.lock')  # Caminho do arquivo de lock
+    lock_file = acquire_file_lock()  # Caminho do arquivo de lock
     if lock_file:
         try:
             asyncio.run_coroutine_threadsafe(check_and_send_email(), loop)
@@ -47,16 +56,23 @@ def agendar_execucao(hora: int, minuto: int, loop):
     if hora_execucao <= agora:
         hora_execucao += timedelta(days=1)
     
-    scheduler.add_job(executar_funcao_assincrona, 'date', run_date=hora_execucao, args=[loop])
-    print(f"Função agendada para: {hora_execucao}")
+    scheduler.add_job(
+        executar_funcao_assincrona,
+        'cron',  # Tipo cron para execução recorrente
+        hour=hora,
+        minute=minuto,
+        args=[loop],
+        id="execucao_diaria",  # ID único para evitar duplicações
+        replace_existing=True  # Substitui a tarefa caso já exista
+    )
     current_time = datetime.now().strftime('%H:%M:%S')
-    print(f"Horário atual: {current_time}")
+    logger.info(f"Tarefa diária agendada para {hora:02d}:{minuto:02d}. Hora atual {current_time}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()  # Loop principal do FastAPI
     scheduler.start()
-    agendar_execucao(11, 0,loop)  
+    agendar_execucao(13, 10,loop)  
     try:
         yield
     finally:
