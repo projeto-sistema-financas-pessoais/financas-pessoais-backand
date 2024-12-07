@@ -30,7 +30,7 @@ def acquire_file_lock():
         logger.info(f"Lock adquirido com sucesso no arquivo: {lock_file.name}")
         return lock_file
     except IOError as e:
-        logger.info("Outro processo já está executando a tarefa.")
+        logger.info(f"Outro processo já está executando a tarefa {e}")
         return None
 
 def release_file_lock(lock_file):
